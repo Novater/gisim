@@ -88,18 +88,19 @@ func New(p Profile) (*Sim, error) {
 	//create the characters
 	for _, v := range p.Characters {
 		//initialize artifact sets
-
-		f, ok := charMap[v.Name]
-		if !ok {
-			return nil, fmt.Errorf("invalid character: %v", v.Name)
-		}
-		c := f(s)
+		c := &Character{}
 		//initialize other variables/stats
 		c.Stats = make(map[StatType]float64)
 		c.Cooldown = make(map[string]int)
 		c.Store = make(map[string]interface{})
 		c.Mods = make(map[string]map[StatType]float64)
 		c.Profile = v
+
+		f, ok := charMap[v.Name]
+		if !ok {
+			return nil, fmt.Errorf("invalid character: %v", v.Name)
+		}
+		f(s, c)
 
 		//initialize weapon
 		wf, ok := weaponMap[v.WeaponName]
@@ -222,7 +223,22 @@ func (s *Sim) AddEffect(f effectFunc, key string, hook effectType) {
 }
 
 func (s *Sim) AddAction(f ActionFunc, key string) {
+	s.Log.Debugf("[%v] new action received: %v; current action map count: %v", PrintFrames(s.Frame), key, len(s.actions))
+	if _, ok := s.actions[key]; ok {
+		s.Log.Debugf("[%v] action %v exists; overriding existing", PrintFrames(s.Frame), key)
+	}
 	s.actions[key] = f
+	s.Log.Debugf("[%v] current action map: %v", PrintFrames(s.Frame), s.actions)
+}
+
+//GenerateOrb is called when an ability generates orb
+func (s *Sim) GenerateOrb(n int, ele eleType, isOrb bool) {
+	s.Log.Debugf("[%v]: particle/orbs picked up: %v of %v (isOrb: %v)", PrintFrames(s.Frame), n, ele, isOrb)
+	count := len(s.Characters)
+	for i, c := range s.Characters {
+		active := s.Active == i
+		c.applyOrb(n, ele, isOrb, active, count)
+	}
 }
 
 //handleTick

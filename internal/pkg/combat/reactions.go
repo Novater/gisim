@@ -1,20 +1,19 @@
 package combat
 
-import "go.uber.org/zap"
-
 //eleType is a string representing an element i.e. HYDRO/PYRO/etc...
 type eleType string
 
 //ElementType should be pryo, Hydro, Cryo, Electro, Geo, Anemo and maybe dendro
 const (
-	Pyro     eleType = "pyro"
-	Hydro    eleType = "hydro"
-	Cryo     eleType = "cryo"
-	Electro  eleType = "electro"
-	Geo      eleType = "geo"
-	Anemo    eleType = "anemo"
-	Physical eleType = "physical"
-	Frozen   eleType = "frozen"
+	Pyro         eleType = "pyro"
+	Hydro        eleType = "hydro"
+	Cryo         eleType = "cryo"
+	Electro      eleType = "electro"
+	Geo          eleType = "geo"
+	Anemo        eleType = "anemo"
+	Physical     eleType = "physical"
+	Frozen       eleType = "frozen"
+	NonElemental eleType = "non-elemental"
 )
 
 type aura struct {
@@ -44,9 +43,9 @@ func (s *Sim) applyAura(ds Snapshot) {
 		//this case should only happen with electro charge where there's 2 aura active at any one point in time
 		for ele, a := range e.Auras {
 			if ele != ds.Element {
-				zap.S().Debugw("apply aura", "aura", a, "existing ele", ele, "next ele", ds.Element)
+				s.Log.Debugw("apply aura", "aura", a, "existing ele", ele, "next ele", ds.Element)
 			} else {
-				zap.S().Debugf("not implemented!!!")
+				s.Log.Debugf("not implemented!!!")
 			}
 		}
 	} else if len(e.Auras) == 1 {
@@ -57,12 +56,12 @@ func (s *Sim) applyAura(ds Snapshot) {
 				duration: auraDur(a.unit, ds.AuraGauge),
 			}
 			//refresh duration
-			zap.S().Debugf("%v refreshed. unit: %v. new duration: %v", ds.Element, a.unit, next.duration)
+			s.Log.Debugf("%v refreshed. unit: %v. new duration: %v", ds.Element, a.unit, next.duration)
 			e.Auras[ds.Element] = next
 		} else {
 			//apply reaction
 			//The length of the freeze is based on the lowest remaining duration of the two elements applied.
-			zap.S().Debugf("not implemented!!!")
+			s.Log.Debugf("not implemented!!!")
 		}
 	} else {
 		next := aura{
@@ -70,7 +69,7 @@ func (s *Sim) applyAura(ds Snapshot) {
 			unit:     ds.AuraUnit,
 			duration: auraDur(ds.AuraUnit, ds.AuraGauge),
 		}
-		zap.S().Debugf("%v applied (new). unit: %v. duration: %v", ds.Element, next.unit, next.duration)
+		s.Log.Debugf("%v applied (new). unit: %v. duration: %v", ds.Element, next.unit, next.duration)
 		e.Auras[ds.Element] = next
 	}
 }

@@ -19,6 +19,7 @@ import (
 func main() {
 
 	debugPtr := flag.String("d", "warn", "output level: debug, info, warn")
+	secondsPtr := flag.Int("s", 20, "how many seconds to run the sim for")
 	flag.Parse()
 
 	var source []byte
@@ -43,18 +44,21 @@ func main() {
 		log.Fatal(err)
 	}
 	var actions = []combat.Action{
-		// {
-		// 	TargetCharIndex: 0,
-		// 	Type:            ActionTypeBurst,
-		// },
+		{
+			TargetCharIndex: 0,
+			Type:            combat.ActionTypeSkill,
+		},
+		{
+			TargetCharIndex: 0,
+			Type:            combat.ActionTypeBurst,
+		},
 		{
 			TargetCharIndex: 0,
 			Type:            combat.ActionTypeChargedAttack,
 		},
 	}
 	start := time.Now()
-	seconds := 6
-	dmg := s.Run(seconds, actions)
+	dmg := s.Run(*secondsPtr, actions)
 	elapsed := time.Since(start)
-	log.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", p, dmg, seconds, dmg/float64(seconds), elapsed)
+	log.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", p, dmg, *secondsPtr, dmg/float64(*secondsPtr), elapsed)
 }

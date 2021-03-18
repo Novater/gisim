@@ -1,0 +1,511 @@
+[35mDEBUG[0m	ganyu/ganyu.go:22	activating Ganyu C1
+[33mWARN[0m	combat/sim.go:136	character Ganyu has unrecognized set Witch's Heart Flame
+[34mINFO[0m	combat/util.go:15	[0.00s|0]: Ganyu executing skill
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/sim.go:226	[0.00s|0] new action received: 0-Ganyu-Skill-Orb; current action map count: 0
+[35mDEBUG[0m	combat/sim.go:231	[0.00s|0] current action map: map[0-Ganyu-Skill-Orb:0x588680]
+[35mDEBUG[0m	combat/sim.go:226	[0.00s|0] new action received: 0-Ganyu-Skill; current action map count: 1
+[35mDEBUG[0m	combat/sim.go:231	[0.00s|0] current action map: map[0-Ganyu-Skill:0x588720 0-Ganyu-Skill-Orb:0x588680]
+[34mINFO[0m	combat/util.go:15	[0.52s|31]: Ganyu executing burst
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/sim.go:226	[0.52s|31] new action received: 31-Ganyu-Burst; current action map count: 2
+[35mDEBUG[0m	combat/sim.go:231	[0.52s|31] current action map: map[0-Ganyu-Skill:0x588720 0-Ganyu-Skill-Orb:0x588680 31-Ganyu-Burst:0x587da0]
+[35mDEBUG[0m	combat/sim.go:236	[1.52s|91]: particle/orbs picked up: 2 of cryo (isOrb: false)
+[35mDEBUG[0m	combat/character.go:142	character received orb	{"count": 2, "ele": "cryo", "isOrb": false, "on field": true, "party count": 1}
+[35mDEBUG[0m	combat/character.go:149	character received orb	{"energy rec'd": 7.007999999999999, "current energy": 7.007999999999999, "ER": 0.168}
+[35mDEBUG[0m	combat/util.go:12	[1.52s|91]: action 0-Ganyu-Skill-Orb expired
+[35mDEBUG[0m	combat/util.go:12	[2.53s|152]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.31, "cd": 2.0420000000000003, "def adj": 0, "res adj": 0, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 0.9, "pre crit damage": 1602.1865775939052}
+[35mDEBUG[0m	combat/reactions.go:74	cryo applied (new). unit: A. duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[2.53s|152]: Ganyu burst (tick) dealt 1602 damage
+[34mINFO[0m	combat/util.go:15	[2.57s|154]: Ganyu executing charged attack
+[35mDEBUG[0m	combat/sim.go:226	[2.57s|154] new action received: 154-Ganyu-CA-FFA; current action map count: 2
+[35mDEBUG[0m	combat/sim.go:231	[2.57s|154] current action map: map[0-Ganyu-Skill:0x588720 154-Ganyu-CA-FFA:0x5870e0 31-Ganyu-Burst:0x587da0]
+[35mDEBUG[0m	combat/sim.go:226	[2.57s|154] new action received: 154-Ganyu-CA-FFB; current action map count: 3
+[35mDEBUG[0m	combat/sim.go:231	[2.57s|154] current action map: map[0-Ganyu-Skill:0x588720 154-Ganyu-CA-FFA:0x5870e0 154-Ganyu-CA-FFB:0x587600 31-Ganyu-Burst:0x587da0]
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[2.92s|175]: Ganyu - Frost Flake Arrow triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 2.304}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 5132.66688, "dmg + bonus": 8294.38967808}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.51, "cd": 2.0420000000000003, "def adj": 0, "res adj": 0, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 0.9, "pre crit damage": 3752.223901988572}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	ganyu/ganyu.go:40	[2.92s|175]: Ganyu C1 refunding 2 energy; current energy 9.008
+[35mDEBUG[0m	combat/sim.go:226	[2.92s|175] new action received: Prototype-Crescent-Proc-Ganyu; current action map count: 4
+[35mDEBUG[0m	combat/sim.go:231	[2.92s|175] current action map: map[0-Ganyu-Skill:0x588720 154-Ganyu-CA-FFA:0x5870e0 154-Ganyu-CA-FFB:0x587600 31-Ganyu-Burst:0x587da0 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:78	[2.92s|175]: Ganyu frost arrow dealt 11414 damage
+[35mDEBUG[0m	combat/util.go:12	[2.92s|175]: action 154-Ganyu-CA-FFA expired
+[35mDEBUG[0m	prototypecrescent/prototypecrescent.go:48	applying prototype crescent buff	{"%": 0.63, "tick": 1}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	ganyu/ganyu.go:27	[3.42s|205]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[3.42s|205]: Ganyu - Frost Flake Bloom triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 3.9168}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 10810.642176, "dmg + bonus": 17469.997756416}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.71, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 9000.74619857676}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:106	[3.42s|205]: Ganyu frost flake bloom dealt 27380 damage
+[35mDEBUG[0m	combat/util.go:12	[3.42s|205]: action 154-Ganyu-CA-FFB expired
+[35mDEBUG[0m	ganyu/ganyu.go:27	[3.53s|212]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[3.53s|212]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.51, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 1824.7124911486142}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[3.53s|212]: Ganyu burst (tick) dealt 5551 damage
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	ganyu/ganyu.go:27	[4.53s|272]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	combat/util.go:12	[4.53s|272]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.71, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 1824.7124911486142}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[4.53s|272]: Ganyu burst (tick) dealt 5551 damage
+[34mINFO[0m	combat/util.go:15	[4.87s|292]: Ganyu executing skill
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	combat/sim.go:226	[4.87s|292] new action received: 292-Ganyu-Skill-Orb; current action map count: 3
+[35mDEBUG[0m	combat/sim.go:231	[4.87s|292] current action map: map[0-Ganyu-Skill:0x588720 292-Ganyu-Skill-Orb:0x588680 31-Ganyu-Burst:0x587da0 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/sim.go:226	[4.87s|292] new action received: 292-Ganyu-Skill; current action map count: 4
+[35mDEBUG[0m	combat/sim.go:231	[4.87s|292] current action map: map[0-Ganyu-Skill:0x588720 292-Ganyu-Skill:0x588720 292-Ganyu-Skill-Orb:0x588680 31-Ganyu-Burst:0x587da0 Prototype-Crescent-Proc-Ganyu:0x589880]
+[34mINFO[0m	combat/util.go:15	[5.38s|323]: Ganyu executing burst
+[35mDEBUG[0m	ganyu/ganyu.go:121	Ganyu burst still on CD; skipping
+[34mINFO[0m	combat/util.go:15	[5.40s|324]: Ganyu executing charged attack
+[35mDEBUG[0m	combat/sim.go:226	[5.40s|324] new action received: 324-Ganyu-CA-FFA; current action map count: 5
+[35mDEBUG[0m	combat/sim.go:231	[5.40s|324] current action map: map[0-Ganyu-Skill:0x588720 292-Ganyu-Skill:0x588720 292-Ganyu-Skill-Orb:0x588680 31-Ganyu-Burst:0x587da0 324-Ganyu-CA-FFA:0x5870e0 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/sim.go:226	[5.40s|324] new action received: 324-Ganyu-CA-FFB; current action map count: 6
+[35mDEBUG[0m	combat/sim.go:231	[5.40s|324] current action map: map[0-Ganyu-Skill:0x588720 292-Ganyu-Skill:0x588720 292-Ganyu-Skill-Orb:0x588680 31-Ganyu-Burst:0x587da0 324-Ganyu-CA-FFA:0x5870e0 324-Ganyu-CA-FFB:0x587600 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	ganyu/ganyu.go:27	[5.53s|332]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[5.53s|332]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.9099999999999999, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 1824.7124911486142}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[5.53s|332]: Ganyu burst (tick) dealt 5551 damage
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	ganyu/ganyu.go:27	[5.75s|345]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[5.75s|345]: Ganyu - Frost Flake Arrow triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 2.304}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 6359.20128, "dmg + bonus": 10276.469268480001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.71, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 5294.556587398096}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	ganyu/ganyu.go:40	[5.75s|345]: Ganyu C1 refunding 2 energy; current energy 11.008
+[35mDEBUG[0m	combat/sim.go:226	[5.75s|345] new action received: Prototype-Crescent-Proc-Ganyu; current action map count: 7
+[35mDEBUG[0m	combat/sim.go:228	[5.75s|345] action Prototype-Crescent-Proc-Ganyu exists; overriding existing
+[35mDEBUG[0m	combat/sim.go:231	[5.75s|345] current action map: map[0-Ganyu-Skill:0x588720 292-Ganyu-Skill:0x588720 292-Ganyu-Skill-Orb:0x588680 31-Ganyu-Burst:0x587da0 324-Ganyu-CA-FFA:0x5870e0 324-Ganyu-CA-FFB:0x587600 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:78	[5.75s|345]: Ganyu frost arrow dealt 16106 damage
+[35mDEBUG[0m	combat/util.go:12	[5.75s|345]: action 324-Ganyu-CA-FFA expired
+[35mDEBUG[0m	ganyu/ganyu.go:27	[6.02s|361]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[6.02s|361]: Ganyu - Ice Lotus triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 1.848}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 4116.82656, "dmg + bonus": 6652.791720960001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.51, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 3427.595734542223}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:218	[6.02s|361]: Ganyu ice lotus (tick) dealt 10427 damage
+[35mDEBUG[0m	combat/util.go:12	[6.02s|361]: action 0-Ganyu-Skill expired
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	ganyu/ganyu.go:27	[6.25s|375]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[6.25s|375]: Ganyu - Frost Flake Bloom triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 3.9168}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 10810.642176, "dmg + bonus": 17469.997756416}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.71, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 9000.74619857676}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:106	[6.25s|375]: Ganyu frost flake bloom dealt 27380 damage
+[35mDEBUG[0m	combat/util.go:12	[6.25s|375]: action 324-Ganyu-CA-FFB expired
+[35mDEBUG[0m	combat/sim.go:236	[6.38s|383]: particle/orbs picked up: 2 of cryo (isOrb: false)
+[35mDEBUG[0m	combat/character.go:142	character received orb	{"count": 2, "ele": "cryo", "isOrb": false, "on field": true, "party count": 1}
+[35mDEBUG[0m	combat/character.go:149	character received orb	{"energy rec'd": 7.007999999999999, "current energy": 18.016, "ER": 0.168}
+[35mDEBUG[0m	combat/util.go:12	[6.38s|383]: action 292-Ganyu-Skill-Orb expired
+[35mDEBUG[0m	ganyu/ganyu.go:27	[6.53s|392]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[6.53s|392]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 1, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 1824.7124911486142}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[6.53s|392]: Ganyu burst (tick) dealt 5551 damage
+[35mDEBUG[0m	ganyu/ganyu.go:27	[7.53s|452]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[7.53s|452]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 1, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 1824.7124911486142}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[7.53s|452]: Ganyu burst (tick) dealt 5551 damage
+[34mINFO[0m	combat/util.go:15	[7.70s|462]: Ganyu executing skill
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	combat/sim.go:226	[7.70s|462] new action received: 462-Ganyu-Skill-Orb; current action map count: 3
+[35mDEBUG[0m	combat/sim.go:231	[7.70s|462] current action map: map[292-Ganyu-Skill:0x588720 31-Ganyu-Burst:0x587da0 462-Ganyu-Skill-Orb:0x588680 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/sim.go:226	[7.70s|462] new action received: 462-Ganyu-Skill; current action map count: 4
+[35mDEBUG[0m	combat/sim.go:231	[7.70s|462] current action map: map[292-Ganyu-Skill:0x588720 31-Ganyu-Burst:0x587da0 462-Ganyu-Skill:0x588720 462-Ganyu-Skill-Orb:0x588680 Prototype-Crescent-Proc-Ganyu:0x589880]
+[34mINFO[0m	combat/util.go:15	[8.22s|493]: Ganyu executing burst
+[35mDEBUG[0m	ganyu/ganyu.go:121	Ganyu burst still on CD; skipping
+[34mINFO[0m	combat/util.go:15	[8.23s|494]: Ganyu executing charged attack
+[35mDEBUG[0m	combat/sim.go:226	[8.23s|494] new action received: 494-Ganyu-CA-FFA; current action map count: 5
+[35mDEBUG[0m	combat/sim.go:231	[8.23s|494] current action map: map[292-Ganyu-Skill:0x588720 31-Ganyu-Burst:0x587da0 462-Ganyu-Skill:0x588720 462-Ganyu-Skill-Orb:0x588680 494-Ganyu-CA-FFA:0x5870e0 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/sim.go:226	[8.23s|494] new action received: 494-Ganyu-CA-FFB; current action map count: 6
+[35mDEBUG[0m	combat/sim.go:231	[8.23s|494] current action map: map[292-Ganyu-Skill:0x588720 31-Ganyu-Burst:0x587da0 462-Ganyu-Skill:0x588720 462-Ganyu-Skill-Orb:0x588680 494-Ganyu-CA-FFA:0x5870e0 494-Ganyu-CA-FFB:0x587600 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	ganyu/ganyu.go:27	[8.53s|512]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[8.53s|512]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 1, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 1824.7124911486142}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[8.53s|512]: Ganyu burst (tick) dealt 5551 damage
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	ganyu/ganyu.go:27	[8.58s|515]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	combat/util.go:12	[8.58s|515]: Ganyu - Frost Flake Arrow triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 2.304}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 6359.20128, "dmg + bonus": 10276.469268480001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.71, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 5294.556587398096}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	ganyu/ganyu.go:40	[8.58s|515]: Ganyu C1 refunding 2 energy; current energy 20.016
+[35mDEBUG[0m	combat/sim.go:226	[8.58s|515] new action received: Prototype-Crescent-Proc-Ganyu; current action map count: 7
+[35mDEBUG[0m	combat/sim.go:228	[8.58s|515] action Prototype-Crescent-Proc-Ganyu exists; overriding existing
+[35mDEBUG[0m	combat/sim.go:231	[8.58s|515] current action map: map[292-Ganyu-Skill:0x588720 31-Ganyu-Burst:0x587da0 462-Ganyu-Skill:0x588720 462-Ganyu-Skill-Orb:0x588680 494-Ganyu-CA-FFA:0x5870e0 494-Ganyu-CA-FFB:0x587600 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:78	[8.58s|515]: Ganyu frost arrow dealt 16106 damage
+[35mDEBUG[0m	combat/util.go:12	[8.58s|515]: action 494-Ganyu-CA-FFA expired
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	ganyu/ganyu.go:27	[9.08s|545]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[9.08s|545]: Ganyu - Frost Flake Bloom triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 3.9168}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 10810.642176, "dmg + bonus": 17469.997756416}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.71, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 9000.74619857676}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:106	[9.08s|545]: Ganyu frost flake bloom dealt 27380 damage
+[35mDEBUG[0m	combat/util.go:12	[9.08s|545]: action 494-Ganyu-CA-FFB expired
+[35mDEBUG[0m	combat/sim.go:236	[9.22s|553]: particle/orbs picked up: 2 of cryo (isOrb: false)
+[35mDEBUG[0m	combat/character.go:142	character received orb	{"count": 2, "ele": "cryo", "isOrb": false, "on field": true, "party count": 1}
+[35mDEBUG[0m	combat/character.go:149	character received orb	{"energy rec'd": 7.007999999999999, "current energy": 27.023999999999997, "ER": 0.168}
+[35mDEBUG[0m	combat/util.go:12	[9.22s|553]: action 462-Ganyu-Skill-Orb expired
+[35mDEBUG[0m	ganyu/ganyu.go:27	[9.53s|572]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[9.53s|572]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 1, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 1824.7124911486142}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[9.53s|572]: Ganyu burst (tick) dealt 5551 damage
+[35mDEBUG[0m	ganyu/ganyu.go:27	[10.53s|632]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[10.53s|632]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 1, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 1824.7124911486142}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[10.53s|632]: Ganyu burst (tick) dealt 5551 damage
+[34mINFO[0m	combat/util.go:15	[10.53s|632]: Ganyu executing skill
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	combat/sim.go:226	[10.53s|632] new action received: 632-Ganyu-Skill-Orb; current action map count: 4
+[35mDEBUG[0m	combat/sim.go:231	[10.53s|632] current action map: map[292-Ganyu-Skill:0x588720 31-Ganyu-Burst:0x587da0 462-Ganyu-Skill:0x588720 632-Ganyu-Skill-Orb:0x588680 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/sim.go:226	[10.53s|632] new action received: 632-Ganyu-Skill; current action map count: 5
+[35mDEBUG[0m	combat/sim.go:231	[10.53s|632] current action map: map[292-Ganyu-Skill:0x588720 31-Ganyu-Burst:0x587da0 462-Ganyu-Skill:0x588720 632-Ganyu-Skill:0x588720 632-Ganyu-Skill-Orb:0x588680 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	ganyu/ganyu.go:27	[10.88s|653]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	combat/util.go:12	[10.88s|653]: Ganyu - Ice Lotus triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 1.848}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 5100.60936, "dmg + bonus": 8242.584725760002}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.51, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 4246.675596142223}
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:218	[10.88s|653]: Ganyu ice lotus (tick) dealt 4247 damage
+[35mDEBUG[0m	combat/util.go:12	[10.88s|653]: action 292-Ganyu-Skill expired
+[34mINFO[0m	combat/util.go:15	[11.05s|663]: Ganyu executing burst
+[35mDEBUG[0m	ganyu/ganyu.go:121	Ganyu burst still on CD; skipping
+[34mINFO[0m	combat/util.go:15	[11.07s|664]: Ganyu executing charged attack
+[35mDEBUG[0m	combat/sim.go:226	[11.07s|664] new action received: 664-Ganyu-CA-FFA; current action map count: 5
+[35mDEBUG[0m	combat/sim.go:231	[11.07s|664] current action map: map[31-Ganyu-Burst:0x587da0 462-Ganyu-Skill:0x588720 632-Ganyu-Skill:0x588720 632-Ganyu-Skill-Orb:0x588680 664-Ganyu-CA-FFA:0x5870e0 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/sim.go:226	[11.07s|664] new action received: 664-Ganyu-CA-FFB; current action map count: 6
+[35mDEBUG[0m	combat/sim.go:231	[11.07s|664] current action map: map[31-Ganyu-Burst:0x587da0 462-Ganyu-Skill:0x588720 632-Ganyu-Skill:0x588720 632-Ganyu-Skill-Orb:0x588680 664-Ganyu-CA-FFA:0x5870e0 664-Ganyu-CA-FFB:0x587600 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	ganyu/ganyu.go:27	[11.42s|685]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	combat/util.go:12	[11.42s|685]: Ganyu - Frost Flake Arrow triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 2.304}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 6359.20128, "dmg + bonus": 10276.469268480001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.71, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 5294.556587398096}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	ganyu/ganyu.go:40	[11.42s|685]: Ganyu C1 refunding 2 energy; current energy 29.023999999999997
+[35mDEBUG[0m	combat/sim.go:226	[11.42s|685] new action received: Prototype-Crescent-Proc-Ganyu; current action map count: 7
+[35mDEBUG[0m	combat/sim.go:228	[11.42s|685] action Prototype-Crescent-Proc-Ganyu exists; overriding existing
+[35mDEBUG[0m	combat/sim.go:231	[11.42s|685] current action map: map[31-Ganyu-Burst:0x587da0 462-Ganyu-Skill:0x588720 632-Ganyu-Skill:0x588720 632-Ganyu-Skill-Orb:0x588680 664-Ganyu-CA-FFA:0x5870e0 664-Ganyu-CA-FFB:0x587600 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:78	[11.42s|685]: Ganyu frost arrow dealt 16106 damage
+[35mDEBUG[0m	combat/util.go:12	[11.42s|685]: action 664-Ganyu-CA-FFA expired
+[35mDEBUG[0m	ganyu/ganyu.go:27	[11.53s|692]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[11.53s|692]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 1, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 1824.7124911486142}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[11.53s|692]: Ganyu burst (tick) dealt 5551 damage
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	ganyu/ganyu.go:27	[11.92s|715]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	combat/util.go:12	[11.92s|715]: Ganyu - Frost Flake Bloom triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 3.9168}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 10810.642176, "dmg + bonus": 17469.997756416}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.71, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 9000.74619857676}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:106	[11.92s|715]: Ganyu frost flake bloom dealt 27380 damage
+[35mDEBUG[0m	combat/util.go:12	[11.92s|715]: action 664-Ganyu-CA-FFB expired
+[35mDEBUG[0m	combat/sim.go:236	[12.05s|723]: particle/orbs picked up: 2 of cryo (isOrb: false)
+[35mDEBUG[0m	combat/character.go:142	character received orb	{"count": 2, "ele": "cryo", "isOrb": false, "on field": true, "party count": 1}
+[35mDEBUG[0m	combat/character.go:149	character received orb	{"energy rec'd": 7.007999999999999, "current energy": 36.032, "ER": 0.168}
+[35mDEBUG[0m	combat/util.go:12	[12.05s|723]: action 632-Ganyu-Skill-Orb expired
+[35mDEBUG[0m	ganyu/ganyu.go:27	[12.53s|752]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[12.53s|752]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 1, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 1824.7124911486142}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[12.53s|752]: Ganyu burst (tick) dealt 5551 damage
+[34mINFO[0m	combat/util.go:15	[13.37s|802]: Ganyu executing skill
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	combat/sim.go:226	[13.37s|802] new action received: 802-Ganyu-Skill-Orb; current action map count: 4
+[35mDEBUG[0m	combat/sim.go:231	[13.37s|802] current action map: map[31-Ganyu-Burst:0x587da0 462-Ganyu-Skill:0x588720 632-Ganyu-Skill:0x588720 802-Ganyu-Skill-Orb:0x588680 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/sim.go:226	[13.37s|802] new action received: 802-Ganyu-Skill; current action map count: 5
+[35mDEBUG[0m	combat/sim.go:231	[13.37s|802] current action map: map[31-Ganyu-Burst:0x587da0 462-Ganyu-Skill:0x588720 632-Ganyu-Skill:0x588720 802-Ganyu-Skill:0x588720 802-Ganyu-Skill-Orb:0x588680 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	ganyu/ganyu.go:27	[13.53s|812]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[13.53s|812]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 1, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 1824.7124911486142}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[13.53s|812]: Ganyu burst (tick) dealt 5551 damage
+[35mDEBUG[0m	ganyu/ganyu.go:27	[13.72s|823]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[13.72s|823]: Ganyu - Ice Lotus triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 1.848}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 5100.60936, "dmg + bonus": 8242.584725760002}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.51, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 4246.675596142223}
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:218	[13.72s|823]: Ganyu ice lotus (tick) dealt 4247 damage
+[35mDEBUG[0m	combat/util.go:12	[13.72s|823]: action 462-Ganyu-Skill expired
+[34mINFO[0m	combat/util.go:15	[13.88s|833]: Ganyu executing burst
+[35mDEBUG[0m	ganyu/ganyu.go:121	Ganyu burst still on CD; skipping
+[34mINFO[0m	combat/util.go:15	[13.90s|834]: Ganyu executing charged attack
+[35mDEBUG[0m	combat/sim.go:226	[13.90s|834] new action received: 834-Ganyu-CA-FFA; current action map count: 5
+[35mDEBUG[0m	combat/sim.go:231	[13.90s|834] current action map: map[31-Ganyu-Burst:0x587da0 632-Ganyu-Skill:0x588720 802-Ganyu-Skill:0x588720 802-Ganyu-Skill-Orb:0x588680 834-Ganyu-CA-FFA:0x5870e0 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/sim.go:226	[13.90s|834] new action received: 834-Ganyu-CA-FFB; current action map count: 6
+[35mDEBUG[0m	combat/sim.go:231	[13.90s|834] current action map: map[31-Ganyu-Burst:0x587da0 632-Ganyu-Skill:0x588720 802-Ganyu-Skill:0x588720 802-Ganyu-Skill-Orb:0x588680 834-Ganyu-CA-FFA:0x5870e0 834-Ganyu-CA-FFB:0x587600 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	ganyu/ganyu.go:27	[14.25s|855]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[14.25s|855]: Ganyu - Frost Flake Arrow triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 2.304}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 6359.20128, "dmg + bonus": 10276.469268480001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.71, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 5294.556587398096}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	ganyu/ganyu.go:40	[14.25s|855]: Ganyu C1 refunding 2 energy; current energy 38.032
+[35mDEBUG[0m	combat/sim.go:226	[14.25s|855] new action received: Prototype-Crescent-Proc-Ganyu; current action map count: 7
+[35mDEBUG[0m	combat/sim.go:228	[14.25s|855] action Prototype-Crescent-Proc-Ganyu exists; overriding existing
+[35mDEBUG[0m	combat/sim.go:231	[14.25s|855] current action map: map[31-Ganyu-Burst:0x587da0 632-Ganyu-Skill:0x588720 802-Ganyu-Skill:0x588720 802-Ganyu-Skill-Orb:0x588680 834-Ganyu-CA-FFA:0x5870e0 834-Ganyu-CA-FFB:0x587600 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:78	[14.25s|855]: Ganyu frost arrow dealt 16106 damage
+[35mDEBUG[0m	combat/util.go:12	[14.25s|855]: action 834-Ganyu-CA-FFA expired
+[35mDEBUG[0m	ganyu/ganyu.go:27	[14.53s|872]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[14.53s|872]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 1, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 1824.7124911486142}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[14.53s|872]: Ganyu burst (tick) dealt 5551 damage
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	ganyu/ganyu.go:27	[14.75s|885]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[14.75s|885]: Ganyu - Frost Flake Bloom triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 3.9168}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 10810.642176, "dmg + bonus": 17469.997756416}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.71, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 9000.74619857676}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:106	[14.75s|885]: Ganyu frost flake bloom dealt 27380 damage
+[35mDEBUG[0m	combat/util.go:12	[14.75s|885]: action 834-Ganyu-CA-FFB expired
+[35mDEBUG[0m	combat/sim.go:236	[14.88s|893]: particle/orbs picked up: 2 of cryo (isOrb: false)
+[35mDEBUG[0m	combat/character.go:142	character received orb	{"count": 2, "ele": "cryo", "isOrb": false, "on field": true, "party count": 1}
+[35mDEBUG[0m	combat/character.go:149	character received orb	{"energy rec'd": 7.007999999999999, "current energy": 45.03999999999999, "ER": 0.168}
+[35mDEBUG[0m	combat/util.go:12	[14.88s|893]: action 802-Ganyu-Skill-Orb expired
+[35mDEBUG[0m	combat/character.go:107	[15.53s|932] cooldown burst-cd finished; deleting
+[35mDEBUG[0m	ganyu/ganyu.go:27	[15.53s|932]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[15.53s|932]: Ganyu - Celestial Shower triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.1760000000000002, "bonus dmg": 0.616, "mul": 0.9838}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2227.7200000000003, "base dmg": 2191.6309360000005, "dmg + bonus": 3541.675592576001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 1, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 1824.7124911486142}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:154	[15.53s|932]: Ganyu burst (tick) dealt 5551 damage
+[35mDEBUG[0m	combat/util.go:12	[15.55s|933]: action 31-Ganyu-Burst expired
+[34mINFO[0m	combat/util.go:15	[16.20s|972]: Ganyu executing skill
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	combat/sim.go:226	[16.20s|972] new action received: 972-Ganyu-Skill-Orb; current action map count: 3
+[35mDEBUG[0m	combat/sim.go:231	[16.20s|972] current action map: map[632-Ganyu-Skill:0x588720 802-Ganyu-Skill:0x588720 972-Ganyu-Skill-Orb:0x588680 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/sim.go:226	[16.20s|972] new action received: 972-Ganyu-Skill; current action map count: 4
+[35mDEBUG[0m	combat/sim.go:231	[16.20s|972] current action map: map[632-Ganyu-Skill:0x588720 802-Ganyu-Skill:0x588720 972-Ganyu-Skill:0x588720 972-Ganyu-Skill-Orb:0x588680 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	ganyu/ganyu.go:27	[16.55s|993]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[16.55s|993]: Ganyu - Ice Lotus triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 1.848}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 5100.60936, "dmg + bonus": 8242.584725760002}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.51, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 4246.675596142223}
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:218	[16.55s|993]: Ganyu ice lotus (tick) dealt 4247 damage
+[35mDEBUG[0m	combat/util.go:12	[16.55s|993]: action 632-Ganyu-Skill expired
+[34mINFO[0m	combat/util.go:15	[16.72s|1003]: Ganyu executing burst
+[35mDEBUG[0m	ganyu/ganyu.go:126	Ganyu burst - insufficent energy, current: 45.03999999999999
+[34mINFO[0m	combat/util.go:15	[16.73s|1004]: Ganyu executing charged attack
+[35mDEBUG[0m	combat/sim.go:226	[16.73s|1004] new action received: 1004-Ganyu-CA-FFA; current action map count: 4
+[35mDEBUG[0m	combat/sim.go:231	[16.73s|1004] current action map: map[1004-Ganyu-CA-FFA:0x5870e0 802-Ganyu-Skill:0x588720 972-Ganyu-Skill:0x588720 972-Ganyu-Skill-Orb:0x588680 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/sim.go:226	[16.73s|1004] new action received: 1004-Ganyu-CA-FFB; current action map count: 5
+[35mDEBUG[0m	combat/sim.go:231	[16.73s|1004] current action map: map[1004-Ganyu-CA-FFA:0x5870e0 1004-Ganyu-CA-FFB:0x587600 802-Ganyu-Skill:0x588720 972-Ganyu-Skill:0x588720 972-Ganyu-Skill-Orb:0x588680 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	ganyu/ganyu.go:27	[17.08s|1025]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[17.08s|1025]: Ganyu - Frost Flake Arrow triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 2.304}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 6359.20128, "dmg + bonus": 10276.469268480001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.71, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 5294.556587398096}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	ganyu/ganyu.go:40	[17.08s|1025]: Ganyu C1 refunding 2 energy; current energy 47.03999999999999
+[35mDEBUG[0m	combat/sim.go:226	[17.08s|1025] new action received: Prototype-Crescent-Proc-Ganyu; current action map count: 6
+[35mDEBUG[0m	combat/sim.go:228	[17.08s|1025] action Prototype-Crescent-Proc-Ganyu exists; overriding existing
+[35mDEBUG[0m	combat/sim.go:231	[17.08s|1025] current action map: map[1004-Ganyu-CA-FFA:0x5870e0 1004-Ganyu-CA-FFB:0x587600 802-Ganyu-Skill:0x588720 972-Ganyu-Skill:0x588720 972-Ganyu-Skill-Orb:0x588680 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:78	[17.08s|1025]: Ganyu frost arrow dealt 16106 damage
+[35mDEBUG[0m	combat/util.go:12	[17.08s|1025]: action 1004-Ganyu-CA-FFA expired
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	ganyu/ganyu.go:27	[17.58s|1055]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[17.58s|1055]: Ganyu - Frost Flake Bloom triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 3.9168}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 10810.642176, "dmg + bonus": 17469.997756416}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.71, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 9000.74619857676}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:106	[17.58s|1055]: Ganyu frost flake bloom dealt 27380 damage
+[35mDEBUG[0m	combat/util.go:12	[17.58s|1055]: action 1004-Ganyu-CA-FFB expired
+[35mDEBUG[0m	combat/sim.go:236	[17.72s|1063]: particle/orbs picked up: 2 of cryo (isOrb: false)
+[35mDEBUG[0m	combat/character.go:142	character received orb	{"count": 2, "ele": "cryo", "isOrb": false, "on field": true, "party count": 1}
+[35mDEBUG[0m	combat/character.go:149	character received orb	{"energy rec'd": 7.007999999999999, "current energy": 54.04799999999999, "ER": 0.168}
+[35mDEBUG[0m	combat/util.go:12	[17.72s|1063]: action 972-Ganyu-Skill-Orb expired
+[34mINFO[0m	combat/util.go:15	[19.03s|1142]: Ganyu executing skill
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	combat/sim.go:226	[19.03s|1142] new action received: 1142-Ganyu-Skill-Orb; current action map count: 3
+[35mDEBUG[0m	combat/sim.go:231	[19.03s|1142] current action map: map[1142-Ganyu-Skill-Orb:0x588680 802-Ganyu-Skill:0x588720 972-Ganyu-Skill:0x588720 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/sim.go:226	[19.03s|1142] new action received: 1142-Ganyu-Skill; current action map count: 4
+[35mDEBUG[0m	combat/sim.go:231	[19.03s|1142] current action map: map[1142-Ganyu-Skill:0x588720 1142-Ganyu-Skill-Orb:0x588680 802-Ganyu-Skill:0x588720 972-Ganyu-Skill:0x588720 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	ganyu/ganyu.go:27	[19.38s|1163]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	combat/util.go:12	[19.38s|1163]: Ganyu - Ice Lotus triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 1.848}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 5100.60936, "dmg + bonus": 8242.584725760002}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.51, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 4246.675596142223}
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:218	[19.38s|1163]: Ganyu ice lotus (tick) dealt 4247 damage
+[35mDEBUG[0m	combat/util.go:12	[19.38s|1163]: action 802-Ganyu-Skill expired
+[34mINFO[0m	combat/util.go:15	[19.55s|1173]: Ganyu executing burst
+[35mDEBUG[0m	ganyu/ganyu.go:126	Ganyu burst - insufficent energy, current: 54.04799999999999
+[34mINFO[0m	combat/util.go:15	[19.57s|1174]: Ganyu executing charged attack
+[35mDEBUG[0m	combat/sim.go:226	[19.57s|1174] new action received: 1174-Ganyu-CA-FFA; current action map count: 4
+[35mDEBUG[0m	combat/sim.go:231	[19.57s|1174] current action map: map[1142-Ganyu-Skill:0x588720 1142-Ganyu-Skill-Orb:0x588680 1174-Ganyu-CA-FFA:0x5870e0 972-Ganyu-Skill:0x588720 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/sim.go:226	[19.57s|1174] new action received: 1174-Ganyu-CA-FFB; current action map count: 5
+[35mDEBUG[0m	combat/sim.go:231	[19.57s|1174] current action map: map[1142-Ganyu-Skill:0x588720 1142-Ganyu-Skill-Orb:0x588680 1174-Ganyu-CA-FFA:0x5870e0 1174-Ganyu-CA-FFB:0x587600 972-Ganyu-Skill:0x588720 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Blizzard Strayer 2PC", "mods": {"Cryo%":0.15}}
+[35mDEBUG[0m	combat/character.go:161	adding special char stat mod to snapshot	{"key": "Prototype-Crescent-Proc", "mods": {"ATK%":0.63}}
+[35mDEBUG[0m	blizzard/blizzard.go:27	applying blizzard strayer 4pc buff on cryo target
+[35mDEBUG[0m	ganyu/ganyu.go:27	[19.92s|1195]: applying Ganyu C1 cryo debuff
+[35mDEBUG[0m	combat/util.go:12	[19.92s|1195]: Ganyu - Frost Flake Arrow triggered dmg
+[35mDEBUG[0m	combat/damage.go:94	calc	{"base atk": 845, "flat +": 389, "% +": 1.806, "bonus dmg": 0.616, "mul": 2.304}
+[35mDEBUG[0m	combat/damage.go:106	calc	{"total atk": 2760.07, "base dmg": 6359.20128, "dmg + bonus": 10276.469268480001}
+[35mDEBUG[0m	combat/damage.go:116	calc	{"cr": 0.71, "cd": 2.0420000000000003, "def adj": 0, "res adj": -0.15, "char lvl": 90, "target lvl": 88}
+[35mDEBUG[0m	combat/damage.go:135	calc	{"def mod": 0.5026455026455027, "res mod": 1.025, "pre crit damage": 5294.556587398096}
+[35mDEBUG[0m	combat/damage.go:139	damage is crit!
+[35mDEBUG[0m	ganyu/ganyu.go:40	[19.92s|1195]: Ganyu C1 refunding 2 energy; current energy 56.04799999999999
+[35mDEBUG[0m	combat/sim.go:226	[19.92s|1195] new action received: Prototype-Crescent-Proc-Ganyu; current action map count: 6
+[35mDEBUG[0m	combat/sim.go:228	[19.92s|1195] action Prototype-Crescent-Proc-Ganyu exists; overriding existing
+[35mDEBUG[0m	combat/sim.go:231	[19.92s|1195] current action map: map[1142-Ganyu-Skill:0x588720 1142-Ganyu-Skill-Orb:0x588680 1174-Ganyu-CA-FFA:0x5870e0 1174-Ganyu-CA-FFB:0x587600 972-Ganyu-Skill:0x588720 Prototype-Crescent-Proc-Ganyu:0x589880]
+[35mDEBUG[0m	combat/reactions.go:61	cryo refreshed. unit: A. new duration: 570
+[34mINFO[0m	ganyu/ganyu.go:78	[19.92s|1195]: Ganyu frost arrow dealt 16106 damage
+[35mDEBUG[0m	combat/util.go:12	[19.92s|1195]: action 1174-Ganyu-CA-FFA expired
+2021/03/18 14:36:45 Running profile ./current.yaml, total damage dealt: 373507.85 over 20 seconds. DPS = 18675.39. Sim took 2.686ms

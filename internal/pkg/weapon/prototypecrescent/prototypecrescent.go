@@ -49,7 +49,7 @@ func weapon(c *combat.Character, s *combat.Sim, r int) {
 				c.Mods["Prototype-Crescent-Proc"][combat.ATKP] = atkmod
 			}
 			return false
-		}, fmt.Sprintf("%v-Prototype-Crescent-Proc-%v", s.Frame, c.Profile.Name))
+		}, fmt.Sprintf("Prototype-Crescent-Proc-%v", c.Profile.Name))
 		return false
 	}, "prototype-crescent-proc", combat.PostDamageHook)
 }

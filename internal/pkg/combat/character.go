@@ -4,7 +4,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type NewCharacterFunc func(s *Sim) *Character
+type NewCharacterFunc func(s *Sim, c *Character)
 
 func RegisterCharFunc(name string, f NewCharacterFunc) {
 	mu.Lock()
@@ -66,6 +66,7 @@ type Character struct {
 //CharacterProfile ...
 type CharacterProfile struct {
 	Name                string               `yaml:"Name"`
+	Element             eleType              `yaml:"Element"`
 	Level               int64                `yaml:"Level"`
 	BaseHP              float64              `yaml:"BaseHP"`
 	BaseAtk             float64              `yaml:"BaseAtk"`
@@ -103,11 +104,50 @@ func (c *Character) tick(s *Sim) {
 	//this function gets called for every character every tick
 	for k, v := range c.Cooldown {
 		if v == 0 {
+			s.Log.Debugf("[%v] cooldown %v finished; deleting", PrintFrames(s.Frame), k)
 			delete(c.Cooldown, k)
 		} else {
 			c.Cooldown[k]--
 		}
 	}
+}
+
+func (c *Character) applyOrb(count int, ele eleType, isOrb bool, isActive bool, partyCount int) {
+	var amt, er, r float64
+	r = 1.0
+	if !isActive {
+		r = 1.0 - 0.1*float64(partyCount)
+	}
+	//recharge amount - particles: same = 3, non-ele = 2, diff = 1
+	//recharge amount - orbs: same = 9, non-ele = 6, diff = 3 (3x particles)
+	switch {
+	case ele == c.Profile.Element:
+		amt = 3
+	case ele == NonElemental:
+		amt = 2
+	default:
+		amt = 1
+	}
+	if isOrb {
+		amt = amt * 3
+	}
+	amt = amt * r //apply off field reduction
+	//apply energy regen stat
+	er = c.Stats[ER]
+	for _, m := range c.Mods {
+		er += m[ER]
+	}
+	amt = amt * (1 + er) * float64(count)
+
+	zap.S().Debugw("character received orb", "count", count, "ele", ele, "isOrb", isOrb, "on field", isActive, "party count", partyCount)
+
+	c.Energy += amt
+	if c.Energy > c.MaxEnergy {
+		c.Energy = c.MaxEnergy
+	}
+
+	zap.S().Debugw("character received orb", "energy rec'd", amt, "current energy", c.Energy, "ER", er)
+
 }
 
 func (c *Character) Snapshot(e eleType) Snapshot {

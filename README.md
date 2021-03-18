@@ -1,19 +1,25 @@
 # gisim
 
+## bugs
+
+- sim action list currently wastes 1 frame if the current skill is on cd
+- resist is currently assumed to be flat. should be per element per enemy
+- action list currently goes around in circles, can't really make use of skill charges
+
 ## todo list
 
-- [ ] character orb receiving function
-- [ ] sim handle orb
+- [x] character orb receiving function
+- [x] sim handle orb
 - [ ] finish implementing ganyu (up to c6?)
 
   - [ ] normal attack
   - [ ] aimed attack
   - [ ] aimed attack lvl 1
   - [ ] plunge attack
-  - [ ] cooldown on abil
-  - [ ] energy use on abil
-  - [ ] particles on skill
-  - [ ] C1: ffa regen 2 energy/ ffa reduce target cryo res
+  - [x] cooldown on abil
+  - [x] energy use on abil
+  - [x] particles on skill
+  - [x] C1: ffa regen 2 energy/ ffa reduce target cryo res
   - [ ] C2: extra charge
   - [ ]
 

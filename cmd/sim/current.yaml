@@ -2,12 +2,13 @@ Label: "Test"
 Characters:
   - Name: Ganyu
     Level: 90
+    Element: "cryo"
     BaseHP: 9797
     BaseAtk: 335
     BaseDef: 630
     BaseCR: 0.05
     BaseCD: 0.50
-    Constellation: 1
+    Constellation: 2
     AscensionBonus:
       CD: 0.384
     TalentLevel:
