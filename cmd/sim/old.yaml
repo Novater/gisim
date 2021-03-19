@@ -2,18 +2,19 @@ Label: "Test"
 Characters:
   - Name: Ganyu
     Level: 90
+    Element: "cryo"
     BaseHP: 9797
     BaseAtk: 335
     BaseDef: 630
     BaseCR: 0.05
     BaseCD: 0.50
-    Constellation: 1
+    Constellation: 0
     AscensionBonus:
       CD: 0.384
     TalentLevel:
       attack: 10
       skill: 6
-      burst: 6    
+      burst: 6
     WeaponName: "Prototype Crescent"
     WeaponRefinement: 4
     WeaponBaseAtk: 510
@@ -102,7 +103,15 @@ Characters:
             Value: 0.066
 Enemy:
   Level: 88
-  Resist: 0.1
+  Resist:
+    pyro: 0.5
+    dendro: 0.1
+    hydro: 0.1
+    cryo: 0.1
+    electro: 0.1
+    geo: 0.1
+    anemo: 0.1
+    physical: -0.2
 Rotation:
   - CharacterName: "Ganyu"
     Action: "charge"

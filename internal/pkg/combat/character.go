@@ -57,16 +57,17 @@ type Character struct {
 	Talent    map[ActionType]int64 //talent levels
 
 	//other stats
-	MaxEnergy  float64
-	MaxStamina float64
-	Energy     float64 //how much energy the character currently have
-	Stamina    float64 //how much stam the character currently have
+	MaxEnergy     float64
+	MaxStamina    float64
+	Energy        float64 //how much energy the character currently have
+	Stamina       float64 //how much stam the character currently have
+	AttackCounter int     //which attack in the series are we at now
 }
 
 //CharacterProfile ...
 type CharacterProfile struct {
 	Name                string               `yaml:"Name"`
-	Element             eleType              `yaml:"Element"`
+	Element             EleType              `yaml:"Element"`
 	Level               int64                `yaml:"Level"`
 	BaseHP              float64              `yaml:"BaseHP"`
 	BaseAtk             float64              `yaml:"BaseAtk"`
@@ -98,7 +99,13 @@ const (
 	//derivative actions
 	ActionTypeChargedAttack ActionType = "charge"
 	ActionTypePlungeAttack  ActionType = "plunge"
+	//procs
+	ActionTypeWeaponProc ActionType = "proc"
 )
+
+func (c *Character) CancelNormal() {
+	c.AttackCounter = 0
+}
 
 func (c *Character) tick(s *Sim) {
 	//this function gets called for every character every tick
@@ -112,7 +119,7 @@ func (c *Character) tick(s *Sim) {
 	}
 }
 
-func (c *Character) applyOrb(count int, ele eleType, isOrb bool, isActive bool, partyCount int) {
+func (c *Character) applyOrb(count int, ele EleType, isOrb bool, isActive bool, partyCount int) {
 	var amt, er, r float64
 	r = 1.0
 	if !isActive {
@@ -139,26 +146,28 @@ func (c *Character) applyOrb(count int, ele eleType, isOrb bool, isActive bool, 
 	}
 	amt = amt * (1 + er) * float64(count)
 
-	zap.S().Debugw("character received orb", "count", count, "ele", ele, "isOrb", isOrb, "on field", isActive, "party count", partyCount)
+	zap.S().Debugw("orb", "count", count, "ele", ele, "isOrb", isOrb, "on field", isActive, "party count", partyCount)
 
 	c.Energy += amt
 	if c.Energy > c.MaxEnergy {
 		c.Energy = c.MaxEnergy
 	}
 
-	zap.S().Debugw("character received orb", "energy rec'd", amt, "current energy", c.Energy, "ER", er)
+	zap.S().Debugw("orb", "energy rec'd", amt, "current energy", c.Energy, "ER", er)
 
 }
 
-func (c *Character) Snapshot(e eleType) Snapshot {
+func (c *Character) Snapshot(e EleType) Snapshot {
 	var s Snapshot
 	s.Stats = make(map[StatType]float64)
+	s.ResMod = make(map[EleType]float64)
+	s.TargetRes = make(map[EleType]float64)
 	for k, v := range c.Stats {
 		s.Stats[k] = v
 	}
 	//add char specific stat effect
 	for x, m := range c.Mods {
-		zap.S().Debugw("adding special char stat mod to snapshot", "key", x, "mods", m)
+		zap.S().Debugw("\t\tchar stat mod", "key", x, "mods", m)
 		for k, v := range m {
 			s.Stats[k] += v
 		}

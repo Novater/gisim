@@ -8,7 +8,7 @@ Characters:
     BaseDef: 630
     BaseCR: 0.05
     BaseCD: 0.50
-    Constellation: 2
+    Constellation: 0
     AscensionBonus:
       CD: 0.384
     TalentLevel:
@@ -72,7 +72,7 @@ Characters:
       Goblet:
         Level: 20
         Type: "Goblet"
-        Set: "Witch's Heart Flame"
+        Set: "Crimson Witch of Flames"
         MainStat:
           Type: "Cryo%"
           Value: 0.466
@@ -103,7 +103,15 @@ Characters:
             Value: 0.066
 Enemy:
   Level: 88
-  Resist: 0.1
+  Resist:
+    pyro: 0.5
+    dendro: 0.1
+    hydro: 0.1
+    cryo: 0.1
+    electro: 0.1
+    geo: 0.1
+    anemo: 0.1
+    physical: -0.2
 Rotation:
   - CharacterName: "Ganyu"
     Action: "charge"

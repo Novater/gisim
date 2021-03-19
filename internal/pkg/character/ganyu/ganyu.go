@@ -25,7 +25,7 @@ func New(s *combat.Sim, c *combat.Character) {
 			//check if c1 debuff is on, if so, reduce resist by -0.15
 			if _, ok := s.Target.Status["ganyu-c1"]; ok {
 				s.Log.Debugf("[%v]: applying Ganyu C1 cryo debuff", combat.PrintFrames(s.Frame))
-				snap.ResMod -= 0.15
+				snap.ResMod[combat.Cryo] -= 0.15
 			}
 			return false
 		}, "ganyu-c1", combat.PreDamageHook)

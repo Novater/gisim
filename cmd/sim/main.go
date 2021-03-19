@@ -7,12 +7,20 @@ import (
 	"time"
 
 	"github.com/srliao/gisim/internal/pkg/combat"
+
 	//characters
 	_ "github.com/srliao/gisim/internal/pkg/character/ganyu"
-	//sets
-	_ "github.com/srliao/gisim/internal/pkg/artifact/blizzard"
+	_ "github.com/srliao/gisim/internal/pkg/character/xiangling"
+
 	//weapons
 	_ "github.com/srliao/gisim/internal/pkg/weapon/prototypecrescent"
+	_ "github.com/srliao/gisim/internal/pkg/weapon/skywardspine"
+
+	//sets
+	_ "github.com/srliao/gisim/internal/pkg/artifact/blizzard"
+	_ "github.com/srliao/gisim/internal/pkg/artifact/crimson"
+	_ "github.com/srliao/gisim/internal/pkg/artifact/noblesse"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -26,7 +34,7 @@ func main() {
 	var cfg combat.Profile
 	var err error
 
-	p := "./current.yaml"
+	p := "./xl.yaml"
 
 	source, err = ioutil.ReadFile(p)
 	if err != nil {
@@ -44,17 +52,21 @@ func main() {
 		log.Fatal(err)
 	}
 	var actions = []combat.Action{
+		// {
+		// 	TargetCharIndex: 0,
+		// 	Type:            combat.ActionTypeSkill,
+		// },
+		// {
+		// 	TargetCharIndex: 0,
+		// 	Type:            combat.ActionTypeBurst,
+		// },
+		// {
+		// 	TargetCharIndex: 0,
+		// 	Type:            combat.ActionTypeChargedAttack,
+		// },
 		{
 			TargetCharIndex: 0,
-			Type:            combat.ActionTypeSkill,
-		},
-		{
-			TargetCharIndex: 0,
-			Type:            combat.ActionTypeBurst,
-		},
-		{
-			TargetCharIndex: 0,
-			Type:            combat.ActionTypeChargedAttack,
+			Type:            combat.ActionTypeAttack,
 		},
 	}
 	start := time.Now()

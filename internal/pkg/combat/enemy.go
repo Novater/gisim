@@ -3,13 +3,13 @@ package combat
 //Enemy keeps track of the status of one enemy Enemy
 type Enemy struct {
 	Level  int64
-	Resist float64
+	Resist map[EleType]float64
 
 	//resist mods
 	ResMod map[string]float64
 
 	//tracking
-	Auras  map[eleType]aura
+	Auras  map[EleType]aura
 	Status map[string]int //countdown to how long status last
 
 	//stats

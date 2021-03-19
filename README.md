@@ -22,13 +22,19 @@
   - [x] C1: ffa regen 2 energy/ ffa reduce target cryo res
   - [ ] C2: extra charge
   - [ ]
+- [ ] implement xiangling
+  - [ ] normal attack
+  - [ ] charged attack
+  - [ ] guoba
+  - [ ] pyronado
 
+- [ ] jump/dash/char switch/burst/skill force reset all char normal counter
 - [ ] reactions
 - [ ] add ningguang
-- resonance
-- priority based rotation
-- rotation conditions
-- field effects
+- [ ] resonance
+- [ ] priority based rotation
+- [ ] rotation conditions
+- [ ] field effects
 
 ## brainstorm
 

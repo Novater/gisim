@@ -27,6 +27,22 @@ const (
 	PostDamageHook  effectType = "POST_DAMAGE"
 	PreAuraAppHook  effectType = "PRE_AURA_APP"
 	PostAuraAppHook effectType = "POST_AURA_APP"
+	// triggered when there will be a reaction
+	PreReaction effectType = "PRE_REACTION"
+	// triggered pre damage calculated; this snapshot contains info about the
+	// particular reaction. important because one damage can trigger multiple
+	// PreReactionDamage, one for each reaction i.e. pryo applied to electro+water
+	// trigering vape and overload at the same time
+	PreReactionDamage effectType = "PRE_REACTION_DAMAGE"
+
+	PreOverload       effectType = "PRE_OVERLOAD"
+	PreSuperconduct   effectType = "PRE_SUPERCONDUCT"
+	PreFreeze         effectType = "PRE_FREEZE"
+	PreVaporize       effectType = "PRE_VAPORIZE"
+	PreMelt           effectType = "PRE_MELT"
+	PreSwirl          effectType = "PRE_SWIRL"
+	PreCrystallize    effectType = "PRE_CRYSTALLIZE"
+	PreElectroCharged effectType = "PRE_ELECTROCHARGED"
 )
 
 type effectFunc func(s *Snapshot) bool
@@ -52,7 +68,7 @@ func New(p Profile) (*Sim, error) {
 
 	u := &Enemy{}
 
-	u.Auras = make(map[eleType]aura)
+	u.Auras = make(map[EleType]aura)
 	u.Status = make(map[string]int)
 	u.Level = p.Enemy.Level
 	u.Resist = p.Enemy.Resist
@@ -76,6 +92,7 @@ func New(p Profile) (*Sim, error) {
 	}
 	config.EncoderConfig.TimeKey = ""
 	config.EncoderConfig.StacktraceKey = ""
+	config.EncoderConfig.CallerKey = ""
 
 	logger, err := config.Build()
 	if err != nil {
@@ -223,16 +240,15 @@ func (s *Sim) AddEffect(f effectFunc, key string, hook effectType) {
 }
 
 func (s *Sim) AddAction(f ActionFunc, key string) {
-	s.Log.Debugf("[%v] new action received: %v; current action map count: %v", PrintFrames(s.Frame), key, len(s.actions))
 	if _, ok := s.actions[key]; ok {
 		s.Log.Debugf("[%v] action %v exists; overriding existing", PrintFrames(s.Frame), key)
 	}
 	s.actions[key] = f
-	s.Log.Debugf("[%v] current action map: %v", PrintFrames(s.Frame), s.actions)
+	s.Log.Debugf("[%v] new action %v; action map: %v", PrintFrames(s.Frame), key, s.actions)
 }
 
 //GenerateOrb is called when an ability generates orb
-func (s *Sim) GenerateOrb(n int, ele eleType, isOrb bool) {
+func (s *Sim) GenerateOrb(n int, ele EleType, isOrb bool) {
 	s.Log.Debugf("[%v]: particle/orbs picked up: %v of %v (isOrb: %v)", PrintFrames(s.Frame), n, ele, isOrb)
 	count := len(s.Characters)
 	for i, c := range s.Characters {
@@ -300,8 +316,8 @@ type Profile struct {
 
 //EnemyProfile ...
 type EnemyProfile struct {
-	Level  int64   `yaml:"Level"`
-	Resist float64 `yaml:"Resist"` //this needs to be a map later on
+	Level  int64               `yaml:"Level"`
+	Resist map[EleType]float64 `yaml:"Resist"`
 }
 
 //RotationItem ...
