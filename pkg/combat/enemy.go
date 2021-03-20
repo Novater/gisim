@@ -28,7 +28,7 @@ func (e *Enemy) tick(s *Sim) {
 	//tick down aura
 	for k, v := range e.Auras {
 		if v.duration == 0 {
-			print(s.Frame, true, "aura %v expired", k)
+			s.Log.Debugf("[%v] aura %v expired", s.Frame(), k)
 			delete(e.Auras, k)
 		} else {
 			a := e.Auras[k]

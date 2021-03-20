@@ -17,17 +17,6 @@ var (
 	weaponMap = make(map[string]NewWeaponFunc)
 )
 
-type NewWeaponFunc func(c Character, s *Sim, refine int)
-
-func RegisterWeaponFunc(name string, f NewWeaponFunc) {
-	mu.Lock()
-	defer mu.Unlock()
-	if _, dup := weaponMap[name]; dup {
-		panic("combat: RegisterWeapon called twice for character " + name)
-	}
-	weaponMap[name] = f
-}
-
 type AbilFunc func(s *Sim) int
 type ActionFunc func(s *Sim) bool
 
@@ -60,25 +49,24 @@ type effectFunc func(s *Snapshot) bool
 
 //Sim keeps track of one simulation
 type Sim struct {
-	Target     *Enemy
-	characters []Character
-	Active     int
-	Frame      int
-
-	Log *zap.SugaredLogger
-
+	Target *Enemy
+	Log    *zap.SugaredLogger
 	//track whatever status, ticked down by 1 each tick
 	Status map[string]int
 
+	active     int
+	characters []Character
+	f          int
+	stam       float64
+	swapCD     int
 	//per tick hooks
 	actions map[string]ActionFunc
 	//effects
 	effects map[effectType]map[string]effectFunc
+	field   map[string]map[StatType]float64
 
 	//action priority list
 	priority []RotationItem
-
-	field map[string]map[StatType]float64
 }
 
 //New creates new sim from given profile
@@ -98,6 +86,8 @@ func New(p Profile) (*Sim, error) {
 	s.effects = make(map[effectType]map[string]effectFunc)
 	s.Status = make(map[string]int)
 	s.field = make(map[string]map[StatType]float64)
+
+	s.stam = 240
 
 	config := zap.NewDevelopmentConfig()
 	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
@@ -123,8 +113,9 @@ func New(p Profile) (*Sim, error) {
 	zap.ReplaceGlobals(logger)
 
 	dup := make(map[string]bool)
+	s.active = -1
 	//create the characters
-	for _, v := range p.Characters {
+	for i, v := range p.Characters {
 
 		f, ok := charMap[v.Name]
 		if !ok {
@@ -157,6 +148,10 @@ func New(p Profile) (*Sim, error) {
 
 		s.characters = append(s.characters, c)
 
+		if v.Name == p.InitialActive {
+			s.active = i
+		}
+
 		if _, ok := dup[v.Name]; ok {
 			return nil, fmt.Errorf("duplicated character %v", v.Name)
 		}
@@ -186,6 +181,9 @@ func New(p Profile) (*Sim, error) {
 			}
 		}
 
+	}
+	if s.active == -1 {
+		return nil, fmt.Errorf("invalid active initial character %v", p.InitialActive)
 	}
 	for _, v := range p.Rotation {
 		//find index
@@ -228,11 +226,9 @@ func (s *Sim) FieldEffects() map[StatType]float64 {
 //Run the sim; length in seconds
 func (s *Sim) Run(length int, list []Action) float64 {
 	var cooldown int
-	var active int //index of the currently active car
-	var i int
 	rand.Seed(time.Now().UnixNano())
 	//60fps, 60s/min, 2min
-	for s.Frame = 0; s.Frame < 60*length; s.Frame++ {
+	for s.f = 0; s.f < 60*length; s.f++ {
 		//tick target and each character
 		//target doesn't do anything, just takes punishment, so it won't affect cd
 		s.Target.tick(s)
@@ -241,7 +237,7 @@ func (s *Sim) Run(length int, list []Action) float64 {
 			c.Tick()
 		}
 
-		s.handleTick()
+		s.tick()
 
 		//if in cooldown, do nothing
 		if cooldown > 0 {
@@ -251,46 +247,48 @@ func (s *Sim) Run(length int, list []Action) float64 {
 
 		//execute first item on priority list we can execute
 		//create list of cd for the priority list, execute item with lowest cd on the priority list
-		// var cd []int
+		var next RotationItem
+		found := false
+	prio:
 		for _, v := range s.priority {
-			t := 0
-			//check if same character
-			if v.index != s.Active {
-				t += 10 //add frame lag to switch char
+			//check if swap is required for this action
+			//if true, then this action is only executable if swapCD = 0
+			if v.index != s.active {
+				if s.swapCD > 0 {
+					continue prio
+				}
 			}
-			//check abil cd
-			switch v.Action {
-			case ActionTypeBurst:
-				t += s.characters[v.index].ActionCooldown(v.Action)
-			case ActionTypeSkill:
-				t += s.characters[v.index].ActionCooldown(v.Action)
-			case ActionTypeChargedAttack:
-				//check stam
+			if v.Action == ActionTypeChargedAttack {
+				scost := s.characters[v.index].ChargeAttackStam()
+				if scost < s.stam {
+					next = v
+					found = true
+					break prio
+				}
+			} else {
+				ok := s.characters[v.index].ActionReady(v.Action)
+				if ok {
+					next = v
+					found = true
+					break prio
+				}
 			}
-
 		}
 
-		if i >= len(list) {
-			//start over
-			i = 0
+		if !found {
+			continue //skip this frame, wait for something to become available
 		}
-		//otherwise only either action or swaps can trigger cooldown
-		//we figure out what the next action is to be
-		next := list[i]
 
 		//check if actor is active
-		if next.TargetCharIndex != active {
-			fmt.Printf("[%v] swapping to char #%v (current = %v)\n", s.Frame, next.TargetCharIndex, active)
-			//trigger a swap
-			cooldown = 150
-			active = next.TargetCharIndex
-			continue
-
+		if next.index != s.active {
+			s.Log.Debugf("[%v] swapping to char #%v (current = %v)\n", s.f, next.index, s.active)
+			//trigger a swap, add 20 to the cooldown
+			cooldown = 20
+			s.swapCD = 150
+			s.active = next.index
 		}
-		//move on to next action on list
-		i++
 
-		cooldown = s.handleAction(active, next)
+		cooldown += s.handleAction(s.active, next)
 
 	}
 
@@ -311,27 +309,27 @@ func (s *Sim) RemoveEffect(key string, hook effectType) {
 
 func (s *Sim) AddAction(f ActionFunc, key string) {
 	if _, ok := s.actions[key]; ok {
-		s.Log.Debugf("\t[%v] action %v exists; overriding existing", PrintFrames(s.Frame), key)
+		s.Log.Debugf("\t[%v] action %v exists; overriding existing", s.Frame(), key)
 	}
 	s.actions[key] = f
-	s.Log.Debugf("\t[%v] new action %v; action map: %v", PrintFrames(s.Frame), key, s.actions)
+	s.Log.Debugf("\t[%v] new action %v; action map: %v", s.Frame(), key, s.actions)
 }
 
 //GenerateOrb is called when an ability generates orb
 func (s *Sim) GenerateOrb(n int, ele EleType, isOrb bool) {
-	s.Log.Debugf("\t[%v]: particle/orbs picked up: %v of %v (isOrb: %v)", PrintFrames(s.Frame), n, ele, isOrb)
+	s.Log.Debugf("[%v]: particle/orbs picked up: %v of %v (isOrb: %v)", s.Frame(), n, ele, isOrb)
 	count := len(s.characters)
 	for i, c := range s.characters {
-		active := s.Active == i
+		active := s.active == i
 		c.ApplyOrb(n, ele, isOrb, active, count)
 	}
 }
 
-//handleTick
-func (s *Sim) handleTick() {
+//tick
+func (s *Sim) tick() {
 	for k, f := range s.actions {
 		if f(s) {
-			print(s.Frame, true, "action %v expired", k)
+			s.Log.Debugf("\t[%v] action %v expired", s.Frame(), k)
 			delete(s.actions, k)
 		}
 	}
@@ -342,39 +340,61 @@ func (s *Sim) handleTick() {
 			s.Status[k]--
 		}
 	}
+	if s.swapCD > 0 {
+		s.swapCD--
+	}
+
 }
 
 //handleAction executes the next action, returns the cooldown
-func (s *Sim) handleAction(active int, a Action) int {
+func (s *Sim) handleAction(active int, a RotationItem) int {
 	//if active see what ability we want to use
 	c := s.characters[active]
-
-	switch a.Type {
+	s.Log.Infof("[%v] executing %v", s.Frame(), a.Action)
+	switch a.Action {
 	case ActionTypeDash:
-		print(s.Frame, false, "dashing")
-		return 100
+		return 30
 	case ActionTypeJump:
-		print(s.Frame, false, "dashing")
-		fmt.Printf("[%v] jumping\n", s.Frame)
-		return 100
+		return 30
 	case ActionTypeAttack:
-		print(s.Frame, false, "%v executing attack", c.Name())
 		return c.Attack()
 	case ActionTypeChargedAttack:
-		print(s.Frame, false, "%v executing charged attack", c.Name())
 		return c.ChargeAttack()
 	case ActionTypeBurst:
-		print(s.Frame, false, "%v executing burst", c.Name())
 		return c.Burst()
 	case ActionTypeSkill:
-		print(s.Frame, false, "%v executing skill", c.Name())
 		return c.Skill()
 	default:
 		//do nothing
-		print(s.Frame, false, "no action specified: %v. Doing nothing", a.Type)
 	}
 
 	return 0
+}
+
+func (s *Sim) Frame() string {
+	return fmt.Sprintf("%.2fs|%v", float64(s.f)/60, s.f)
+}
+
+type NewCharacterFunc func(s *Sim, p CharacterProfile) (Character, error)
+
+func RegisterCharFunc(name string, f NewCharacterFunc) {
+	mu.Lock()
+	defer mu.Unlock()
+	if _, dup := charMap[name]; dup {
+		panic("combat: RegisterChar called twice for character " + name)
+	}
+	charMap[name] = f
+}
+
+type NewWeaponFunc func(c Character, s *Sim, refine int)
+
+func RegisterWeaponFunc(name string, f NewWeaponFunc) {
+	mu.Lock()
+	defer mu.Unlock()
+	if _, dup := weaponMap[name]; dup {
+		panic("combat: RegisterWeapon called twice for character " + name)
+	}
+	weaponMap[name] = f
 }
 
 //Action describe one action to execute
@@ -384,11 +404,12 @@ type Action struct {
 }
 
 type Profile struct {
-	Label      string             `yaml:"Label"`
-	Enemy      EnemyProfile       `yaml:"Enemy"`
-	Characters []CharacterProfile `yaml:"Characters"`
-	Rotation   []RotationItem     `yaml:"Rotation"`
-	LogLevel   string             `yaml:"LogLevel"`
+	Label         string             `yaml:"Label"`
+	Enemy         EnemyProfile       `yaml:"Enemy"`
+	InitialActive string             `yaml:"InitialActive"`
+	Characters    []CharacterProfile `yaml:"Characters"`
+	Rotation      []RotationItem     `yaml:"Rotation"`
+	LogLevel      string             `yaml:"LogLevel"`
 }
 
 //EnemyProfile ...
@@ -399,8 +420,77 @@ type EnemyProfile struct {
 
 //RotationItem ...
 type RotationItem struct {
-	CharacterName string `yaml:"CharacterName"`
-	index         int
-	Action        ActionType `yaml:"Action"`
-	Condition     string     //to be implemented
+	CharacterName   string `yaml:"CharacterName"`
+	index           int
+	Action          ActionType `yaml:"Action"`
+	ConditionType   string     `yaml:"ConditionType"`   //for now either a status or aura
+	ConditionTarget string     `yaml:"ConditionTarget"` //which status or aura
+	Condition       bool       `yaml:"Condition"`       //true or false
 }
+
+type Character interface {
+	//ability functions to be defined by each character on how they will
+	Name() string
+	//affect the unit
+	Attack() int
+	ChargeAttack() int
+	PlungeAttack() int
+	Skill() int
+	Burst() int
+	Filler() int //action to be called when we don't want to switch and need something to fill time until cd comes up
+	Tick()       //function to be called every frame
+	//special char mods
+	AddMod(key string, val map[StatType]float64)
+	RemoveMod(key string)
+	//info methods
+	HasMod(key string) bool
+	ActionCooldown(a ActionType) int
+	ActionReady(a ActionType) bool
+	ChargeAttackStam() float64
+	FillerFrames() int
+	//other actions
+	ApplyOrb(count int, ele EleType, isOrb bool, isActive bool, partyCount int)
+	Snapshot(e EleType) Snapshot
+}
+
+//CharacterProfile ...
+type CharacterProfile struct {
+	Name                string               `yaml:"Name"`
+	Element             EleType              `yaml:"Element"`
+	Level               int64                `yaml:"Level"`
+	BaseHP              float64              `yaml:"BaseHP"`
+	BaseAtk             float64              `yaml:"BaseAtk"`
+	BaseDef             float64              `yaml:"BaseDef"`
+	BaseCR              float64              `yaml:"BaseCR"`
+	BaseCD              float64              `yaml:"BaseCD"`
+	Constellation       int                  `yaml:"Constellation"`
+	AscensionBonus      map[StatType]float64 `yaml:"AscensionBonus"`
+	TalentLevel         map[ActionType]int64 `yaml:"TalentLevel"`
+	WeaponName          string               `yaml:"WeaponName"`
+	WeaponRefinement    int                  `yaml:"WeaponRefinement"`
+	WeaponBaseAtk       float64              `yaml:"WeaponBaseAtk"`
+	WeaponSecondaryStat map[StatType]float64 `yaml:"WeaponSecondaryStat"`
+	Artifacts           map[Slot]Artifact    `yaml:"Artifacts"`
+}
+
+type ActionType string
+
+//ActionType constants
+const (
+	//motions
+	ActionTypeSwap ActionType = "swap"
+	ActionTypeDash ActionType = "dash"
+	ActionTypeJump ActionType = "jump"
+	//main actions
+	ActionTypeAttack ActionType = "attack"
+	ActionTypeSkill  ActionType = "skill"
+	ActionTypeBurst  ActionType = "burst"
+	//derivative actions
+	ActionTypeChargedAttack ActionType = "charge"
+	ActionTypePlungeAttack  ActionType = "plunge"
+	//procs
+	ActionTypeWeaponProc ActionType = "proc"
+	//xiao special
+	ActionTypeXiaoLowJump  ActionType = "xiao-low-jump"
+	ActionTypeXiaoHighJump ActionType = "xiao-high-jump"
+)

@@ -2,44 +2,25 @@
 
 ## bugs
 
-- sim action list currently wastes 1 frame if the current skill is on cd
-- resist is currently assumed to be flat. should be per element per enemy
-- action list currently goes around in circles, can't really make use of skill charges
 - there should be an animation lock if normal attacks are not chained
+- ICD for aura application not yet tracked
+- status such as gouba, ganyu lotus etc... should be kept track of under Sim
 
 ## todo list
 
-- [x] refactor character into an interface, let the character itself decide what to use to keep track of stuff
-- [ ] rotations to check CD
+- [ ] melt reaction
 - [ ] refactor weapon and artifact equip code into character
-- [x] character orb receiving function
-- [x] sim handle orb
 - [ ] finish implementing ganyu (up to c6?)
-
   - [ ] normal attack
   - [ ] aimed attack
   - [ ] aimed attack lvl 1
   - [ ] plunge attack
-  - [x] cooldown on abil
-  - [x] energy use on abil
-  - [x] particles on skill
-  - [x] C1: ffa regen 2 energy/ ffa reduce target cryo res
-  - [x] C2: extra charge
   - [ ]
-
 - [ ] implement xiangling
-
-  - [x] normal attack
+  - [ ] pyro application
   - [ ] charged attack
   - [ ] plunge attack
-  - [x] guoba
-  - [x] pyronado
   - [ ] xiangling a4 (when to pick up?)
-  - [x] c1
-  - [x] c2
-  - [x] c4
-  - [x] c6
-
 - [ ] jump/dash/char switch/burst/skill force reset all char normal counter
 - [ ] reactions
 - [ ] add ningguang
@@ -48,6 +29,28 @@
 - [ ] rotation conditions
 - [ ] field effects
 - [ ] frames returned per action should have at least 2 number, avg cancellable and avg normal; may actually required more than 2, 1 into each trailling action such as swap, dash, jump, burst, skill, auto
+
+## done
+
+- [x] character orb receiving function
+- [x] sim handle orb
+- [x] refactor character into an interface, let the character itself decide what to use to keep track of stuff
+- [x] rotations to check CD
+- [x] swap should trigger a 150f cooldown
+- Ganyu
+  - [x] cooldown on abil
+  - [x] energy use on abil
+  - [x] particles on skill
+  - [x] C1: ffa regen 2 energy/ ffa reduce target cryo res
+  - [x] C2: extra charge
+- Xiangling
+  - [x] normal attack
+  - [x] guoba
+  - [x] pyronado
+  - [x] c1
+  - [x] c2
+  - [x] c4
+  - [x] c6
 
 ## brainstorm
 

@@ -29,7 +29,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		s.AddEffect(func(snap *combat.Snapshot) bool {
 			//check if c1 debuff is on, if so, reduce resist by -0.15
 			if _, ok := s.Target.Status["ganyu-c1"]; ok {
-				s.Log.Debugf("\t[%v]: applying Ganyu C1 cryo debuff", combat.PrintFrames(s.Frame))
+				s.Log.Debugf("\t[%v]: applying Ganyu C1 cryo debuff", s.Frame())
 				snap.ResMod[combat.Cryo] -= 0.15
 			}
 			return false
@@ -42,7 +42,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 				if g.Energy > g.MaxEnergy {
 					g.Energy = g.MaxEnergy
 				}
-				s.Log.Debugf("\t[%v]: Ganyu C1 refunding 2 energy; current energy %v", combat.PrintFrames(s.Frame), g.Energy)
+				s.Log.Debugf("\t[%v]: Ganyu C1 refunding 2 energy; current energy %v", s.Frame(), g.Energy)
 				//also add c1 debuff to target
 				s.Target.Status["ganyu-c1"] = 5 * 60
 			}
@@ -56,7 +56,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 func (g *ganyu) ChargeAttack() int {
 	i := 0
 	g.S.AddAction(func(s *combat.Sim) bool {
-		if i < 20 { //assume 20 frame travel time
+		if i < 20+137 { //assume 20 frame travel time
 			i++
 			return false
 		}
@@ -80,13 +80,13 @@ func (g *ganyu) ChargeAttack() int {
 		g.CD["A2"] = 5 * 60
 		//apply damage
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Ganyu frost arrow dealt %.0f damage", combat.PrintFrames(s.Frame), damage)
+		s.Log.Infof("[%v]: Ganyu frost arrow dealt %.0f damage", s.Frame(), damage)
 		return true
-	}, fmt.Sprintf("%v-Ganyu-CA-FFA", g.S.Frame))
+	}, fmt.Sprintf("%v-Ganyu-CA-FFA", g.S.Frame()))
 
 	b := 0
 	g.S.AddAction(func(s *combat.Sim) bool {
-		if b < 50 {
+		if b < 50+137 {
 			b++
 			return false
 		}
@@ -107,10 +107,14 @@ func (g *ganyu) ChargeAttack() int {
 		}
 		//apply damage
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Ganyu frost flake bloom dealt %.0f damage", combat.PrintFrames(s.Frame), damage)
+		s.Log.Infof("[%v]: Ganyu frost flake bloom dealt %.0f damage", s.Frame(), damage)
 		return true
-	}, fmt.Sprintf("%v-Ganyu-CA-FFB", g.S.Frame))
+	}, fmt.Sprintf("%v-Ganyu-CA-FFB", g.S.Frame()))
 
+	return 137
+}
+
+func (g *ganyu) FillerFrames() int {
 	return 137
 }
 
@@ -160,7 +164,7 @@ func (g *ganyu) Skill() int {
 		}
 		s.GenerateOrb(2, combat.Cryo, false)
 		return true
-	}, fmt.Sprintf("%v-Ganyu-Skill-Orb", g.S.Frame))
+	}, fmt.Sprintf("%v-Ganyu-Skill-Orb", g.S.Frame()))
 
 	tick := 0
 	flower := func(s *combat.Sim) bool {
@@ -170,11 +174,11 @@ func (g *ganyu) Skill() int {
 		}
 		//do damage
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Ganyu ice lotus (tick) dealt %.0f damage", combat.PrintFrames(s.Frame), damage)
+		s.Log.Infof("[%v]: Ganyu ice lotus (tick) dealt %.0f damage", s.Frame(), damage)
 		tick++
 		return true
 	}
-	g.S.AddAction(flower, fmt.Sprintf("%v-Ganyu-Skill", g.S.Frame))
+	g.S.AddAction(flower, fmt.Sprintf("%v-Ganyu-Skill", g.S.Frame()))
 	//add cooldown to sim
 	g.CD[charge] = 10 * 60
 
@@ -224,11 +228,11 @@ func (g *ganyu) Burst() int {
 		}
 		//do damage
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Ganyu burst (tick) dealt %.0f damage", combat.PrintFrames(s.Frame), damage)
+		s.Log.Infof("[%v]: Ganyu burst (tick) dealt %.0f damage", s.Frame(), damage)
 		tick++
 		return false
 	}
-	g.S.AddAction(storm, fmt.Sprintf("%v-Ganyu-Burst", g.S.Frame))
+	g.S.AddAction(storm, fmt.Sprintf("%v-Ganyu-Burst", g.S.Frame()))
 	//add cooldown to sim
 	g.CD["burst-cd"] = 15 * 60
 	//use up energy
@@ -253,4 +257,31 @@ func (g *ganyu) ActionCooldown(a combat.ActionType) int {
 	}
 	return 0
 
+}
+
+func (g *ganyu) ActionReady(a combat.ActionType) bool {
+	switch a {
+	case combat.ActionTypeBurst:
+		if g.Energy != g.MaxEnergy {
+			return false
+		}
+		if _, ok := g.CD["burst-cd"]; ok {
+			return false
+		}
+	case combat.ActionTypeSkill:
+		_, cd := g.CD["skill-cd"]
+		//if skill-cd is not there, then return true
+		if !cd {
+			return true
+		}
+		//other wise skill-cd is there, we check c2
+		if g.Profile.Constellation >= 2 {
+			_, cd2 := g.CD["skill-cd2"]
+			if !cd2 {
+				return true
+			}
+		}
+		return false
+	}
+	return true
 }

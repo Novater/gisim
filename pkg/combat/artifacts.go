@@ -20,9 +20,6 @@ type Artifact struct {
 	Substat  []Stat `yaml:"Substat"`
 }
 
-//ArtifactSet represents a set of artifacts
-type ArtifactSet map[Slot]Artifact
-
 //Stat represents one stat
 type Stat struct {
 	Type  StatType `yaml:"Type"`
@@ -65,5 +62,28 @@ const (
 	GeoP     StatType = "Geo%"
 	EleP     StatType = "Ele%"
 	PhyP     StatType = "Phys%"
+	DendroP  StatType = "Dendro%"
 	AtkSpd   StatType = "ATKSPD%"
 )
+
+func EleToDmgP(e EleType) StatType {
+	switch e {
+	case Anemo:
+		return AnemoP
+	case Cryo:
+		return CryoP
+	case Electro:
+		return ElectroP
+	case Geo:
+		return GeoP
+	case Hydro:
+		return HydroP
+	case Pyro:
+		return PyroP
+	case Dendro:
+		return DendroP
+	case Physical:
+		return PhyP
+	}
+	return ""
+}

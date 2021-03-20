@@ -29,7 +29,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		s.AddEffect(func(snap *combat.Snapshot) bool {
 			//check if c1 debuff is on, if so, reduce resist by -0.15
 			if _, ok := s.Target.Status["xiangling-c1"]; ok {
-				s.Log.Debugf("\t[%v]: applying Xiangling C1 pyro debuff", combat.PrintFrames(s.Frame))
+				s.Log.Debugf("\t[%v]: applying Xiangling C1 pyro debuff", s.Frame())
 				snap.ResMod[combat.Pyro] -= 0.15
 			}
 			return false
@@ -45,6 +45,23 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	}
 
 	return &x, nil
+}
+
+func (x *xl) FillerFrames() int {
+	frames := 26
+	//hit one starts at 1955 end 2097
+	//1480 to 1677, 1853, 2045
+	switch x.NormalCounter {
+	case 1:
+		frames = 41
+	case 2:
+		frames = 66
+	case 3:
+		frames = 49
+	case 4:
+		frames = 17
+	}
+	return frames
 }
 
 func (x *xl) Attack() int {
@@ -92,9 +109,9 @@ func (x *xl) Attack() int {
 			//since it doesnt apply any elements, only trigger weapon procs
 			c := d.Clone()
 			damage := s.ApplyDamage(c)
-			s.Log.Infof("[%v]: Xiangling normal %v (hit %v) dealt %.0f damage", combat.PrintFrames(s.Frame), n, t, damage)
+			s.Log.Infof("[%v]: Xiangling normal %v (hit %v) dealt %.0f damage", s.Frame(), n, t, damage)
 			return true
-		}, fmt.Sprintf("%v-Xiangling-Normal-%v-%v", x.S.Frame, n, i))
+		}, fmt.Sprintf("%v-Xiangling-Normal-%v-%v", x.S.Frame(), n, i))
 	}
 	//if n = 5, add explosion for c2
 	if x.Profile.Constellation >= 2 && n == 5 {
@@ -107,9 +124,9 @@ func (x *xl) Attack() int {
 			c := d.Clone()
 			c.Element = combat.Pyro
 			damage := s.ApplyDamage(c)
-			s.Log.Infof("[%v]: Xiangling C2 explosion dealt %.0f damage", combat.PrintFrames(s.Frame), damage)
+			s.Log.Infof("[%v]: Xiangling C2 explosion dealt %.0f damage", s.Frame(), damage)
 			return true
-		}, fmt.Sprintf("%v-Xiangling-C2-Explosion", x.S.Frame))
+		}, fmt.Sprintf("%v-Xiangling-C2-Explosion", x.S.Frame()))
 	}
 	//add a 75 frame attackcounter reset
 	x.NormalResetTimer = 70
@@ -132,12 +149,16 @@ func (x *xl) ChargeAttack() int {
 		//no delay for now? realistically the hits should have delay but not sure if it actually makes a diff
 		//since it doesnt apply any elements, only trigger weapon procs
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Xiangling charge attack dealt %.0f damage", combat.PrintFrames(s.Frame), damage)
+		s.Log.Infof("[%v]: Xiangling charge attack dealt %.0f damage", s.Frame(), damage)
 		return true
-	}, fmt.Sprintf("%v-Xiangling-Charge-Attack", x.S.Frame))
+	}, fmt.Sprintf("%v-Xiangling-Charge-Attack", x.S.Frame()))
 	x.NormalResetTimer = 0
 	//return animation cd
 	return 85
+}
+
+func (x *xl) ChargeAttackStam() float64 {
+	return 25
 }
 
 func (x *xl) Skill() int {
@@ -183,7 +204,7 @@ func (x *xl) Skill() int {
 			next += 90
 			count++
 			damage := s.ApplyDamage(c)
-			s.Log.Infof("[%v]: Xiangling (Gouba - tick) dealt %.0f damage", combat.PrintFrames(s.Frame), damage)
+			s.Log.Infof("[%v]: Xiangling (Gouba - tick) dealt %.0f damage", s.Frame(), damage)
 			//generate orbs
 			//add delayed orb for travel time
 			orbDelay := 0
@@ -194,15 +215,15 @@ func (x *xl) Skill() int {
 				}
 				s.GenerateOrb(1, combat.Pyro, false)
 				return true
-			}, fmt.Sprintf("%v-Xiangling-Skill-Orb", s.Frame))
+			}, fmt.Sprintf("%v-Xiangling-Skill-Orb", s.Frame()))
 		}
 		if count == 4 {
-			s.Log.Infof("[%v]: Xiangling (Gouba) expired", combat.PrintFrames(s.Frame))
+			s.Log.Infof("[%v]: Xiangling (Gouba) expired", s.Frame())
 			return true
 		}
 		return false
 	}
-	x.S.AddAction(g, fmt.Sprintf("%v-Xiangling-Skill", x.S.Frame))
+	x.S.AddAction(g, fmt.Sprintf("%v-Xiangling-Skill", x.S.Frame()))
 	//add cooldown to sim
 	x.CD["skill-cd"] = 12 * 60
 	x.NormalResetTimer = 0
@@ -240,9 +261,9 @@ func (x *xl) Burst() int {
 		d.AbilType = combat.ActionTypeBurst
 		d.Mult = pyronado1[lvl]
 		damage := s.ApplyDamage(d)
-		x.S.Log.Infof("[%v]: Xiangling Pyronado initial hit 1 dealt %.0f damage", combat.PrintFrames(s.Frame), damage)
+		x.S.Log.Infof("[%v]: Xiangling Pyronado initial hit 1 dealt %.0f damage", s.Frame(), damage)
 		return true
-	}, fmt.Sprintf("%v-Xiangling-Burst-Hit-1", x.S.Frame))
+	}, fmt.Sprintf("%v-Xiangling-Burst-Hit-1", x.S.Frame()))
 	h2d := 0
 	x.S.AddAction(func(s *combat.Sim) bool {
 		h2d++
@@ -254,9 +275,9 @@ func (x *xl) Burst() int {
 		d.AbilType = combat.ActionTypeBurst
 		d.Mult = pyronado2[lvl]
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Xiangling Pyronado initial hit 2 dealt %.0f damage", combat.PrintFrames(s.Frame), damage)
+		s.Log.Infof("[%v]: Xiangling Pyronado initial hit 2 dealt %.0f damage", s.Frame(), damage)
 		return true
-	}, fmt.Sprintf("%v-Xiangling-Burst-Hit-2", x.S.Frame))
+	}, fmt.Sprintf("%v-Xiangling-Burst-Hit-2", x.S.Frame()))
 	h3d := 0
 	x.S.AddAction(func(s *combat.Sim) bool {
 		h3d++
@@ -268,9 +289,9 @@ func (x *xl) Burst() int {
 		d.AbilType = combat.ActionTypeBurst
 		d.Mult = pyronado3[lvl]
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Xiangling Pyronado initial hit 3 dealt %.0f damage", combat.PrintFrames(s.Frame), damage)
+		s.Log.Infof("[%v]: Xiangling Pyronado initial hit 3 dealt %.0f damage", s.Frame(), damage)
 		return true
-	}, fmt.Sprintf("%v-Xiangling-Burst-Hit-3", x.S.Frame))
+	}, fmt.Sprintf("%v-Xiangling-Burst-Hit-3", x.S.Frame()))
 	//ok for now we assume it's 80 frames per cycle, that gives us roughly 10s uptime
 	tick := 0
 	next := 70
@@ -299,10 +320,10 @@ func (x *xl) Burst() int {
 			//make a copy of the snapshot
 			next += 70
 			damage := s.ApplyDamage(pd)
-			s.Log.Infof("[%v]: Xiangling (Pyronado - tick #%v) dealt %.0f damage", combat.PrintFrames(s.Frame), count, damage)
+			s.Log.Infof("[%v]: Xiangling (Pyronado - tick #%v) dealt %.0f damage", s.Frame(), count, damage)
 		}
 		return false
-	}, fmt.Sprintf("%v-Xiangling-Burst-Spin", x.S.Frame))
+	}, fmt.Sprintf("%v-Xiangling-Burst-Spin", x.S.Frame()))
 	//add an effect starting at frame 70 to end of duration to increase pyro dmg by 15% if c6
 	if x.Profile.Constellation >= 6 {
 		//wait 70 frames, add effect
@@ -324,7 +345,7 @@ func (x *xl) Burst() int {
 				return true
 			}
 			return false
-		}, fmt.Sprintf("%v-Xiangling-Burst-C6", x.S.Frame))
+		}, fmt.Sprintf("%v-Xiangling-Burst-C6", x.S.Frame()))
 
 	}
 

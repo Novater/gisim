@@ -61,7 +61,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		d.Mult = dmg
 		s.AddAction(func(s *combat.Sim) bool {
 			damage := s.ApplyDamage(d)
-			s.Log.Infof("[%v]: Skyward Spine proc dealt %.0f damage", combat.PrintFrames(s.Frame), damage)
+			s.Log.Infof("[%v]: Skyward Spine proc dealt %.0f damage", s.Frame(), damage)
 			return true
 		}, fmt.Sprintf("Skyware-Spine-Proc-%v", c.Name()))
 		//trigger cd

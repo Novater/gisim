@@ -87,8 +87,19 @@ func (c *TemplateChar) Attack() int {
 	return 0
 }
 
-func (c *TemplateChar) ChargeAttack() int {
+func (c *TemplateChar) Filler() int {
+	return c.Attack()
+}
 
+func (c *TemplateChar) FillerFrames() int {
+	return 0
+}
+
+func (c *TemplateChar) ChargeAttack() int {
+	return 0
+}
+
+func (c *TemplateChar) ChargeAttackStam() float64 {
 	return 0
 }
 
@@ -97,12 +108,10 @@ func (c *TemplateChar) PlungeAttack() int {
 }
 
 func (c *TemplateChar) Skill() int {
-
 	return 0
 }
 
 func (c *TemplateChar) Burst() int {
-
 	return 0
 }
 
@@ -110,7 +119,7 @@ func (c *TemplateChar) Tick() {
 	//this function gets called for every character every tick
 	for k, v := range c.CD {
 		if v == 0 {
-			c.S.Log.Debugf("\t[%v] cooldown %v finished; deleting", combat.PrintFrames(c.S.Frame), k)
+			c.S.Log.Debugf("\t[%v] cooldown %v finished; deleting", c.S.Frame(), k)
 			delete(c.CD, k)
 		} else {
 			c.CD[k]--
@@ -119,7 +128,7 @@ func (c *TemplateChar) Tick() {
 	//check normal reset
 	if c.NormalResetTimer == 0 {
 		if c.NRTChanged {
-			c.S.Log.Debugf("\t[%v] character normal reset", combat.PrintFrames(c.S.Frame))
+			c.S.Log.Debugf("\t[%v] character normal reset", c.S.Frame())
 			c.NRTChanged = false
 		}
 		c.NormalCounter = 0
@@ -189,5 +198,21 @@ func (c *TemplateChar) ActionCooldown(a combat.ActionType) int {
 		return c.CD["skill-cd"]
 	}
 	return 0
+}
 
+func (c *TemplateChar) ActionReady(a combat.ActionType) bool {
+	switch a {
+	case combat.ActionTypeBurst:
+		if c.Energy != c.MaxEnergy {
+			return false
+		}
+		if _, ok := c.CD["burst-cd"]; ok {
+			return false
+		}
+	case combat.ActionTypeSkill:
+		if _, ok := c.CD["skill-cd"]; ok {
+			return false
+		}
+	}
+	return true
 }
