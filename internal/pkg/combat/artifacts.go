@@ -1,5 +1,16 @@
 package combat
 
+type NewSetFunc func(c *Character, s *Sim, count int)
+
+func RegisterSetFunc(name string, f NewSetFunc) {
+	mu.Lock()
+	defer mu.Unlock()
+	if _, dup := setMap[name]; dup {
+		panic("combat: RegisterSetBonus called twice for character " + name)
+	}
+	setMap[name] = f
+}
+
 //Artifact represents one artfact
 type Artifact struct {
 	Level    int64  `yaml:"Level"`

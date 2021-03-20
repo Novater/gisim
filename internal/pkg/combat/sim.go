@@ -17,6 +17,17 @@ var (
 	weaponMap = make(map[string]NewWeaponFunc)
 )
 
+type NewWeaponFunc func(c Character, s *Sim, refine int)
+
+func RegisterWeaponFunc(name string, f NewWeaponFunc) {
+	mu.Lock()
+	defer mu.Unlock()
+	if _, dup := weaponMap[name]; dup {
+		panic("combat: RegisterWeapon called twice for character " + name)
+	}
+	weaponMap[name] = f
+}
+
 type AbilFunc func(s *Sim) int
 type ActionFunc func(s *Sim) bool
 
@@ -50,7 +61,7 @@ type effectFunc func(s *Snapshot) bool
 //Sim keeps track of one simulation
 type Sim struct {
 	Target     *Enemy
-	Characters []*Char
+	characters []Character
 	Active     int
 	Frame      int
 
@@ -106,68 +117,20 @@ func New(p Profile) (*Sim, error) {
 	s.Log = logger.Sugar()
 	zap.ReplaceGlobals(logger)
 
-	var chars []*Char
 	dup := make(map[string]bool)
 	//create the characters
 	for _, v := range p.Characters {
-		//initialize artifact sets
-		c := &Char{}
-		//initialize other variables/stats
-		c.Stats = make(map[StatType]float64)
-		c.Cooldown = make(map[string]int)
-		c.Store = make(map[string]interface{})
-		c.Mods = make(map[string]map[StatType]float64)
-		c.TickHooks = make(map[string]func(c *Char) bool)
-		c.Profile = v
 
 		f, ok := charMap[v.Name]
 		if !ok {
 			return nil, fmt.Errorf("invalid character: %v", v.Name)
 		}
-		f(s, c)
-
-		if _, ok := dup[v.Name]; ok {
-			return nil, fmt.Errorf("duplicated character %v", v.Name)
+		c, err := f(s, v)
+		if err != nil {
+			return nil, err
 		}
 
-		dup[v.Name] = true
-
-		//initialize weapon
-		wf, ok := weaponMap[v.WeaponName]
-		if !ok {
-			return nil, fmt.Errorf("unrecognized weapon %v for character %v", v.WeaponName, v.Name)
-		}
-		wf(c, s, v.WeaponRefinement)
-
-		c.WeaponAtk = v.WeaponBaseAtk
-		//check set bonus
-		sb := make(map[string]int)
-		for _, a := range v.Artifacts {
-			c.Stats[a.MainStat.Type] += a.MainStat.Value
-			for _, sub := range a.Substat {
-				c.Stats[sub.Type] += sub.Value
-			}
-			sb[a.Set]++
-		}
-		//add ascension bonus
-		for k, v := range v.AscensionBonus {
-			c.Stats[k] += v
-		}
-		//add weapon sub stat
-		for k, v := range v.WeaponSecondaryStat {
-			c.Stats[k] += v
-		}
-		//add set bonus
-		for key, count := range sb {
-			f, ok := setMap[key]
-			if ok {
-				f(c, s, count)
-			} else {
-				s.Log.Warnf("character %v has unrecognized set %v", v.Name, key)
-			}
-
-		}
-		//check talents are valid
+		//check talent levels are valid
 		for key, val := range v.TalentLevel {
 			if key != ActionTypeAttack && key != ActionTypeSkill && key != ActionTypeBurst {
 				return nil, fmt.Errorf("invalid talent type: %v - %v", v.Name, key)
@@ -187,14 +150,43 @@ func New(p Profile) (*Sim, error) {
 			return nil, fmt.Errorf("char %v missing talent level for %v", v.Name, ActionTypeBurst)
 		}
 
-		chars = append(chars, c)
+		s.characters = append(s.characters, c)
+
+		if _, ok := dup[v.Name]; ok {
+			return nil, fmt.Errorf("duplicated character %v", v.Name)
+		}
+
+		dup[v.Name] = true
+
+		//initialize weapon
+		wf, ok := weaponMap[v.WeaponName]
+		if !ok {
+			return nil, fmt.Errorf("unrecognized weapon %v for character %v", v.WeaponName, v.Name)
+		}
+		wf(c, s, v.WeaponRefinement)
+
+		//check set bonus
+		sb := make(map[string]int)
+		for _, a := range v.Artifacts {
+			sb[a.Set]++
+		}
+
+		//add set bonus
+		for key, count := range sb {
+			f, ok := setMap[key]
+			if ok {
+				f(&c, s, count)
+			} else {
+				s.Log.Warnf("character %v has unrecognized set %v", v.Name, key)
+			}
+		}
+
 	}
-	s.Characters = chars
 	for _, v := range p.Rotation {
 		//find index
 		index := -1
-		for i, c := range s.Characters {
-			if c.Profile.Name == v.CharacterName {
+		for i, c := range s.characters {
+			if c.Name() == v.CharacterName {
 				index = i
 				break
 			}
@@ -231,9 +223,9 @@ func (s *Sim) Run(length int, list []Action) float64 {
 		//tick target and each character
 		//target doesn't do anything, just takes punishment, so it won't affect cd
 		s.Target.tick(s)
-		for _, c := range s.Characters {
+		for _, c := range s.characters {
 			//character may affect cooldown by i.e. adding to it
-			c.tick(s)
+			c.Tick()
 		}
 
 		s.handleTick()
@@ -256,9 +248,9 @@ func (s *Sim) Run(length int, list []Action) float64 {
 			//check abil cd
 			switch v.Action {
 			case ActionTypeBurst:
-				t += s.Characters[v.index].ActionCooldown(v.Action)
+				t += s.characters[v.index].ActionCooldown(v.Action)
 			case ActionTypeSkill:
-				t += s.Characters[v.index].ActionCooldown(v.Action)
+				t += s.characters[v.index].ActionCooldown(v.Action)
 			case ActionTypeChargedAttack:
 				//check stam
 			}
@@ -315,10 +307,10 @@ func (s *Sim) AddAction(f ActionFunc, key string) {
 //GenerateOrb is called when an ability generates orb
 func (s *Sim) GenerateOrb(n int, ele EleType, isOrb bool) {
 	s.Log.Debugf("\t[%v]: particle/orbs picked up: %v of %v (isOrb: %v)", PrintFrames(s.Frame), n, ele, isOrb)
-	count := len(s.Characters)
-	for i, c := range s.Characters {
+	count := len(s.characters)
+	for i, c := range s.characters {
 		active := s.Active == i
-		c.applyOrb(n, ele, isOrb, active, count)
+		c.ApplyOrb(n, ele, isOrb, active, count)
 	}
 }
 
@@ -335,7 +327,7 @@ func (s *Sim) handleTick() {
 //handleAction executes the next action, returns the cooldown
 func (s *Sim) handleAction(active int, a Action) int {
 	//if active see what ability we want to use
-	c := s.Characters[active]
+	c := s.characters[active]
 
 	switch a.Type {
 	case ActionTypeDash:
@@ -346,17 +338,17 @@ func (s *Sim) handleAction(active int, a Action) int {
 		fmt.Printf("[%v] jumping\n", s.Frame)
 		return 100
 	case ActionTypeAttack:
-		print(s.Frame, false, "%v executing attack", c.Profile.Name)
-		return c.Attack(s)
+		print(s.Frame, false, "%v executing attack", c.Name())
+		return c.Attack()
 	case ActionTypeChargedAttack:
-		print(s.Frame, false, "%v executing charged attack", c.Profile.Name)
-		return c.ChargeAttack(s)
+		print(s.Frame, false, "%v executing charged attack", c.Name())
+		return c.ChargeAttack()
 	case ActionTypeBurst:
-		print(s.Frame, false, "%v executing burst", c.Profile.Name)
-		return c.Burst(s)
+		print(s.Frame, false, "%v executing burst", c.Name())
+		return c.Burst()
 	case ActionTypeSkill:
-		print(s.Frame, false, "%v executing skill", c.Profile.Name)
-		return c.Skill(s)
+		print(s.Frame, false, "%v executing skill", c.Name())
+		return c.Skill()
 	default:
 		//do nothing
 		print(s.Frame, false, "no action specified: %v. Doing nothing", a.Type)

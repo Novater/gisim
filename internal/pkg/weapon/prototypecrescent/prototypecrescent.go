@@ -4,18 +4,17 @@ import (
 	"fmt"
 
 	"github.com/srliao/gisim/internal/pkg/combat"
-	"go.uber.org/zap"
 )
 
 func init() {
 	combat.RegisterWeaponFunc("Prototype Crescent", weapon)
 }
 
-func weapon(c *combat.Char, s *combat.Sim, r int) {
+func weapon(c combat.Character, s *combat.Sim, r int) {
 	//add on hit effect to sim?
 	s.AddEffect(func(snap *combat.Snapshot) bool {
 		//check if char is correct?
-		if snap.CharName != c.Profile.Name {
+		if snap.CharName != c.Name() {
 			return false
 		}
 		//check if weakpoint triggered
@@ -27,13 +26,13 @@ func weapon(c *combat.Char, s *combat.Sim, r int) {
 		tick := 0
 		s.AddAction(func(s *combat.Sim) bool {
 			if tick >= 10*60 {
-				delete(c.Mods, "Prototype-Crescent-Proc")
-				zap.S().Debugw("\tprototype crescent buff expired", "tick", tick)
+				c.RemoveMod("Prototype-Crescent-Proc")
+				s.Log.Debugw("\tprototype crescent buff expired", "tick", tick)
 				return true
 			}
 			tick++
-			if _, ok := c.Mods["Prototype-Crescent-Proc"]; !ok {
-				c.Mods["Prototype-Crescent-Proc"] = make(map[combat.StatType]float64)
+			if !c.HasMod("Prototype-Crescent-Proc") {
+				m := make(map[combat.StatType]float64)
 				atkmod := 0.36
 				switch r {
 				case 2:
@@ -45,11 +44,12 @@ func weapon(c *combat.Char, s *combat.Sim, r int) {
 				case 5:
 					atkmod = 0.72
 				}
-				zap.S().Debugw("\tapplying prototype crescent buff", "%", atkmod, "tick", tick)
-				c.Mods["Prototype-Crescent-Proc"][combat.ATKP] = atkmod
+				m[combat.ATKP] = atkmod
+				c.AddMod("Prototype-Crescent-Proc", m)
 			}
+
 			return false
-		}, fmt.Sprintf("Prototype-Crescent-Proc-%v", c.Profile.Name))
+		}, fmt.Sprintf("Prototype-Crescent-Proc-%v", c.Name()))
 		return false
 	}, "prototype-crescent-proc", combat.PostDamageHook)
 }

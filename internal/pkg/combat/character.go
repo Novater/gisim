@@ -4,7 +4,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type NewCharacterFunc func(s *Sim, c *Char)
+type NewCharacterFunc func(s *Sim, p CharacterProfile) (Character, error)
 
 func RegisterCharFunc(name string, f NewCharacterFunc) {
 	mu.Lock()
@@ -16,9 +16,8 @@ func RegisterCharFunc(name string, f NewCharacterFunc) {
 }
 
 type Character interface {
-	//initialize this character
-	Init(s *Sim) error
 	//ability functions to be defined by each character on how they will
+	Name() string
 	//affect the unit
 	Attack() int
 	ChargeAttack() int
@@ -26,9 +25,13 @@ type Character interface {
 	Skill() int
 	Burst() int
 	Tick() //function to be called every frame
-	//add or remove new stat mods to char (for whole party effects)
-	AddMod(key string, t StatType, v float64)
+	//special char mods
+	AddMod(key string, val map[StatType]float64)
 	RemoveMod(key string)
+	HasMod(key string) bool
+	//other actions
+	ApplyOrb(count int, ele EleType, isOrb bool, isActive bool, partyCount int)
+	ActionCooldown(a ActionType) int
 }
 
 //Char contains all the information required to calculate
@@ -62,9 +65,6 @@ type Char struct {
 
 	//return how many more frames until specified action comes off CD
 	ActionCooldown func(a ActionType) int
-
-	//somehow we have to deal with artifact effects too?
-	ArtifactSetBonus func(e *Enemy)
 
 	//key Stats
 	Stats map[StatType]float64
