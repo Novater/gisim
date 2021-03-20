@@ -32,6 +32,7 @@ type Character interface {
 	//other actions
 	ApplyOrb(count int, ele EleType, isOrb bool, isActive bool, partyCount int)
 	ActionCooldown(a ActionType) int
+	Snapshot(e EleType) Snapshot
 }
 
 //Char contains all the information required to calculate

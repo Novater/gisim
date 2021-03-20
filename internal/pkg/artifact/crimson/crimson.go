@@ -8,14 +8,15 @@ func init() {
 	combat.RegisterSetFunc("Crimson Witch of Flames", set)
 }
 
-func set(c *combat.Char, s *combat.Sim, count int) {
+func set(c combat.Character, s *combat.Sim, count int) {
 	if count >= 2 {
-		c.Mods["Crimson Witch of Flames 2PC"] = make(map[combat.StatType]float64)
-		c.Mods["Crimson Witch of Flames 2PC"][combat.PyroP] = 0.15
+		m := make(map[combat.StatType]float64)
+		m[combat.PyroP] = 0.15
+		c.AddMod("Crimson Witch of Flames 2PC", m)
 	}
 	if count >= 4 {
 		s.AddEffect(func(snap *combat.Snapshot) bool {
-			if snap.CharName != c.Profile.Name {
+			if snap.CharName != c.Name() {
 				return false
 			}
 

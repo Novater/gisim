@@ -1,6 +1,6 @@
 package combat
 
-type NewSetFunc func(c *Character, s *Sim, count int)
+type NewSetFunc func(c Character, s *Sim, count int)
 
 func RegisterSetFunc(name string, f NewSetFunc) {
 	mu.Lock()

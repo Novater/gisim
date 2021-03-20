@@ -67,6 +67,9 @@ type Sim struct {
 
 	Log *zap.SugaredLogger
 
+	//track whatever status, ticked down by 1 each tick
+	Status map[string]int
+
 	//per tick hooks
 	actions map[string]ActionFunc
 	//effects
@@ -93,6 +96,8 @@ func New(p Profile) (*Sim, error) {
 
 	s.actions = make(map[string]ActionFunc)
 	s.effects = make(map[effectType]map[string]effectFunc)
+	s.Status = make(map[string]int)
+	s.field = make(map[string]map[StatType]float64)
 
 	config := zap.NewDevelopmentConfig()
 	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
@@ -175,7 +180,7 @@ func New(p Profile) (*Sim, error) {
 		for key, count := range sb {
 			f, ok := setMap[key]
 			if ok {
-				f(&c, s, count)
+				f(c, s, count)
 			} else {
 				s.Log.Warnf("character %v has unrecognized set %v", v.Name, key)
 			}
@@ -200,6 +205,14 @@ func New(p Profile) (*Sim, error) {
 	}
 
 	return s, nil
+}
+
+func (s *Sim) AddFieldEffect(key string, val map[StatType]float64) {
+	s.field[key] = val
+}
+
+func (s *Sim) RemoveFieldEffect(key string) {
+	delete(s.field, key)
 }
 
 func (s *Sim) FieldEffects() map[StatType]float64 {
@@ -320,6 +333,13 @@ func (s *Sim) handleTick() {
 		if f(s) {
 			print(s.Frame, true, "action %v expired", k)
 			delete(s.actions, k)
+		}
+	}
+	for k, v := range s.Status {
+		if v == 0 {
+			delete(s.Status, k)
+		} else {
+			s.Status[k]--
 		}
 	}
 }
