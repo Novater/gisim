@@ -126,6 +126,7 @@ func (x *xl) ChargeAttack() int {
 	d := x.Snapshot(combat.Physical)
 	d.Abil = "Charge Attack"
 	d.AbilType = combat.ActionTypeChargedAttack
+	d.Mult = nc[x.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 
 	x.S.AddAction(func(s *combat.Sim) bool {
 		//no delay for now? realistically the hits should have delay but not sure if it actually makes a diff
