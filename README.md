@@ -1,10 +1,33 @@
 # gisim
 
-## bugs
+## instructions
+
+download Go for your operating system
+
+clone the repo; `cd gisim`
+
+either `go build` and then run the executable (in command line) or use `go run main.go`
+
+Flags:
+
+| flag | acceptable            | info                                                         |
+| ---- | --------------------- | ------------------------------------------------------------ |
+| d    | `debug` `info` `warn` | level out log output, defaults to `warn`                     |
+| p    | `whatever.yaml`       | config file to use; defaults to `config.yaml`                |
+| s    | `100`                 | number representing seconds to run sim for, defaults to `60` |
+
+Example `go run main.go -d=debug -s=20`
+
+Typically I would run the command in bash with output piped to a file for debugging purposes
+
+`go run main.go -d=debug -s=60 &> out.log`
+
+## bugs/issues
 
 - there should be an animation lock if normal attacks are not chained
 - ICD for aura application not yet tracked
 - status such as gouba, ganyu lotus etc... should be kept track of under Sim
+- not sure how to implement Amos bow yet? maybe add post arrow fire hook?
 
 ## todo list
 
@@ -15,7 +38,6 @@
   - [ ] aimed attack
   - [ ] aimed attack lvl 1
   - [ ] plunge attack
-  - [ ]
 - [ ] implement xiangling
   - [ ] pyro application
   - [ ] charged attack
@@ -52,7 +74,7 @@
   - [x] c4
   - [x] c6
 
-## brainstorm
+## brainstorm - OUT DATED
 
 hooks should have both the trigger character, and the sim data
 
@@ -122,11 +144,3 @@ Implemented in the skill
 
 - Amber C1
 - Barbara e on hit healing
-
-## other notes?
-
-amos bow
-
-- need 2 hooks:
-  - after normal/charge attack if arrow
-  - after normal/charge attack damage (for flight time)

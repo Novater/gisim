@@ -28,7 +28,7 @@ import (
 func main() {
 
 	debugPtr := flag.String("d", "warn", "output level: debug, info, warn")
-	secondsPtr := flag.Int("s", 20, "how many seconds to run the sim for")
+	secondsPtr := flag.Int("s", 60, "how many seconds to run the sim for")
 	pPtr := flag.String("p", "config.yaml", "which profile to use")
 	flag.Parse()
 
