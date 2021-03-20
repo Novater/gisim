@@ -111,6 +111,7 @@ func New(p Profile) (*Sim, error) {
 		c.Cooldown = make(map[string]int)
 		c.Store = make(map[string]interface{})
 		c.Mods = make(map[string]map[StatType]float64)
+		c.TickHooks = make(map[string]func(c *Character) bool)
 		c.Profile = v
 
 		f, ok := charMap[v.Name]
@@ -239,17 +240,22 @@ func (s *Sim) AddEffect(f effectFunc, key string, hook effectType) {
 	s.effects[hook][key] = f
 }
 
+//RemoveEffect forcefully remove an effect even if the call does not return true
+func (s *Sim) RemoveEffect(key string, hook effectType) {
+	delete(s.effects[hook], key)
+}
+
 func (s *Sim) AddAction(f ActionFunc, key string) {
 	if _, ok := s.actions[key]; ok {
-		s.Log.Debugf("[%v] action %v exists; overriding existing", PrintFrames(s.Frame), key)
+		s.Log.Debugf("\t[%v] action %v exists; overriding existing", PrintFrames(s.Frame), key)
 	}
 	s.actions[key] = f
-	s.Log.Debugf("[%v] new action %v; action map: %v", PrintFrames(s.Frame), key, s.actions)
+	s.Log.Debugf("\t[%v] new action %v; action map: %v", PrintFrames(s.Frame), key, s.actions)
 }
 
 //GenerateOrb is called when an ability generates orb
 func (s *Sim) GenerateOrb(n int, ele EleType, isOrb bool) {
-	s.Log.Debugf("[%v]: particle/orbs picked up: %v of %v (isOrb: %v)", PrintFrames(s.Frame), n, ele, isOrb)
+	s.Log.Debugf("\t[%v]: particle/orbs picked up: %v of %v (isOrb: %v)", PrintFrames(s.Frame), n, ele, isOrb)
 	count := len(s.Characters)
 	for i, c := range s.Characters {
 		active := s.Active == i

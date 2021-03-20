@@ -21,10 +21,10 @@ func set(c *combat.Character, s *combat.Sim, count int) {
 			}
 
 			if _, ok := s.Target.Auras[combat.Frozen]; ok {
-				zap.S().Debugf("applying blizzard strayer 4pc buff on frozen target")
+				zap.S().Debugf("\tapplying blizzard strayer 4pc buff on frozen target")
 				snap.Stats[combat.CR] += .4
 			} else if _, ok := s.Target.Auras[combat.Cryo]; ok {
-				zap.S().Debugf("applying blizzard strayer 4pc buff on cryo target")
+				zap.S().Debugf("\tapplying blizzard strayer 4pc buff on cryo target")
 				snap.Stats[combat.CR] += .2
 			}
 

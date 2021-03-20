@@ -9,7 +9,7 @@ import (
 func print(f int, debug bool, msg string, data ...interface{}) {
 	// fmt.Printf("[%.2fs|%v]: %v\n", float64(f)/60, f, fmt.Sprintf(msg, data...))
 	if debug {
-		zap.S().Debugf("[%.2fs|%v]: %v", float64(f)/60, f, fmt.Sprintf(msg, data...))
+		zap.S().Debugf("\t[%.2fs|%v]: %v", float64(f)/60, f, fmt.Sprintf(msg, data...))
 		return
 	}
 	zap.S().Infof("[%.2fs|%v]: %v", float64(f)/60, f, fmt.Sprintf(msg, data...))

@@ -19,12 +19,12 @@ func New(s *combat.Sim, c *combat.Character) {
 	c.Energy = 60
 
 	if c.Profile.Constellation >= 1 {
-		s.Log.Debugf("activating Ganyu C1")
+		s.Log.Debugf("\tactivating Ganyu C1")
 
 		s.AddEffect(func(snap *combat.Snapshot) bool {
 			//check if c1 debuff is on, if so, reduce resist by -0.15
 			if _, ok := s.Target.Status["ganyu-c1"]; ok {
-				s.Log.Debugf("[%v]: applying Ganyu C1 cryo debuff", combat.PrintFrames(s.Frame))
+				s.Log.Debugf("\t[%v]: applying Ganyu C1 cryo debuff", combat.PrintFrames(s.Frame))
 				snap.ResMod[combat.Cryo] -= 0.15
 			}
 			return false
@@ -37,7 +37,7 @@ func New(s *combat.Sim, c *combat.Character) {
 				if c.Energy > c.MaxEnergy {
 					c.Energy = c.MaxEnergy
 				}
-				s.Log.Debugf("[%v]: Ganyu C1 refunding 2 energy; current energy %v", combat.PrintFrames(s.Frame), c.Energy)
+				s.Log.Debugf("\t[%v]: Ganyu C1 refunding 2 energy; current energy %v", combat.PrintFrames(s.Frame), c.Energy)
 				//also add c1 debuff to target
 				s.Target.Status["ganyu-c1"] = 5 * 60
 			}
@@ -118,12 +118,12 @@ func burst(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
 	return func(s *combat.Sim) int {
 		//check if on cd first
 		if _, ok := c.Cooldown["burst-cd"]; ok {
-			log.Debugf("Ganyu burst still on CD; skipping")
+			log.Debugf("\tGanyu burst still on CD; skipping")
 			return 0
 		}
 		//check if sufficient energy
 		if c.Energy < c.MaxEnergy {
-			log.Debugf("Ganyu burst - insufficent energy, current: %v", c.Energy)
+			log.Debugf("\tGanyu burst - insufficent energy, current: %v", c.Energy)
 			return 0
 		}
 		//snap shot stats at cast time here
@@ -189,7 +189,7 @@ func skill(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
 		}
 
 		if charge == "" {
-			log.Debugf("Ganyu skill still on CD; skipping")
+			log.Debugf("\tGanyu skill still on CD; skipping")
 			return 0
 		}
 

@@ -15,11 +15,11 @@ Characters:
       attack: 6
       skill: 6
       burst: 7
-    WeaponName: "Skyward Spine"
-    WeaponRefinement: 1
-    WeaponBaseAtk: 674
+    WeaponName: "Black Tassel"
+    WeaponRefinement: 5
+    WeaponBaseAtk: 38
     WeaponSecondaryStat:
-      ER: 0.368
+      HP: 0.102
     Artifacts:
       Flower:
         Level: 20

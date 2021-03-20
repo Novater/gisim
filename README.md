@@ -5,6 +5,7 @@
 - sim action list currently wastes 1 frame if the current skill is on cd
 - resist is currently assumed to be flat. should be per element per enemy
 - action list currently goes around in circles, can't really make use of skill charges
+- there should be an animation lock if normal attacks are not chained
 
 ## todo list
 
@@ -22,11 +23,19 @@
   - [x] C1: ffa regen 2 energy/ ffa reduce target cryo res
   - [ ] C2: extra charge
   - [ ]
+
 - [ ] implement xiangling
-  - [ ] normal attack
+
+  - [x] normal attack
   - [ ] charged attack
-  - [ ] guoba
-  - [ ] pyronado
+  - [ ] plunge attack
+  - [x] guoba
+  - [x] pyronado
+  - [ ] xiangling a4 (when to pick up?)
+  - [x] c1
+  - [x] c2
+  - [x] c4
+  - [x] c6
 
 - [ ] jump/dash/char switch/burst/skill force reset all char normal counter
 - [ ] reactions
@@ -35,6 +44,7 @@
 - [ ] priority based rotation
 - [ ] rotation conditions
 - [ ] field effects
+- [ ] frames returned per action should have at least 2 number, avg cancellable and avg normal; may actually required more than 2, 1 into each trailling action such as swap, dash, jump, burst, skill, auto
 
 ## brainstorm
 

@@ -13,8 +13,11 @@ func init() {
 
 func weapon(c *combat.Character, s *combat.Sim, r int) {
 	//add passive crit, atk speed not sure how to do right now??
+	//looks like jsut reduce the frames of normal attacks by 1 + 12%
 	dmg := .4
 	c.Mods["Skyward-Spine-Crit"] = make(map[combat.StatType]float64)
+	c.Mods["Skyward-Spine-AtkSpd"] = make(map[combat.StatType]float64)
+	c.Mods["Skyward-Spine-AtkSpd"][combat.AtkSpd] = 0.12
 	switch r {
 	default:
 		c.Mods["Skyward-Spine-Crit"][combat.CR] = 0.08

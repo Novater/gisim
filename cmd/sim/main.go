@@ -13,6 +13,7 @@ import (
 	_ "github.com/srliao/gisim/internal/pkg/character/xiangling"
 
 	//weapons
+	_ "github.com/srliao/gisim/internal/pkg/weapon/blacktassel"
 	_ "github.com/srliao/gisim/internal/pkg/weapon/prototypecrescent"
 	_ "github.com/srliao/gisim/internal/pkg/weapon/skywardspine"
 
@@ -34,7 +35,7 @@ func main() {
 	var cfg combat.Profile
 	var err error
 
-	p := "./xl.yaml"
+	p := "./current.yaml"
 
 	source, err = ioutil.ReadFile(p)
 	if err != nil {
@@ -52,22 +53,22 @@ func main() {
 		log.Fatal(err)
 	}
 	var actions = []combat.Action{
-		// {
-		// 	TargetCharIndex: 0,
-		// 	Type:            combat.ActionTypeSkill,
-		// },
-		// {
-		// 	TargetCharIndex: 0,
-		// 	Type:            combat.ActionTypeBurst,
-		// },
-		// {
-		// 	TargetCharIndex: 0,
-		// 	Type:            combat.ActionTypeChargedAttack,
-		// },
 		{
 			TargetCharIndex: 0,
-			Type:            combat.ActionTypeAttack,
+			Type:            combat.ActionTypeSkill,
 		},
+		{
+			TargetCharIndex: 0,
+			Type:            combat.ActionTypeBurst,
+		},
+		{
+			TargetCharIndex: 0,
+			Type:            combat.ActionTypeChargedAttack,
+		},
+		// {
+		// 	TargetCharIndex: 0,
+		// 	Type:            combat.ActionTypeAttack,
+		// },
 	}
 	start := time.Now()
 	dmg := s.Run(*secondsPtr, actions)

@@ -54,4 +54,5 @@ const (
 	GeoP     StatType = "Geo%"
 	EleP     StatType = "Ele%"
 	PhyP     StatType = "Phys%"
+	AtkSpd   StatType = "ATKSPD%"
 )

@@ -28,7 +28,7 @@ func weapon(c *combat.Character, s *combat.Sim, r int) {
 		s.AddAction(func(s *combat.Sim) bool {
 			if tick >= 10*60 {
 				delete(c.Mods, "Prototype-Crescent-Proc")
-				zap.S().Debugw("prototype crescent buff expired", "tick", tick)
+				zap.S().Debugw("\tprototype crescent buff expired", "tick", tick)
 				return true
 			}
 			tick++
@@ -45,7 +45,7 @@ func weapon(c *combat.Character, s *combat.Sim, r int) {
 				case 5:
 					atkmod = 0.72
 				}
-				zap.S().Debugw("applying prototype crescent buff", "%", atkmod, "tick", tick)
+				zap.S().Debugw("\tapplying prototype crescent buff", "%", atkmod, "tick", tick)
 				c.Mods["Prototype-Crescent-Proc"][combat.ATKP] = atkmod
 			}
 			return false

@@ -57,11 +57,12 @@ type Character struct {
 	Talent    map[ActionType]int64 //talent levels
 
 	//other stats
-	MaxEnergy     float64
-	MaxStamina    float64
-	Energy        float64 //how much energy the character currently have
-	Stamina       float64 //how much stam the character currently have
-	AttackCounter int     //which attack in the series are we at now
+	MaxEnergy          float64
+	MaxStamina         float64
+	Energy             float64 //how much energy the character currently have
+	NormalCounter      int     //which attack in the series are we at now
+	NormalResetTimer   int     //how many frames until normal reset
+	normalTimerChanged bool
 }
 
 //CharacterProfile ...
@@ -101,22 +102,45 @@ const (
 	ActionTypePlungeAttack  ActionType = "plunge"
 	//procs
 	ActionTypeWeaponProc ActionType = "proc"
+	//xiao special
+	ActionTypeXiaoLowJump  ActionType = "xiao-low-jump"
+	ActionTypeXiaoHighJump ActionType = "xiao-high-jump"
 )
 
 func (c *Character) CancelNormal() {
-	c.AttackCounter = 0
+	c.NormalCounter = 0
 }
 
 func (c *Character) tick(s *Sim) {
 	//this function gets called for every character every tick
 	for k, v := range c.Cooldown {
 		if v == 0 {
-			s.Log.Debugf("[%v] cooldown %v finished; deleting", PrintFrames(s.Frame), k)
+			s.Log.Debugf("\t[%v] cooldown %v finished; deleting", PrintFrames(s.Frame), k)
 			delete(c.Cooldown, k)
 		} else {
 			c.Cooldown[k]--
 		}
 	}
+	for k, f := range c.TickHooks {
+		if f(c) {
+			s.Log.Debugf("\t[%v] character hook %v expired", PrintFrames(s.Frame), k)
+		}
+	}
+	//check normal reset
+	if c.NormalResetTimer == 0 {
+		if c.normalTimerChanged {
+			s.Log.Debugf("\t[%v] character normal reset", PrintFrames(s.Frame))
+			c.normalTimerChanged = false
+		}
+		c.NormalCounter = 0
+	} else {
+		c.normalTimerChanged = true
+		c.NormalResetTimer--
+	}
+}
+
+func (c *Character) AddHook(key string, f func(c *Character) bool) {
+	c.TickHooks[key] = f
 }
 
 func (c *Character) applyOrb(count int, ele EleType, isOrb bool, isActive bool, partyCount int) {
@@ -146,22 +170,21 @@ func (c *Character) applyOrb(count int, ele EleType, isOrb bool, isActive bool, 
 	}
 	amt = amt * (1 + er) * float64(count)
 
-	zap.S().Debugw("orb", "count", count, "ele", ele, "isOrb", isOrb, "on field", isActive, "party count", partyCount)
+	zap.S().Debugw("\torb", "count", count, "ele", ele, "isOrb", isOrb, "on field", isActive, "party count", partyCount)
 
 	c.Energy += amt
 	if c.Energy > c.MaxEnergy {
 		c.Energy = c.MaxEnergy
 	}
 
-	zap.S().Debugw("orb", "energy rec'd", amt, "current energy", c.Energy, "ER", er)
+	zap.S().Debugw("\torb", "energy rec'd", amt, "current energy", c.Energy, "ER", er)
 
 }
 
 func (c *Character) Snapshot(e EleType) Snapshot {
 	var s Snapshot
 	s.Stats = make(map[StatType]float64)
-	s.ResMod = make(map[EleType]float64)
-	s.TargetRes = make(map[EleType]float64)
+
 	for k, v := range c.Stats {
 		s.Stats[k] = v
 	}
@@ -184,5 +207,19 @@ func (c *Character) Snapshot(e EleType) Snapshot {
 	s.Stats[CR] += c.Profile.BaseCR
 	s.Stats[CD] += c.Profile.BaseCD
 
+	//maps for other mods
+	s.ResMod = make(map[EleType]float64)
+	s.TargetRes = make(map[EleType]float64)
+	s.ExtraStatMod = make(map[StatType]float64)
+
 	return s
+}
+
+func (s *Snapshot) Clone() Snapshot {
+	c := Snapshot{}
+	c = *s
+	c.ResMod = make(map[EleType]float64)
+	c.TargetRes = make(map[EleType]float64)
+	c.ExtraStatMod = make(map[StatType]float64)
+	return c
 }

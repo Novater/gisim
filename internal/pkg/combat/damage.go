@@ -22,13 +22,14 @@ type Snapshot struct {
 	FlatDmg   float64 //flat dmg; so far only zhongli
 	OtherMult float64 //so far just for xingqiu C4
 
-	Stats    map[StatType]float64 //total character stats including from artifact, bonuses, etc...
-	BaseAtk  float64              //base attack used in calc
-	BaseDef  float64              //base def used in calc
-	DmgBonus float64              //total damage bonus, including appropriate ele%, etc..
-	CharLvl  int64
-	DefMod   float64
-	ResMod   map[EleType]float64
+	Stats        map[StatType]float64 //total character stats including from artifact, bonuses, etc...
+	ExtraStatMod map[StatType]float64
+	BaseAtk      float64 //base attack used in calc
+	BaseDef      float64 //base def used in calc
+	DmgBonus     float64 //total damage bonus, including appropriate ele%, etc..
+	CharLvl      int64
+	DefMod       float64
+	ResMod       map[EleType]float64
 
 	//reaction stuff
 	ApplyAura bool    //if aura should be applied; false if under ICD
@@ -75,7 +76,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 				unit:     ds.AuraUnit,
 				duration: dur,
 			}
-			s.Log.Debugf("%v applied (new). unit: %v. duration: %v", ds.Element, ds.AuraUnit, dur)
+			s.Log.Debugf("\t%v applied (new). unit: %v. duration: %v", ds.Element, ds.AuraUnit, dur)
 
 		} else {
 			//if target has more than one aura then it gets complicated....
@@ -93,7 +94,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 						duration: dur,
 					}
 					//refresh duration
-					s.Log.Debugf("%v refreshed. unit: %v. new duration: %v", ds.Element, a.unit, dur)
+					s.Log.Debugf("\t%v refreshed. unit: %v. new duration: %v", ds.Element, a.unit, dur)
 				//these following reactions are transformative so we calculate separate damage, update gauge, and add to total
 				//overload
 				case ele == Pyro && ds.Element == Electro:
@@ -169,9 +170,9 @@ func (s *Sim) applyAura(ds Snapshot) {
 		//this case should only happen with electro charge where there's 2 aura active at any one point in time
 		for ele, a := range e.Auras {
 			if ele != ds.Element {
-				s.Log.Debugw("apply aura", "aura", a, "existing ele", ele, "next ele", ds.Element)
+				s.Log.Debugw("\tapply aura", "aura", a, "existing ele", ele, "next ele", ds.Element)
 			} else {
-				s.Log.Debugf("not implemented!!!")
+				s.Log.Debugf("\tnot implemented!!!")
 			}
 		}
 	} else if len(e.Auras) == 1 {
@@ -182,12 +183,12 @@ func (s *Sim) applyAura(ds Snapshot) {
 				duration: auraDur(a.unit, ds.AuraGauge),
 			}
 			//refresh duration
-			s.Log.Debugf("%v refreshed. unit: %v. new duration: %v", ds.Element, a.unit, next.duration)
+			s.Log.Debugf("\t%v refreshed. unit: %v. new duration: %v", ds.Element, a.unit, next.duration)
 			e.Auras[ds.Element] = next
 		} else {
 			//apply reaction
 			//The length of the freeze is based on the lowest remaining duration of the two elements applied.
-			s.Log.Debugf("not implemented!!!")
+			s.Log.Debugf("\tnot implemented!!!")
 		}
 	} else {
 		next := aura{
@@ -248,6 +249,7 @@ func calcDmg(ds Snapshot) float64 {
 	defmod := float64(ds.CharLvl+100) / (float64(ds.CharLvl+100) + float64(ds.TargetLvl+100)*(1-ds.DefMod))
 	//apply def mod
 	damage = damage * defmod
+	//add up the resist mods
 	//apply resist mod
 	res := ds.TargetRes[ds.Element] + ds.ResMod[ds.Element]
 	resmod := 1 - res/2
@@ -266,7 +268,7 @@ func calcDmg(ds Snapshot) float64 {
 
 	//check if crit
 	if rand.Float64() <= ds.Stats[CR] || ds.HitWeakPoint {
-		zap.S().Debugf("damage is crit!")
+		zap.S().Debugf("\t\tdamage is crit!")
 		damage = damage * (1 + ds.Stats[CD])
 	}
 
@@ -282,7 +284,7 @@ func calcOverload(ds Snapshot) float64 {
 	cl := float64(ds.CharLvl)
 	lvlm := 0.0002325*cl*cl*cl + 0.05547*cl*cl - 0.2523*cl + 14.74
 	//resist is always fire resist b/c overload does fire dmg
-	res := ds.TargetRes[ds.Element] + ds.ResMod[ds.Element]
+	res := ds.TargetRes[Pyro] + ds.ResMod[Pyro]
 	resmod := 1 - res/2
 	if res >= 0 && res < 0.75 {
 		resmod = 1 - res
