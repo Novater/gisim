@@ -27,12 +27,13 @@ Typically I would run the command in bash with output piped to a file for debugg
 - there should be an animation lock if normal attacks are not chained
 - ICD for aura application not yet tracked
 - status such as gouba, ganyu lotus etc... should be kept track of under Sim
-- not sure how to implement Amos bow yet? maybe add post arrow fire hook?
+- not sure how to implement Amos bow yet? maybe add post arrow fire hook? [could just add an initial frame to snapshot, then diff between that and current frame would be travel time]
+- crimson witch does not track stacks yet
 
 ## todo list
 
 - [ ] melt reaction
-- [ ] refactor weapon and artifact equip code into character
+- [ ] refactor weapon and artifact equip code into character; this way weapons can keep track of their own internal icd etc..
 - [ ] finish implementing ganyu (up to c6?)
   - [ ] normal attack
   - [ ] aimed attack

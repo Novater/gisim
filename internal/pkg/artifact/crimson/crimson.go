@@ -20,6 +20,23 @@ func set(c combat.Character, s *combat.Sim, count int) {
 				return false
 			}
 
+			if !snap.WillReact {
+				return false
+			}
+
+			if snap.ReactionType != combat.Melt && snap.ReactionType != combat.Vaporize && snap.ReactionType != combat.Overload {
+				return false
+			}
+
+			switch snap.ReactionType {
+			case combat.Melt:
+				snap.ReactBonus += 0.15
+			case combat.Vaporize:
+				snap.ReactBonus += 0.15
+			case combat.Overload:
+				snap.ReactBonus += 0.4
+			}
+
 			//check for vaporize
 			// if snap.Element == combat.Pyro &&
 
@@ -29,7 +46,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			s.Log.Warnf("Crimson Witch 4PC bonus not yet implemented")
 
 			return false
-		}, "crimson witch 4pc", combat.PreReactionDamage)
+		}, "crimson witch 4pc", combat.PreReaction)
 	}
 	//add flat stat to char
 }

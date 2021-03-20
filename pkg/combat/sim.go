@@ -28,21 +28,8 @@ const (
 	PreAuraAppHook  effectType = "PRE_AURA_APP"
 	PostAuraAppHook effectType = "POST_AURA_APP"
 	// triggered when there will be a reaction
-	PreReaction effectType = "PRE_REACTION"
-	// triggered pre damage calculated; this snapshot contains info about the
-	// particular reaction. important because one damage can trigger multiple
-	// PreReactionDamage, one for each reaction i.e. pryo applied to electro+water
-	// trigering vape and overload at the same time
-	PreReactionDamage effectType = "PRE_REACTION_DAMAGE"
-
-	PreOverload       effectType = "PRE_OVERLOAD"
-	PreSuperconduct   effectType = "PRE_SUPERCONDUCT"
-	PreFreeze         effectType = "PRE_FREEZE"
-	PreVaporize       effectType = "PRE_VAPORIZE"
-	PreMelt           effectType = "PRE_MELT"
-	PreSwirl          effectType = "PRE_SWIRL"
-	PreCrystallize    effectType = "PRE_CRYSTALLIZE"
-	PreElectroCharged effectType = "PRE_ELECTROCHARGED"
+	PreReaction  effectType = "PRE_REACTION"
+	PostReaction effectType = "POST_REACTION"
 )
 
 type effectFunc func(s *Snapshot) bool
