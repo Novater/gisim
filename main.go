@@ -53,26 +53,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var actions = []combat.Action{
-		{
-			TargetCharIndex: 0,
-			Type:            combat.ActionTypeSkill,
-		},
-		{
-			TargetCharIndex: 0,
-			Type:            combat.ActionTypeBurst,
-		},
-		{
-			TargetCharIndex: 0,
-			Type:            combat.ActionTypeChargedAttack,
-		},
-		// {
-		// 	TargetCharIndex: 0,
-		// 	Type:            combat.ActionTypeAttack,
-		// },
-	}
 	start := time.Now()
-	dmg := s.Run(*secondsPtr, actions)
+	dmg := s.Run(*secondsPtr)
 	elapsed := time.Since(start)
 	log.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", *pPtr, dmg, *secondsPtr, dmg/float64(*secondsPtr), elapsed)
 }

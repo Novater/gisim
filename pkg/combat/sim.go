@@ -224,7 +224,7 @@ func (s *Sim) FieldEffects() map[StatType]float64 {
 }
 
 //Run the sim; length in seconds
-func (s *Sim) Run(length int, list []Action) float64 {
+func (s *Sim) Run(length int) float64 {
 	var cooldown int
 	rand.Seed(time.Now().UnixNano())
 	//60fps, 60s/min, 2min
