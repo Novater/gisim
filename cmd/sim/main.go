@@ -35,7 +35,7 @@ func main() {
 	var cfg combat.Profile
 	var err error
 
-	p := "./xl.yaml"
+	p := "./xl.yaml" //xl.yaml expecting 4659 dps
 
 	source, err = ioutil.ReadFile(p)
 	if err != nil {
