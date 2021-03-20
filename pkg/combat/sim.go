@@ -343,7 +343,6 @@ func (s *Sim) tick() {
 	if s.swapCD > 0 {
 		s.swapCD--
 	}
-
 }
 
 //handleAction executes the next action, returns the cooldown

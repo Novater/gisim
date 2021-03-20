@@ -25,8 +25,6 @@ func New(s *combat.Sim, p combat.CharacterProfile) (*TemplateChar, error) {
 	c.CD = make(map[string]int)
 	c.Stats = make(map[combat.StatType]float64)
 	c.Mods = make(map[string]map[combat.StatType]float64)
-	c.Energy = 60
-	c.MaxEnergy = 60
 	c.Profile = p
 
 	for _, a := range p.Artifacts {
@@ -179,7 +177,7 @@ func (c *TemplateChar) ApplyOrb(count int, ele combat.EleType, isOrb bool, isAct
 	}
 	amt = amt * (1 + er) * float64(count)
 
-	c.S.Log.Debugw("\torb", "count", count, "ele", ele, "isOrb", isOrb, "on field", isActive, "party count", partyCount)
+	c.S.Log.Debugw("\torb", "name", c.Profile.Name, "count", count, "ele", ele, "isOrb", isOrb, "on field", isActive, "party count", partyCount)
 
 	c.Energy += amt
 	if c.Energy > c.MaxEnergy {

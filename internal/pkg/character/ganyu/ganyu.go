@@ -22,6 +22,8 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		return nil, err
 	}
 	g.TemplateChar = t
+	g.Energy = 60
+	g.MaxEnergy = 60
 
 	if g.Profile.Constellation >= 1 {
 		s.Log.Debugf("\tactivating Ganyu C1")
@@ -67,7 +69,7 @@ func (g *ganyu) ChargeAttack() int {
 		d.HitWeakPoint = true
 		d.Mult = ffa[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 		d.AuraGauge = 1
-		d.AuraUnit = "A"
+		d.AuraDecayRate = "A"
 		d.ApplyAura = true
 		//if not ICD, apply aura
 		if _, ok := g.CD["ICD-charge"]; !ok {
@@ -86,7 +88,7 @@ func (g *ganyu) ChargeAttack() int {
 
 	b := 0
 	g.S.AddAction(func(s *combat.Sim) bool {
-		if b < 50+137 {
+		if b < 20+20+137 { //bloom takes roughly 20 frames
 			b++
 			return false
 		}
@@ -97,7 +99,7 @@ func (g *ganyu) ChargeAttack() int {
 		d.Mult = ffb[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 		d.ApplyAura = true
 		d.AuraGauge = 1
-		d.AuraUnit = "A"
+		d.AuraDecayRate = "A"
 		//if not ICD, apply aura
 		if _, ok := g.CD["ICD-charge"]; !ok {
 			d.ApplyAura = true
@@ -152,7 +154,7 @@ func (g *ganyu) Skill() int {
 	d.Mult = lotus[lvl]
 	d.ApplyAura = true
 	d.AuraGauge = 1
-	d.AuraUnit = "A"
+	d.AuraDecayRate = "A"
 
 	//we get the orbs right away
 	//add delayed orb for travel time
@@ -210,7 +212,7 @@ func (g *ganyu) Burst() int {
 	d.Mult = shower[lvl]
 	d.ApplyAura = true
 	d.AuraGauge = 1
-	d.AuraUnit = "A"
+	d.AuraDecayRate = "A"
 
 	//apply weapon stats here
 	//burst should be instant

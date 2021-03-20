@@ -22,6 +22,8 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		return nil, err
 	}
 	x.TemplateChar = t
+	x.Energy = 60
+	x.MaxEnergy = 60
 
 	if x.Profile.Constellation >= 1 {
 		s.Log.Debugf("\tactivating Xiangling C1")
@@ -181,7 +183,7 @@ func (x *xl) Skill() int {
 	d.Mult = guoba[lvl]
 	d.ApplyAura = true
 	d.AuraGauge = 1
-	d.AuraUnit = "A"
+	d.AuraDecayRate = "A"
 
 	//we get orb after a delay each tick, tick 4 times
 	tick := 0
@@ -201,7 +203,7 @@ func (x *xl) Skill() int {
 			c = d
 			c.ResMod = make(map[combat.EleType]float64)
 
-			next += 90
+			next += 95
 			count++
 			damage := s.ApplyDamage(c)
 			s.Log.Infof("[%v]: Xiangling (Gouba - tick) dealt %.0f damage", s.Frame(), damage)
@@ -228,7 +230,7 @@ func (x *xl) Skill() int {
 	x.CD["skill-cd"] = 12 * 60
 	x.NormalResetTimer = 0
 	//return animation cd
-	return 40
+	return 26
 }
 
 func (x *xl) Burst() int {

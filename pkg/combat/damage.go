@@ -1,10 +1,68 @@
 package combat
 
 import (
+	"math"
 	"math/rand"
 
 	"go.uber.org/zap"
 )
+
+//Enemy keeps track of the status of one enemy Enemy
+type Enemy struct {
+	Level  int64
+	Resist map[EleType]float64
+
+	//resist mods
+	ResMod map[string]float64
+
+	//tracking
+	Auras  map[EleType]aura
+	Status map[string]int //countdown to how long status last
+
+	//stats
+	Damage float64 //total damage received
+}
+
+type aura struct {
+	rate  string
+	gauge float64 //gauge remaining
+}
+
+//gaugeMul returns multiplier in seconds for each rate type
+func gaugeMul(rate string) float64 {
+	switch rate {
+	case "A":
+		return 9.5
+	case "B":
+		return 6
+	case "C":
+		return 4.25
+	}
+	return 0
+}
+
+func (e *Enemy) tick(s *Sim) {
+	//tick down buffs and debuffs
+	for k, v := range e.Status {
+		if v == 0 {
+			delete(e.Status, k)
+		} else {
+			e.Status[k]--
+		}
+	}
+	//tick down gauge, reduction is based on the rate of the aura
+	//multipliers are A: 9.5, B:6, C:4.25
+	//decay per frame (60fps) = 1 unit / (mult * 60)
+	for k, v := range e.Auras {
+		//decay first, then delete if < -1
+		v.gauge -= 1 / (gaugeMul(v.rate) * 60)
+		if v.gauge < 0 {
+			s.Log.Debugf("[%v] aura %v expired", s.Frame(), k)
+			delete(e.Auras, k)
+		}
+		e.Auras[k] = v
+	}
+}
 
 //ApplyDamage applies damage to the target given a snapshot
 func (s *Sim) ApplyDamage(ds Snapshot) float64 {
@@ -33,13 +91,11 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 		//if target has no aura then we apply the current aura and carry on with damage calc
 		//since no other aura, no reaction will occur
 		if len(target.Auras) == 0 {
-			dur := auraDur(ds.AuraUnit, ds.AuraGauge)
 			next[ds.Element] = aura{
-				gauge:    ds.AuraGauge,
-				unit:     ds.AuraUnit,
-				duration: dur,
+				gauge: ds.AuraGauge,
+				rate:  ds.AuraDecayRate,
 			}
-			s.Log.Debugf("\t%v applied (new). unit: %v. duration: %v", ds.Element, ds.AuraUnit, dur)
+			s.Log.Debugf("\t%v applied (new). GU: %v Decay: %v", ds.Element, ds.AuraGauge, ds.AuraDecayRate)
 
 		} else {
 			//if target has more than one aura then it gets complicated....
@@ -50,14 +106,14 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 				switch {
 				//no reaction
 				case ele == ds.Element:
-					dur := auraDur(a.unit, ds.AuraGauge)
+					//since element already exist, here we only top up the gauge to the extent the new gauge <= source
+					g := math.Max(ds.AuraGauge, a.gauge)
 					next[ds.Element] = aura{
-						gauge:    ds.AuraGauge,
-						unit:     a.unit,
-						duration: dur,
+						gauge: g,
+						rate:  a.rate,
 					}
 					//refresh duration
-					s.Log.Debugf("\t%v refreshed. unit: %v. new duration: %v", ds.Element, a.unit, dur)
+					s.Log.Debugf("\t%v refreshed. old gu: %v new gu: %v. rate: %v", ds.Element, a.gauge, g, a.rate)
 				//these following reactions are transformative so we calculate separate damage, update gauge, and add to total
 				//overload
 				case ele == Pyro && ds.Element == Electro:
@@ -77,15 +133,51 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 					}
 				//superconduct
 				case ele == Electro && ds.Element == Cryo:
+					reactDamage += calcSuperconductDamage(ds)
 				case ele == Cryo && ds.Element == Electro:
 				case ele == Frozen && ds.Element == Electro:
 				//freeze
+				//Once freeze is triggered, an enemy will be afflicted by a frozen aura. This aura hides the hydro aura, and any elements
+				//applied to a frozen enemy will react with cryo. Removing the frozen aura, either through melt or shatter, will also remove
+				//cryo and expose the hydro aura, allowing any elemental sources to react with hydro again.
+				//this is a pain to implement.... but so far looks like only childe will have this problem
+				//as everyone else applies only 1A of hydro
+				//there's a 1.25 multiplier to the source element
+
 				case ele == Cryo && ds.Element == Hydro:
 				case ele == Hydro && ds.Element == Cryo:
 				//these following reactions are multipliers so we just modify snapshot and update the gauges
 				//melt
 				case ele == Pyro && ds.Element == Cryo:
+					s.Log.Debugf("\t%v caused (weak) melt", ds.Element)
+					//weak melt, source unit x 0.625, subtracted from target unit
+					//IS IT ROUNDED??? probably not??
+					r := ds.AuraGauge * 0.625
+					s.Log.Debugw("\taura applied", "src ele", ds.Element, "src gu", ds.AuraGauge, "t ele", ele, "t gu", a.gauge, "red", r, "rem", a.gauge-r)
+					//if reduction > a.gauge, remove it completely
+					if r < a.gauge {
+						next[ele] = aura{
+							gauge: a.gauge - r,
+							rate:  a.rate,
+						}
+					}
+					//tag it for melt
+					ds.IsMeltVape = true
+					ds.ReactMult = 1.5 //weak reaction
 				case ele == Cryo && ds.Element == Pyro:
+					s.Log.Debugf("\t%v caused (strong) melt", ds.Element)
+					r := ds.AuraGauge * 2.5
+					s.Log.Debugw("\taura applied", "src ele", ds.Element, "src gu", ds.AuraGauge, "t ele", ele, "t gu", a.gauge, "red", r, "rem", a.gauge-r)
+					//if reduction > a.gauge, remove it completely
+					if r < a.gauge {
+						next[ele] = aura{
+							gauge: a.gauge - r,
+							rate:  a.rate,
+						}
+					}
+					//tag it for melt
+					ds.IsMeltVape = true
+					ds.ReactMult = 2.0 //weak reaction
 				case ele == Frozen && ds.Element == Pyro:
 				//vape
 				case ele == Pyro && ds.Element == Hydro:
@@ -101,6 +193,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 				}
 			}
 		}
+		s.Log.Debugf("\taura remaining after reaction: %v", next)
 		target.Auras = next
 	}
 
@@ -122,46 +215,6 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	}
 
 	return damage
-}
-
-//applyAura applies an aura to the Unit, can trigger damage for superconduct, electrocharged, etc..
-func (s *Sim) applyAura(ds Snapshot) {
-	e := s.Target
-	//1A = 9.5s (570 frames) per unit, 2B = 6s (360 frames) per unit, 4C = 4.25s (255 frames) per unit
-	//loop through existing auras and apply reactions if any
-	if len(e.Auras) > 1 {
-		//this case should only happen with electro charge where there's 2 aura active at any one point in time
-		for ele, a := range e.Auras {
-			if ele != ds.Element {
-				s.Log.Debugw("\tapply aura", "aura", a, "existing ele", ele, "next ele", ds.Element)
-			} else {
-				s.Log.Debugf("\tnot implemented!!!")
-			}
-		}
-	} else if len(e.Auras) == 1 {
-		if a, ok := e.Auras[ds.Element]; ok {
-			next := aura{
-				gauge:    ds.AuraGauge,
-				unit:     a.unit,
-				duration: auraDur(a.unit, ds.AuraGauge),
-			}
-			//refresh duration
-			s.Log.Debugf("\t%v refreshed. unit: %v. new duration: %v", ds.Element, a.unit, next.duration)
-			e.Auras[ds.Element] = next
-		} else {
-			//apply reaction
-			//The length of the freeze is based on the lowest remaining duration of the two elements applied.
-			s.Log.Debugf("\tnot implemented!!!")
-		}
-	} else {
-		next := aura{
-			gauge:    ds.AuraGauge,
-			unit:     ds.AuraUnit,
-			duration: auraDur(ds.AuraUnit, ds.AuraGauge),
-		}
-		s.Log.Debugf("%v applied (new). unit: %v. duration: %v", ds.Element, next.unit, next.duration)
-		e.Auras[ds.Element] = next
-	}
 }
 
 func calcDmg(ds Snapshot, log *zap.SugaredLogger) float64 {
@@ -211,7 +264,14 @@ func calcDmg(ds Snapshot, log *zap.SugaredLogger) float64 {
 	if ds.OtherMult > 0 {
 		damage = damage * ds.OtherMult
 	}
-	log.Debugw("\t\tcalc", "def mod", defmod, "res", res, "res mod", resmod, "pre crit damage", damage)
+	log.Debugw("\t\tcalc", "def mod", defmod, "res", res, "res mod", resmod, "pre crit damage", damage, "melt/vape", ds.IsMeltVape)
+
+	//check melt/vape
+	if ds.IsMeltVape {
+		log.Debugw("\t\tcalc", "react mult", ds.ReactMult, "react bonus", ds.ReactBonus, "pre react damage", damage)
+		damage = damage * (ds.ReactMult + ds.ReactBonus)
+		log.Debugw("\t\tcalc", "pre crit (post react) damage", damage)
+	}
 
 	//check if crit
 	if rand.Float64() <= ds.Stats[CR] || ds.HitWeakPoint {
@@ -265,24 +325,6 @@ const (
 	NonElemental EleType = "non-elemental"
 )
 
-type aura struct {
-	gauge    float64
-	unit     string
-	duration int
-}
-
-func auraDur(unit string, gauge float64) int {
-	switch unit {
-	case "A":
-		return int(gauge * 9.5 * 60)
-	case "B":
-		return int(gauge * 6 * 60)
-	case "C":
-		return int(gauge * 4.25 * 60)
-	}
-	return 0
-}
-
 type Snapshot struct {
 	CharName string     //name of the character triggering the damage
 	Abil     string     //name of ability triggering the damage
@@ -309,13 +351,14 @@ type Snapshot struct {
 	ResMod       map[EleType]float64
 
 	//reaction stuff
-	ApplyAura bool    //if aura should be applied; false if under ICD
-	AuraGauge float64 //1 2 or 4
-	AuraUnit  string  //A, B, or C
+	ApplyAura     bool    //if aura should be applied; false if under ICD
+	AuraGauge     float64 //1 2 or 4
+	AuraDecayRate string  //A, B, or C
 
 	//these are calculated fields
 	WillReact bool //true if this will react
 
+	IsMeltVape bool    //trigger melt/vape
 	ReactMult  float64 //reaction multiplier for melt/vape
 	ReactBonus float64 //reaction bonus %+ such as witch; should be 0 and only affected by hooks
 }
