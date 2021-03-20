@@ -11,13 +11,14 @@ func init() {
 	combat.RegisterCharFunc("Xiangling", New)
 }
 
-func New(s *combat.Sim, c *combat.Character) {
+func New(s *combat.Sim, c *combat.Char) {
 	c.Attack = normal(c, s.Log)
 	c.ChargeAttack = charge(c, s.Log)
 	c.Burst = burst(c, s.Log)
 	c.Skill = skill(c, s.Log)
 	c.MaxEnergy = 80
 	c.Energy = 80
+	c.ActionCooldown = cooldown(c)
 
 	if c.Profile.Constellation >= 1 {
 		s.Log.Debugf("\tactivating Xiangling C1")
@@ -42,7 +43,19 @@ func New(s *combat.Sim, c *combat.Character) {
 
 }
 
-func normal(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
+func cooldown(c *combat.Char) func(a combat.ActionType) int {
+	return func(a combat.ActionType) int {
+		switch a {
+		case combat.ActionTypeBurst:
+			return c.Cooldown["burst-cd"]
+		case combat.ActionTypeSkill:
+			return c.Cooldown["skill-cd"]
+		}
+		return 0
+	}
+}
+
+func normal(c *combat.Char, log *zap.SugaredLogger) combat.AbilFunc {
 	return func(s *combat.Sim) int {
 		//register action depending on number in chain
 		//3 and 4 need to be registered as multi action
@@ -119,7 +132,7 @@ func normal(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
 	}
 }
 
-func charge(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
+func charge(c *combat.Char, log *zap.SugaredLogger) combat.AbilFunc {
 	return func(s *combat.Sim) int {
 		d := c.Snapshot(combat.Physical)
 		d.Abil = "Charge Attack"
@@ -138,7 +151,7 @@ func charge(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
 	}
 }
 
-func plunge(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
+func plunge(c *combat.Char, log *zap.SugaredLogger) combat.AbilFunc {
 	return func(s *combat.Sim) int {
 		log.Warnf("[%v]: Xiangling plunge attack not implemented", combat.PrintFrames(s.Frame))
 		return 0
@@ -148,7 +161,7 @@ func plunge(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
 //ult starts 720
 //start at 790 first hit
 
-func burst(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
+func burst(c *combat.Char, log *zap.SugaredLogger) combat.AbilFunc {
 	return func(s *combat.Sim) int {
 		//check if on cd first
 		if _, ok := c.Cooldown["burst-cd"]; ok {
@@ -296,7 +309,7 @@ func burst(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
 	}
 }
 
-func skill(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
+func skill(c *combat.Char, log *zap.SugaredLogger) combat.AbilFunc {
 	return func(s *combat.Sim) int {
 		//check if on cd first
 		if _, ok := c.Cooldown["skill-cd"]; ok {

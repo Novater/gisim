@@ -11,12 +11,13 @@ func init() {
 	combat.RegisterCharFunc("Ganyu", New)
 }
 
-func New(s *combat.Sim, c *combat.Character) {
+func New(s *combat.Sim, c *combat.Char) {
 	c.ChargeAttack = charge(c, s.Log)
 	c.Burst = burst(c, s.Log)
 	c.Skill = skill(c, s.Log)
 	c.MaxEnergy = 60
 	c.Energy = 60
+	c.ActionCooldown = cooldown(c)
 
 	if c.Profile.Constellation >= 1 {
 		s.Log.Debugf("\tactivating Ganyu C1")
@@ -47,7 +48,26 @@ func New(s *combat.Sim, c *combat.Character) {
 
 }
 
-func charge(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
+func cooldown(c *combat.Char) func(a combat.ActionType) int {
+	return func(a combat.ActionType) int {
+		switch a {
+		case combat.ActionTypeBurst:
+			return c.Cooldown["burst-cd"]
+		case combat.ActionTypeSkill:
+			cd := c.Cooldown["skill-cd"]
+			if c.Profile.Constellation >= 2 {
+				cd2 := c.Cooldown["skill-cd2"]
+				if cd2 < cd {
+					return cd2
+				}
+			}
+			return cd
+		}
+		return 0
+	}
+}
+
+func charge(c *combat.Char, log *zap.SugaredLogger) combat.AbilFunc {
 	return func(s *combat.Sim) int {
 		i := 0
 		initial := func(s *combat.Sim) bool {
@@ -114,7 +134,7 @@ func charge(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
 	}
 }
 
-func burst(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
+func burst(c *combat.Char, log *zap.SugaredLogger) combat.AbilFunc {
 	return func(s *combat.Sim) int {
 		//check if on cd first
 		if _, ok := c.Cooldown["burst-cd"]; ok {
@@ -172,7 +192,7 @@ func burst(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
 	}
 }
 
-func skill(c *combat.Character, log *zap.SugaredLogger) combat.AbilFunc {
+func skill(c *combat.Char, log *zap.SugaredLogger) combat.AbilFunc {
 	return func(s *combat.Sim) int {
 		//if c2, check if either cd is cooldown
 		charge := ""

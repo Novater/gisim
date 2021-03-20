@@ -4,7 +4,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type NewCharacterFunc func(s *Sim, c *Character)
+type NewCharacterFunc func(s *Sim, c *Char)
 
 func RegisterCharFunc(name string, f NewCharacterFunc) {
 	mu.Lock()
@@ -15,8 +15,24 @@ func RegisterCharFunc(name string, f NewCharacterFunc) {
 	charMap[name] = f
 }
 
-//Character contains all the information required to calculate
-type Character struct {
+type Character interface {
+	//initialize this character
+	Init(s *Sim) error
+	//ability functions to be defined by each character on how they will
+	//affect the unit
+	Attack() int
+	ChargeAttack() int
+	PlungeAttack() int
+	Skill() int
+	Burst() int
+	Tick() //function to be called every frame
+	//add or remove new stat mods to char (for whole party effects)
+	AddMod(key string, t StatType, v float64)
+	RemoveMod(key string)
+}
+
+//Char contains all the information required to calculate
+type Char struct {
 	//track cooldowns in general; can be skill on field, ICD, etc...
 	Cooldown map[string]int
 
@@ -29,7 +45,7 @@ type Character struct {
 	// init func(s *Sim)
 
 	//tickHooks are functions to be called on each tick
-	TickHooks map[string]func(c *Character) bool
+	TickHooks map[string]func(c *Char) bool
 	//this is useful for on field effect such as gouba/oz/pyronado
 	//we can use store to keep track of the uptime on gouba/oz/pyronado/taunt etc..
 	//for something like baron bunny, if uptime = xx, then trigger damage
@@ -43,6 +59,9 @@ type Character struct {
 	PlungeAttack func(s *Sim) int
 	Skill        func(s *Sim) int
 	Burst        func(s *Sim) int
+
+	//return how many more frames until specified action comes off CD
+	ActionCooldown func(a ActionType) int
 
 	//somehow we have to deal with artifact effects too?
 	ArtifactSetBonus func(e *Enemy)
@@ -58,7 +77,6 @@ type Character struct {
 
 	//other stats
 	MaxEnergy          float64
-	MaxStamina         float64
 	Energy             float64 //how much energy the character currently have
 	NormalCounter      int     //which attack in the series are we at now
 	NormalResetTimer   int     //how many frames until normal reset
@@ -107,11 +125,11 @@ const (
 	ActionTypeXiaoHighJump ActionType = "xiao-high-jump"
 )
 
-func (c *Character) CancelNormal() {
+func (c *Char) CancelNormal() {
 	c.NormalCounter = 0
 }
 
-func (c *Character) tick(s *Sim) {
+func (c *Char) tick(s *Sim) {
 	//this function gets called for every character every tick
 	for k, v := range c.Cooldown {
 		if v == 0 {
@@ -139,11 +157,11 @@ func (c *Character) tick(s *Sim) {
 	}
 }
 
-func (c *Character) AddHook(key string, f func(c *Character) bool) {
+func (c *Char) AddHook(key string, f func(c *Char) bool) {
 	c.TickHooks[key] = f
 }
 
-func (c *Character) applyOrb(count int, ele EleType, isOrb bool, isActive bool, partyCount int) {
+func (c *Char) applyOrb(count int, ele EleType, isOrb bool, isActive bool, partyCount int) {
 	var amt, er, r float64
 	r = 1.0
 	if !isActive {
@@ -181,7 +199,7 @@ func (c *Character) applyOrb(count int, ele EleType, isOrb bool, isActive bool, 
 
 }
 
-func (c *Character) Snapshot(e EleType) Snapshot {
+func (c *Char) Snapshot(e EleType) Snapshot {
 	var s Snapshot
 	s.Stats = make(map[StatType]float64)
 

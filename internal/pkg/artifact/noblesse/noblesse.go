@@ -8,7 +8,7 @@ func init() {
 	combat.RegisterSetFunc("Noblesse Oblige", set)
 }
 
-func set(c *combat.Character, s *combat.Sim, count int) {
+func set(c *combat.Char, s *combat.Sim, count int) {
 	if count >= 2 {
 		s.AddEffect(func(snap *combat.Snapshot) bool {
 			if snap.CharName != c.Profile.Name {

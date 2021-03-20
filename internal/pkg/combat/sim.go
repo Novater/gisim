@@ -50,7 +50,7 @@ type effectFunc func(s *Snapshot) bool
 //Sim keeps track of one simulation
 type Sim struct {
 	Target     *Enemy
-	Characters []*Character
+	Characters []*Char
 	Active     int
 	Frame      int
 
@@ -60,6 +60,11 @@ type Sim struct {
 	actions map[string]ActionFunc
 	//effects
 	effects map[effectType]map[string]effectFunc
+
+	//action priority list
+	priority []RotationItem
+
+	field map[string]map[StatType]float64
 }
 
 //New creates new sim from given profile
@@ -101,17 +106,18 @@ func New(p Profile) (*Sim, error) {
 	s.Log = logger.Sugar()
 	zap.ReplaceGlobals(logger)
 
-	var chars []*Character
+	var chars []*Char
+	dup := make(map[string]bool)
 	//create the characters
 	for _, v := range p.Characters {
 		//initialize artifact sets
-		c := &Character{}
+		c := &Char{}
 		//initialize other variables/stats
 		c.Stats = make(map[StatType]float64)
 		c.Cooldown = make(map[string]int)
 		c.Store = make(map[string]interface{})
 		c.Mods = make(map[string]map[StatType]float64)
-		c.TickHooks = make(map[string]func(c *Character) bool)
+		c.TickHooks = make(map[string]func(c *Char) bool)
 		c.Profile = v
 
 		f, ok := charMap[v.Name]
@@ -119,6 +125,12 @@ func New(p Profile) (*Sim, error) {
 			return nil, fmt.Errorf("invalid character: %v", v.Name)
 		}
 		f(s, c)
+
+		if _, ok := dup[v.Name]; ok {
+			return nil, fmt.Errorf("duplicated character %v", v.Name)
+		}
+
+		dup[v.Name] = true
 
 		//initialize weapon
 		wf, ok := weaponMap[v.WeaponName]
@@ -178,8 +190,34 @@ func New(p Profile) (*Sim, error) {
 		chars = append(chars, c)
 	}
 	s.Characters = chars
+	for _, v := range p.Rotation {
+		//find index
+		index := -1
+		for i, c := range s.Characters {
+			if c.Profile.Name == v.CharacterName {
+				index = i
+				break
+			}
+		}
+		if index == -1 {
+			return nil, fmt.Errorf("invalid character %v in rotation list", v.CharacterName)
+		}
+		next := v
+		next.index = index
+		s.priority = append(s.priority, next)
+	}
 
 	return s, nil
+}
+
+func (s *Sim) FieldEffects() map[StatType]float64 {
+	r := make(map[StatType]float64)
+	for _, m := range s.field {
+		for t, v := range m {
+			r[t] += v
+		}
+	}
+	return r
 }
 
 //Run the sim; length in seconds
@@ -204,6 +242,27 @@ func (s *Sim) Run(length int, list []Action) float64 {
 		if cooldown > 0 {
 			cooldown--
 			continue
+		}
+
+		//execute first item on priority list we can execute
+		//create list of cd for the priority list, execute item with lowest cd on the priority list
+		// var cd []int
+		for _, v := range s.priority {
+			t := 0
+			//check if same character
+			if v.index != s.Active {
+				t += 10 //add frame lag to switch char
+			}
+			//check abil cd
+			switch v.Action {
+			case ActionTypeBurst:
+				t += s.Characters[v.index].ActionCooldown(v.Action)
+			case ActionTypeSkill:
+				t += s.Characters[v.index].ActionCooldown(v.Action)
+			case ActionTypeChargedAttack:
+				//check stam
+			}
+
 		}
 
 		if i >= len(list) {
@@ -328,7 +387,8 @@ type EnemyProfile struct {
 
 //RotationItem ...
 type RotationItem struct {
-	CharacterName string     `yaml:"CharacterName"`
+	CharacterName string `yaml:"CharacterName"`
+	index         int
 	Action        ActionType `yaml:"Action"`
 	Condition     string     //to be implemented
 }

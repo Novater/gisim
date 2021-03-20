@@ -11,7 +11,7 @@ func init() {
 	combat.RegisterWeaponFunc("Skyward Spine", weapon)
 }
 
-func weapon(c *combat.Character, s *combat.Sim, r int) {
+func weapon(c *combat.Char, s *combat.Sim, r int) {
 	//add passive crit, atk speed not sure how to do right now??
 	//looks like jsut reduce the frames of normal attacks by 1 + 12%
 	dmg := .4

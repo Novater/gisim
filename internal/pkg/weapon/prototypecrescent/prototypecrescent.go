@@ -11,7 +11,7 @@ func init() {
 	combat.RegisterWeaponFunc("Prototype Crescent", weapon)
 }
 
-func weapon(c *combat.Character, s *combat.Sim, r int) {
+func weapon(c *combat.Char, s *combat.Sim, r int) {
 	//add on hit effect to sim?
 	s.AddEffect(func(snap *combat.Snapshot) bool {
 		//check if char is correct?

@@ -35,7 +35,7 @@ func main() {
 	var cfg combat.Profile
 	var err error
 
-	p := "./current.yaml"
+	p := "./xl.yaml"
 
 	source, err = ioutil.ReadFile(p)
 	if err != nil {

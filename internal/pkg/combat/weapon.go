@@ -1,6 +1,6 @@
 package combat
 
-type NewWeaponFunc func(c *Character, s *Sim, refine int)
+type NewWeaponFunc func(c *Char, s *Sim, refine int)
 
 func RegisterWeaponFunc(name string, f NewWeaponFunc) {
 	mu.Lock()

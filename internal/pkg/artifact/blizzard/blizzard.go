@@ -9,7 +9,7 @@ func init() {
 	combat.RegisterSetFunc("Blizzard Strayer", set)
 }
 
-func set(c *combat.Character, s *combat.Sim, count int) {
+func set(c *combat.Char, s *combat.Sim, count int) {
 	if count >= 2 {
 		c.Mods["Blizzard Strayer 2PC"] = make(map[combat.StatType]float64)
 		c.Mods["Blizzard Strayer 2PC"][combat.CryoP] = 0.15

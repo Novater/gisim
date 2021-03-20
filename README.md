@@ -9,6 +9,8 @@
 
 ## todo list
 
+- [ ] refactor character into an interface, let the character itself decide what to use to keep track of stuff
+- [ ] rotations to check CD
 - [x] character orb receiving function
 - [x] sim handle orb
 - [ ] finish implementing ganyu (up to c6?)
@@ -21,7 +23,7 @@
   - [x] energy use on abil
   - [x] particles on skill
   - [x] C1: ffa regen 2 energy/ ffa reduce target cryo res
-  - [ ] C2: extra charge
+  - [x] C2: extra charge
   - [ ]
 
 - [ ] implement xiangling
