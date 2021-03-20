@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/srliao/gisim/internal/pkg/combat"
+	"github.com/srliao/gisim/pkg/combat"
 
 	//characters
 	_ "github.com/srliao/gisim/internal/pkg/character/ganyu"
@@ -29,15 +29,16 @@ func main() {
 
 	debugPtr := flag.String("d", "warn", "output level: debug, info, warn")
 	secondsPtr := flag.Int("s", 20, "how many seconds to run the sim for")
+	pPtr := flag.String("p", "config.yaml", "which profile to use")
 	flag.Parse()
 
 	var source []byte
 	var cfg combat.Profile
 	var err error
 
-	p := "./xl.yaml" //xl.yaml expecting 4659 dps
+	// p := "./xl-base.yaml" //xl.yaml expecting 4659 dps
 
-	source, err = ioutil.ReadFile(p)
+	source, err = ioutil.ReadFile(*pPtr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -73,5 +74,5 @@ func main() {
 	start := time.Now()
 	dmg := s.Run(*secondsPtr, actions)
 	elapsed := time.Since(start)
-	log.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", p, dmg, *secondsPtr, dmg/float64(*secondsPtr), elapsed)
+	log.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", *pPtr, dmg, *secondsPtr, dmg/float64(*secondsPtr), elapsed)
 }

@@ -1,7 +1,7 @@
 package blizzard
 
 import (
-	"github.com/srliao/gisim/internal/pkg/combat"
+	"github.com/srliao/gisim/pkg/combat"
 	"go.uber.org/zap"
 )
 

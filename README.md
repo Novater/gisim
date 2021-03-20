@@ -9,8 +9,9 @@
 
 ## todo list
 
-- [ ] refactor character into an interface, let the character itself decide what to use to keep track of stuff
+- [x] refactor character into an interface, let the character itself decide what to use to keep track of stuff
 - [ ] rotations to check CD
+- [ ] refactor weapon and artifact equip code into character
 - [x] character orb receiving function
 - [x] sim handle orb
 - [ ] finish implementing ganyu (up to c6?)

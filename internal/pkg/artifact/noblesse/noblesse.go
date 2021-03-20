@@ -1,7 +1,7 @@
 package noblesse
 
 import (
-	"github.com/srliao/gisim/internal/pkg/combat"
+	"github.com/srliao/gisim/pkg/combat"
 )
 
 func init() {
