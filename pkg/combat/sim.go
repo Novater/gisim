@@ -64,7 +64,6 @@ func New(p Profile) (*Sim, error) {
 
 	u := &Enemy{}
 
-	u.Auras = make(map[EleType]aura)
 	u.Status = make(map[string]int)
 	u.Level = p.Enemy.Level
 	u.Resist = p.Enemy.Resist

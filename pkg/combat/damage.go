@@ -1,6 +1,7 @@
 package combat
 
 import (
+	"log"
 	"math"
 	"math/rand"
 
@@ -15,15 +16,31 @@ type Enemy struct {
 	//resist mods
 	ResMod map[string]float64
 
+	//auras should be stored in an array
+	//there seems to be a priority system on what gets stored first; don't know how it works
+	//for now we're only concerned about EC and Freeze; so we'll just hard code though; EC is electro,hydro; Freeze is cryo,hydro
+	//in EC case, any additional reaction applied will first react with electro, then hydro
+	//	not sure if this is only applicable if first reaction is transformative i.e. overload or superconduct;
+	//	^ may make sense b/c additional application of hydro will prob trigger additional reaction? need to test this somehow??
+	//  but the code would be the same, i.e hydro gets applied to electro (does nothing), then added to more hydro
+	//in frozen's case we just have to hard code that any element will only react with cryo and hydro just dies off why cryo dies off
+	//unless we shatter in which case cryo gets removed
+	Auras []aura
 	//tracking
-	Auras  map[EleType]aura
 	Status map[string]int //countdown to how long status last
 
 	//stats
 	Damage float64 //total damage received
 }
 
+type reaction struct {
+	react bool
+	t     ReactionType
+	next  []aura
+}
+
 type aura struct {
+	Ele   EleType
 	rate  string
 	gauge float64 //gauge remaining
 }
@@ -67,15 +84,17 @@ func (e *Enemy) tick(s *Sim) {
 	//tick down gauge, reduction is based on the rate of the aura
 	//multipliers are A: 9.5, B:6, C:4.25
 	//decay per frame (60fps) = 1 unit / (mult * 60)
-	for k, v := range e.Auras {
+	var next []aura
+	for _, v := range e.Auras {
 		//decay first, then delete if < -1
 		v.gauge -= 1 / (gaugeMul(v.rate) * 60)
-		if v.gauge < 0 {
-			s.Log.Debugf("[%v] aura %v expired", s.Frame(), k)
-			delete(e.Auras, k)
+		if v.gauge > 0 {
+			next = append(next, v)
+		} else {
+			s.Log.Debugf("[%v] aura %v expired", s.Frame(), v.Ele)
 		}
-		e.Auras[k] = v
 	}
+	e.Auras = next
 }
 
 //ApplyDamage applies damage to the target given a snapshot
@@ -98,10 +117,10 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	//in general, transformative reaction does not change the snapshot
 	//they will only trigger a sep damage calc
 	if ds.ApplyAura {
-		willReact, react, next := s.checkReact(ds)
-		if willReact {
+		r := s.checkReact(ds)
+		if r.react {
 			ds.WillReact = true
-			ds.ReactionType = react
+			ds.ReactionType = r.t
 			//handle pre reaction
 			for k, f := range s.effects[PreReaction] {
 				if f(&ds) {
@@ -110,7 +129,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 				}
 			}
 			//either adjust damage snap, adjust stats, or add effect to deal damage after initial damage
-			switch react {
+			switch r.t {
 			case Melt:
 				if ds.Element == Pyro {
 					//tag it for melt
@@ -133,7 +152,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 				}
 			}
 		}
-		target.Auras = next
+		target.Auras = r.next
 	}
 
 	//for each reaction damage to occur -> call any pre reaction hooks
@@ -209,144 +228,143 @@ func (s *Sim) applyReactionDamage(ds Snapshot) float64 {
 	return damage
 }
 
+func reactType(a EleType, b EleType) ReactionType {
+	if a == b {
+		return NoReaction
+	}
+	switch {
+	//overload
+	case a == Pyro && b == Electro:
+		fallthrough
+	case a == Electro && b == Pyro:
+		return Overload
+	//superconduct
+	case a == Electro && b == Cryo:
+		fallthrough
+	case a == Cryo && b == Electro:
+		return Superconduct
+	//freeze
+	case a == Cryo && b == Hydro:
+		fallthrough
+	case a == Hydro && b == Cryo:
+		return Freeze
+	//melt
+	case a == Pyro && b == Cryo:
+		fallthrough
+	case a == Cryo && b == Pyro:
+		return Melt
+	//vape
+	case a == Pyro && b == Hydro:
+		fallthrough
+	case a == Hydro && b == Pyro:
+		return Vaporize
+	//electrocharged
+	case a == Electro && b == Hydro:
+		fallthrough
+	case a == Hydro && b == Electro:
+		return ElectroCharged
+		//special reactions??
+		//crystal
+	case a == Geo || b == Geo:
+		return Crystallize
+	//swirl
+	case a == Anemo || b == Anemo:
+		return Swirl
+	}
+	return NoReaction
+}
+
 //checkReact checks if a reaction has occured. for now it's only handling what happens when target has 1
 //element only and therefore only one reaction.
-func (s *Sim) checkReact(ds Snapshot) (bool, ReactionType, map[EleType]aura) {
+func (s *Sim) checkReact(ds Snapshot) reaction {
 	target := s.Target
-	next := make(map[EleType]aura)
+	result := reaction{}
 	//if target has no aura then we apply the current aura and carry on with damage calc
 	//since no other aura, no reaction will occur
 	if len(target.Auras) == 0 {
-		next[ds.Element] = aura{
+		result.next = append(result.next, aura{
+			Ele:   ds.Element,
 			gauge: ds.AuraGauge,
 			rate:  ds.AuraDecayRate,
-		}
+		})
 		s.Log.Debugf("\t%v applied (new). GU: %v Decay: %v", ds.Element, ds.AuraGauge, ds.AuraDecayRate)
-		return false, NoReaction, next
+		return result
 	}
 
-	//for now let's deal with single aura reactions (cause it's simpler)
+	//single reaction
 	if len(target.Auras) == 1 {
-		var ele EleType
-		var a aura
-		var react ReactionType = NoReaction
-		for k, v := range target.Auras {
-			ele = k
-			a = v
-		}
-		//since element already exist, here we only top up the gauge to the extent the new gauge <= source
-		if ele == ds.Element {
+		a := target.Auras[0]
+		r := reactType(a.Ele, ds.Element)
+
+		//same element, refill
+		if r == NoReaction {
 			g := math.Max(ds.AuraGauge, a.gauge)
-			next[ds.Element] = aura{
+			result.next = append(result.next, aura{
+				Ele:   ds.Element,
 				gauge: g,
 				rate:  a.rate,
-			}
+			})
 			s.Log.Debugf("\t%v refreshed. old gu: %v new gu: %v. rate: %v", ds.Element, a.gauge, g, a.rate)
-			return false, react, next
+			return result
 		}
 
-		switch {
-		//these following reactions are transformative so we calculate separate damage, update gauge, and add to total
-		//overload
-		case ele == Pyro && ds.Element == Electro:
-			s.Log.Debugf("\t%v caused overload", ds.Element)
-		case ele == Electro && ds.Element == Pyro:
-		//superconduct
-		case ele == Electro && ds.Element == Cryo:
-		case ele == Cryo && ds.Element == Electro:
-		case ele == Frozen && ds.Element == Electro:
-		//freeze
-		//Once freeze is triggered, an enemy will be afflicted by a frozen aura. This aura hides the hydro aura, and any elements
-		//applied to a frozen enemy will react with cryo. Removing the frozen aura, either through melt or shatter, will also remove
-		//cryo and expose the hydro aura, allowing any elemental sources to react with hydro again.
-		//this is a pain to implement.... but so far looks like only childe will have this problem
-		//as everyone else applies only 1A of hydro
-		//there's a 1.25 multiplier to the source element
+		result.react = true
+		result.t = r
 
-		case ele == Cryo && ds.Element == Hydro:
-		case ele == Hydro && ds.Element == Cryo:
-		//these following reactions are multipliers so we just modify snapshot and update the gauges
 		//melt
-		case ele == Pyro && ds.Element == Cryo:
-			s.Log.Debugf("\t%v caused (weak) melt", ds.Element)
-			//weak melt, source unit x 0.625, subtracted from target unit
-			//IS IT ROUNDED??? probably not??
-			g := ds.AuraGauge * 0.625
-			s.Log.Debugw("\taura applied", "src ele", ds.Element, "src gu", ds.AuraGauge, "t ele", ele, "t gu", a.gauge, "red", g, "rem", a.gauge-g)
+		if r == Melt {
+			mult := 0.625
+			if ds.Element == Pyro {
+				mult = 2.5
+			}
+			g := ds.AuraGauge * mult
+			s.Log.Debugw("\taura applied", "src ele", ds.Element, "src gu", ds.AuraGauge, "t ele", a.Ele, "t gu", a.gauge, "red", g, "rem", a.gauge-g)
 			//if reduction > a.gauge, remove it completely
 			if g < a.gauge {
-				next[ele] = aura{
+				result.next = append(result.next, aura{
+					Ele:   a.Ele,
 					gauge: a.gauge - g,
 					rate:  a.rate,
-				}
+				})
 			}
-			react = Melt
-		case ele == Cryo && ds.Element == Pyro:
-			s.Log.Debugf("\t%v caused (strong) melt", ds.Element)
-			g := ds.AuraGauge * 2.5
-			s.Log.Debugw("\taura applied", "src ele", ds.Element, "src gu", ds.AuraGauge, "t ele", ele, "t gu", a.gauge, "red", g, "rem", a.gauge-g)
-			//if reduction > a.gauge, remove it completely
-			if g < a.gauge {
-				next[ele] = aura{
-					gauge: a.gauge - g,
-					rate:  a.rate,
-				}
-			}
-			react = Melt
-		case ele == Frozen && ds.Element == Pyro:
-			//NOT IMPLEMENTED, HOW TO DEAL WITH HYDRO REMAINING??
-		//vape
-		case ele == Pyro && ds.Element == Hydro:
-			s.Log.Debugf("\t%v caused (strong) vaporize", ds.Element)
-			g := ds.AuraGauge * 2.5
-			s.Log.Debugw("\taura applied", "src ele", ds.Element, "src gu", ds.AuraGauge, "t ele", ele, "t gu", a.gauge, "red", g, "rem", a.gauge-g)
-			//if reduction > a.gauge, remove it completely
-			if g < a.gauge {
-				next[ele] = aura{
-					gauge: a.gauge - g,
-					rate:  a.rate,
-				}
-			}
-			react = Vaporize
-		case ele == Hydro && ds.Element == Pyro:
-			s.Log.Debugf("\t%v caused (weak) vaporize", ds.Element)
-			g := ds.AuraGauge * 0.625
-			s.Log.Debugw("\taura applied", "src ele", ds.Element, "src gu", ds.AuraGauge, "t ele", ele, "t gu", a.gauge, "red", g, "rem", a.gauge-g)
-			//if reduction > a.gauge, remove it completely
-			if g < a.gauge {
-				next[ele] = aura{
-					gauge: a.gauge - g,
-					rate:  a.rate,
-				}
-			}
-			react = Vaporize
-		//special reactions??
-		//crystal
-		case ele != Geo && ds.Element == Geo:
-			//ONLY GU IMPLEMENTED FOR NOW, NO DAMAGE??
-		//swirl
-		case ele != Anemo && ds.Element == Anemo:
-		//electrocharged is in it's own class
-		case ele == Electro && ds.Element == Hydro:
-		case ele == Hydro && ds.Element == Electro:
-			//ec seem to trigger every 1 second and on expiry, with a 0.5 second ICD of sort?
-			//each tick consumes .4 gu?
-			//seems kinda complicated? the underlying code must be simpler than this...
-			//i wonder if electro + hydro just maintains it's aura and keeps ticking every 1s
-			//and any reapplication just adds to the existing GU
-			//then any reactions react to each aura separately and then uses up more GU
-			//that would seem like a fairly simple way to implement and explain what we're seeing
-			//would also apply to future dendro reactions
+			return result
 		}
 
-		return true, react, next
+		//vaporize
+		if r == Vaporize {
+			mult := 0.625
+			if ds.Element == Hydro {
+				mult = 2.5
+			}
+			g := ds.AuraGauge * mult
+			s.Log.Debugw("\taura applied", "src ele", ds.Element, "src gu", ds.AuraGauge, "t ele", a.Ele, "t gu", a.gauge, "red", g, "rem", a.gauge-g)
+			//if reduction > a.gauge, remove it completely
+			if g < a.gauge {
+				result.next = append(result.next, aura{
+					Ele:   a.Ele,
+					gauge: a.gauge - g,
+					rate:  a.rate,
+				})
+			}
+			return result
+		}
+	}
+
+	if len(target.Auras) == 2 {
+		//the first should either be electro for EC
+		//or cryo for frozen
+		return result
+	}
+
+	if len(target.Auras) > 2 {
+		log.Panicf("unexpected error, target has more than 2 auras active: %v", target.Auras)
 	}
 
 	//if target has more than one aura then it gets complicated....
 	//this should only happen on targets with electrocharged
 	//since electro will only result in transformative, that should just trigger a separate damage calc
 	//the main ds still carries through to the hydro portion
-	return false, NoReaction, next
+	return result
 }
 
 type dmgResult struct {

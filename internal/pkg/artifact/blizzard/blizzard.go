@@ -20,12 +20,12 @@ func set(c combat.Character, s *combat.Sim, count int) {
 				return false
 			}
 
-			if _, ok := s.Target.Auras[combat.Frozen]; ok {
-				s.Log.Debugf("\tapplying blizzard strayer 4pc buff on frozen target")
-				snap.Stats[combat.CR] += .4
-			} else if _, ok := s.Target.Auras[combat.Cryo]; ok {
-				s.Log.Debugf("\tapplying blizzard strayer 4pc buff on cryo target")
-				snap.Stats[combat.CR] += .2
+			//if len > 0 and first one is cryo then we can apply
+			if len(s.Target.Auras) > 0 {
+				if s.Target.Auras[0].Ele == combat.Cryo {
+					s.Log.Debugf("\tapplying blizzard strayer 4pc buff on cryo target")
+					snap.Stats[combat.CR] += .4
+				}
 			}
 
 			return false
