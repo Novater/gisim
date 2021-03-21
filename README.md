@@ -32,7 +32,11 @@ Typically I would run the command in bash with output piped to a file for debugg
 
 ## todo list
 
-- [ ] melt reaction
+- [ ] add fischl E only (up to c4?)
+  - [ ] skill
+- [ ] add xingqiu up to c6
+  - [ ] e
+  - [ ] q
 - [ ] refactor weapon and artifact equip code into character; this way weapons can keep track of their own internal icd etc..
 - [ ] finish implementing ganyu (up to c6?)
   - [ ] normal attack
@@ -55,6 +59,7 @@ Typically I would run the command in bash with output piped to a file for debugg
 
 ## done
 
+- [x] melt reaction
 - [x] character orb receiving function
 - [x] sim handle orb
 - [x] refactor character into an interface, let the character itself decide what to use to keep track of stuff
@@ -74,6 +79,24 @@ Typically I would run the command in bash with output piped to a file for debugg
   - [x] c2
   - [x] c4
   - [x] c6
+
+## on auras
+
+tinfoil hat theory:
+
+- auras are stored in a collection (array perhaps)
+- when a new element is applied, it is applied to the existing auras in this list in order
+- example:
+
+  - crystallize on EC => electro only
+  - pyro (supervape bug) on EC => electro first
+  - shatter on frozen => frozen first
+  - pyro on frozen? i suspect this will trigger melt THEN vaporize
+
+- so geo and pyro both react with electro first but ice reacted first w
+- looks like hydro mage reapplys hydro at regular intervals.. so it could just be which ever has the longer gauge left reacts first
+- looks like single target usually that's going to be electro if you're constantly reapplying it
+- if you melt a frozen 1A with 2B there's nothing left :( i guess you have to melt with a lower threshold?
 
 ## brainstorm - OUT DATED
 

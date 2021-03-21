@@ -453,11 +453,20 @@ type CharacterProfile struct {
 	AscensionBonus      map[StatType]float64 `yaml:"AscensionBonus"`
 	TalentLevel         map[ActionType]int64 `yaml:"TalentLevel"`
 	WeaponName          string               `yaml:"WeaponName"`
+	WeaponClass         WeaponClass          `yaml:"WeaponClass"`
 	WeaponRefinement    int                  `yaml:"WeaponRefinement"`
 	WeaponBaseAtk       float64              `yaml:"WeaponBaseAtk"`
 	WeaponSecondaryStat map[StatType]float64 `yaml:"WeaponSecondaryStat"`
 	Artifacts           map[Slot]Artifact    `yaml:"Artifacts"`
 }
+
+type WeaponClass string
+
+const (
+	WeaponClassSword    WeaponClass = "sword"
+	WeaponClassClaymore WeaponClass = "claymore"
+	WeaponClassSpear    WeaponClass = "spear"
+)
 
 type ActionType string
 

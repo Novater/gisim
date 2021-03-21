@@ -1,0 +1,126 @@
+Label: "Test"
+Characters:
+  - Name: Ganyu
+    Level: 90
+    Element: "cryo"
+    BaseHP: 9797
+    BaseAtk: 335
+    BaseDef: 630
+    BaseCR: 0.05
+    BaseCD: 0.50
+    Constellation: 1
+    AscensionBonus:
+      CD: 0.384
+    TalentLevel:
+      attack: 10
+      skill: 6
+      burst: 6
+    WeaponName: "Prototype Crescent"
+    WeaponRefinement: 4
+    WeaponBaseAtk: 510
+    WeaponSecondaryStat:
+      ATK%: 0.413
+    Artifacts:
+      Flower:
+        Level: 20
+        Type: "Flower"
+        Set: "Blizzard Strayer"
+        MainStat:
+          Type: "HP"
+          Value: 4780
+        Substat:
+          - Type: "EM"
+            Value: 21
+          - Type: "ATK"
+            Value: 47
+          - Type: "CD"
+            Value: 0.179
+          - Type: "DEF"
+            Value: 19
+      Feather:
+        Level: 20
+        Type: "Feather"
+        Set: "Blizzard Strayer"
+        MainStat:
+          Type: "ATK"
+          Value: 311
+        Substat:
+          - Type: "CD"
+            Value: 0.062
+          - Type: "EM"
+            Value: 35
+          - Type: "ATK%"
+            Value: 0.157
+          - Type: "CR"
+            Value: 0.07
+      Sands:
+        Level: 20
+        Type: "Sands"
+        Set: "Blizzard Strayer"
+        MainStat:
+          Type: "ATK%"
+          Value: 0.466
+        Substat:
+          - Type: "ATK"
+            Value: 31
+          - Type: "CD"
+            Value: 0.225
+          - Type: "HP%"
+            Value: 0.047
+          - Type: "ER"
+            Value: 0.168
+      Goblet:
+        Level: 20
+        Type: "Goblet"
+        Set: "Crimson Witch of Flames"
+        MainStat:
+          Type: "Cryo%"
+          Value: 0.466
+        Substat:
+          - Type: "CD"
+            Value: 0.07
+          - Type: "CR"
+            Value: 0.093
+          - Type: "HP"
+            Value: 717
+          - Type: "DEF"
+            Value: 16
+      Circlet:
+        Level: 20
+        Type: "Circlet"
+        Set: "Blizzard Strayer"
+        MainStat:
+          Type: "CD"
+          Value: 0.622
+        Substat:
+          - Type: "CR"
+            Value: 0.097
+          - Type: "DEF"
+            Value: 21
+          - Type: "ATK%"
+            Value: 0.14
+          - Type: "DEF%"
+            Value: 0.066
+Enemy: #blazing axe mitachurl
+  Level: 88
+  Resist:
+    pyro: 0.1
+    dendro: 0.1
+    hydro: 0.1
+    cryo: 0.1
+    electro: 0.1
+    geo: 0.1
+    anemo: 0.1
+    physical: 0.3
+InitialActive: "Xiangling"
+Rotation:
+  - CharacterName: "Xiangling"
+    Action: "skill"
+  - CharacterName: "Xiangling"
+    Action: "burst"
+  - CharacterName: "Ganyu"
+    Action: "skill"
+  - CharacterName: "Ganyu"
+    Action: "burst"
+  - CharacterName: "Ganyu"
+    Action: "charge"

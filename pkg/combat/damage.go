@@ -426,9 +426,10 @@ const (
 )
 
 type Snapshot struct {
-	CharName string     //name of the character triggering the damage
-	Abil     string     //name of ability triggering the damage
-	AbilType ActionType //type of ability triggering the damage
+	CharName    string      //name of the character triggering the damage
+	Abil        string      //name of ability triggering the damage
+	AbilType    ActionType  //type of ability triggering the damage
+	WeaponClass WeaponClass //b.c. Gladiators...
 
 	HitWeakPoint bool
 
