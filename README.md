@@ -98,6 +98,12 @@ tinfoil hat theory:
 - looks like single target usually that's going to be electro if you're constantly reapplying it
 - if you melt a frozen 1A with 2B there's nothing left :( i guess you have to melt with a lower threshold?
 
+Apparently also this...
+
+Artesians, Hu Tao: Zhongli/Xiangling/Hu Tao have seperate CA ICD
+[10:34 PM] Artesians, Hu Tao: uhhh
+[10:35 PM] Artesians, Hu Tao: all catalysts have separate CA ICD
+
 ## brainstorm - OUT DATED
 
 hooks should have both the trigger character, and the sim data
