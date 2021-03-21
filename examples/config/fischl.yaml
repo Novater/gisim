@@ -1,30 +1,30 @@
 Label: "Test"
 Characters:
-  - Name: Ganyu
-    Level: 90
-    Element: "cryo"
-    BaseHP: 9797
-    BaseAtk: 335
-    BaseDef: 630
+  - Name: Fischl
+    Level: 70
+    Element: "electro"
+    BaseHP: 7508
+    BaseAtk: 200
+    BaseDef: 485
     BaseCR: 0.05
     BaseCD: 0.50
-    Constellation: 1
+    Constellation: 4
     AscensionBonus:
-      CD: 0.384
+      ATK%: 0.18
     TalentLevel:
-      attack: 10
+      attack: 4
       skill: 6
-      burst: 6
-    WeaponName: "Prototype Crescent"
-    WeaponRefinement: 4
-    WeaponBaseAtk: 510
+      burst: 2
+    WeaponName: "Favonius Warbow"
+    WeaponRefinement: 5
+    WeaponBaseAtk: 401
     WeaponSecondaryStat:
-      ATK%: 0.413
+      ER%: 0.559
     Artifacts:
       Flower:
         Level: 20
         Type: "Flower"
-        Set: "Blizzard Strayer"
+        Set: "Gladiator's Finale"
         MainStat:
           Type: "HP"
           Value: 4780

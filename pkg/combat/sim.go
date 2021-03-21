@@ -30,6 +30,8 @@ const (
 	// triggered when there will be a reaction
 	PreReaction  effectType = "PRE_REACTION"
 	PostReaction effectType = "POST_REACTION"
+	// triggered when a damage crits
+	OnCritDamage effectType = "CRIT_DAMAGE"
 )
 
 type effectFunc func(s *Snapshot) bool

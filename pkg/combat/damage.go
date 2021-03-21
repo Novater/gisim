@@ -81,8 +81,6 @@ func (e *Enemy) tick(s *Sim) {
 //ApplyDamage applies damage to the target given a snapshot
 func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 
-	var damage float64
-
 	target := s.Target
 
 	ds.TargetLvl = target.Level
@@ -144,8 +142,15 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 
 	//determine type of reaction
 
-	damage = calcDmg(ds, s.Log)
-	s.Target.Damage += damage
+	dr := calcDmg(ds, s.Log)
+	s.Target.Damage += dr.damage
+
+	for k, f := range s.effects[OnCritDamage] {
+		if f(&ds) {
+			s.Log.Debugf("[%v] effect (on crit dmg) %v expired", s.Frame(), k)
+			delete(s.effects[PostDamageHook], k)
+		}
+	}
 
 	for k, f := range s.effects[PostDamageHook] {
 		if f(&ds) {
@@ -153,6 +158,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 			delete(s.effects[PostDamageHook], k)
 		}
 	}
+
 	//apply reaction damage now! not sure if this timing is right though; maybe we can add this to the next frame as a tick instead?
 	if ds.WillReact {
 		s.applyReactionDamage(ds)
@@ -164,7 +170,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 		}
 	}
 
-	return damage
+	return dr.damage
 }
 
 //split this out as a separate function so we can call it if we need to apply EC or Burning damage
@@ -343,7 +349,14 @@ func (s *Sim) checkReact(ds Snapshot) (bool, ReactionType, map[EleType]aura) {
 	return false, NoReaction, next
 }
 
-func calcDmg(ds Snapshot, log *zap.SugaredLogger) float64 {
+type dmgResult struct {
+	damage float64
+	isCrit bool
+}
+
+func calcDmg(ds Snapshot, log *zap.SugaredLogger) dmgResult {
+
+	result := dmgResult{}
 
 	st := EleToDmgP(ds.Element)
 	ds.DmgBonus += ds.Stats[st]
@@ -403,9 +416,12 @@ func calcDmg(ds Snapshot, log *zap.SugaredLogger) float64 {
 	if rand.Float64() <= ds.Stats[CR] || ds.HitWeakPoint {
 		log.Debugf("\t\tdamage is crit!")
 		damage = damage * (1 + ds.Stats[CD])
+		result.isCrit = true
 	}
 
-	return damage
+	result.damage = damage
+
+	return result
 }
 
 //EleType is a string representing an element i.e. HYDRO/PYRO/etc...
