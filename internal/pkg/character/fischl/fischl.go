@@ -62,9 +62,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		d.Abil = "Fischl A4"
 		d.AbilType = combat.ActionTypeSpecialProc
 		d.Mult = 0.8
-		d.ApplyAura = true
-		d.AuraGauge = 1
-		d.AuraDecayRate = "A" //this is just assumed not sure if true
+		//apparently a4 doesnt apply electro
 		s.AddAction(func(s *combat.Sim) bool {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("[%v]: Fischl (Oz - A4) dealt %.0f damage", s.Frame(), damage)
@@ -121,12 +119,21 @@ func (f *fischl) Skill() int {
 	if f.Profile.Constellation >= 2 {
 		d.Mult += 2
 	}
-	d.ApplyAura = true
 	d.AuraGauge = 1
 	d.AuraDecayRate = "A"
+	//clone b without info re aura
+	b := d.Clone()
+	b.Mult = birdAtk[lvl]
 
 	//apply initial damage
 	f.S.AddAction(func(s *combat.Sim) bool {
+		if v, cd := f.CD[common.SkillICD]; cd {
+			d.ApplyAura = false
+			s.Log.Infof("[%v]: Fischl (Oz - summon) - aura app still on ICD (%v)", s.Frame(), v)
+		} else {
+			d.ApplyAura = true
+			f.CD[common.SkillICD] = 150
+		}
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("[%v]: Fischl (Oz - summon) dealt %.0f damage", s.Frame(), damage)
 		return true
@@ -137,8 +144,7 @@ func (f *fischl) Skill() int {
 	tick := 0
 	next := 40 + 50
 	count := 0
-	b := d.Clone()
-	b.Mult = birdAtk[lvl]
+
 	f.S.AddAction(func(s *combat.Sim) bool {
 		tick++
 		if tick < next {
@@ -148,6 +154,14 @@ func (f *fischl) Skill() int {
 			return true
 		}
 		next += 50
+		//share same icd
+		if v, cd := f.CD[common.SkillICD]; cd {
+			b.ApplyAura = false
+			s.Log.Infof("[%v]: Fischl (Oz - tick) - aura app still on ICD (%v)", s.Frame(), v)
+		} else {
+			b.ApplyAura = true
+			f.CD[common.SkillICD] = 150
+		}
 		damage := s.ApplyDamage(b)
 		//assume fischl has 60% chance of generating orb every attack;
 		if rand.Float64() < .6 {

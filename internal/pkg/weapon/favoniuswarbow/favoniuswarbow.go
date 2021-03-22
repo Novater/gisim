@@ -50,7 +50,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 				orbDelay++
 				return false
 			}
-			s.GenerateOrb(1, combat.NonElemental, true)
+			s.GenerateOrb(3, combat.NonElemental, false)
 			return true
 		}, fmt.Sprintf("%v-FavoniusWarbow-Orb", s.Frame()))
 

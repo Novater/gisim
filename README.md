@@ -25,74 +25,28 @@ Typically I would run the command in bash with output piped to a file for debugg
 ## bugs/issues
 
 - there should be an animation lock if normal attacks are not chained
-- ICD for aura application not yet tracked
 - sim assumes A4 is available even if lvl specified has not unlocked A4
-- status such as gouba, ganyu lotus etc... should be kept track of under Sim
+- status such as gouba, ganyu lotus etc... should be kept track of under Sim in order for us to have action conditions
 - not sure how to implement Amos bow yet? maybe add post arrow fire hook? [could just add an initial frame to snapshot, then diff between that and current frame would be travel time]
 - crimson witch does not track stacks yet
-- only initial application of EC will trigger Fischl A4
-- ReactedTo field is not implemented; Fischl A4 on swirl will not work
-- Fischl A4 is assumed to be 1A
-- Fischl turbo interaction not implemented
+- current overload formula seems to give higher damage than actual; actual 2482, got 2594.3517401129357
 
 ## todo list
 
-- [ ] add fischl E only (up to c4?)
-  - [ ] skill
-  - [x] a4
-  - [ ] a2
-  - [x] c1
-  - [ ] c2
-  - [ ] c4
-- [ ] add xingqiu up to c6
-  - [ ] e
-  - [ ] q
+- [ ] aura ICD
+- [ ] xingqiu
+- [ ] EC testing
+- [ ] fischl
 - [ ] refactor weapon and artifact equip code into character; this way weapons can keep track of their own internal icd etc..
-- [ ] finish implementing ganyu (up to c6?)
-  - [ ] normal attack
-  - [ ] aimed attack
-  - [ ] aimed attack lvl 1
-  - [ ] plunge attack
-- [ ] implement xiangling
-  - [ ] pyro application
-  - [ ] charged attack
-  - [ ] plunge attack
-  - [ ] xiangling a4 (when to pick up?)
 - [ ] jump/dash/char switch/burst/skill force reset all char normal counter
-- [ ] reactions
-- [ ] add ningguang
+- [ ] ningguang
+- [ ] crystallize
+- [ ] sucrose
+- [ ] swirl
 - [ ] resonance
-- [ ] priority based rotation
 - [ ] rotation conditions
 - [ ] field effects
 - [ ] frames returned per action should have at least 2 number, avg cancellable and avg normal; may actually required more than 2, 1 into each trailling action such as swap, dash, jump, burst, skill, auto
-
-## done
-
-- [x] melt reaction
-- [x] character orb receiving function
-- [x] sim handle orb
-- [x] refactor character into an interface, let the character itself decide what to use to keep track of stuff
-- [x] rotations to check CD
-- [x] swap should trigger a 150f cooldown
-- Ganyu
-  - [x] cooldown on abil
-  - [x] energy use on abil
-  - [x] particles on skill
-  - [x] C1: ffa regen 2 energy/ ffa reduce target cryo res
-  - [x] C2: extra charge
-- Xiangling
-  - [x] normal attack
-  - [x] guoba
-  - [x] pyronado
-  - [x] c1
-  - [x] c2
-  - [x] c4
-  - [x] c6
-
-## not sure about
-
-
 
 ## on auras
 

@@ -33,6 +33,13 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 			if _, ok := s.Target.Status["xiangling-c1"]; ok {
 				s.Log.Debugf("\t[%v]: applying Xiangling C1 pyro debuff", s.Frame())
 				snap.ResMod[combat.Pyro] -= 0.15
+				if v, cd := x.CD[common.NormalICD]; cd {
+					snap.ApplyAura = false
+					s.Log.Infof("[%v]: Xiangling (Pyronado - initial hit 1) - aura app still on ICD (%v)", s.Frame(), v)
+				} else {
+					snap.ApplyAura = true
+					x.CD[common.BurstICD] = 150
+				}
 			}
 			return false
 		}, "xiangling-c1", combat.PreDamageHook)
@@ -181,7 +188,7 @@ func (x *xl) Skill() int {
 		}
 	}
 	d.Mult = guoba[lvl]
-	d.ApplyAura = true
+	d.ApplyAura = true //apparently every hit applies
 	d.AuraGauge = 1
 	d.AuraDecayRate = "A"
 
@@ -199,9 +206,7 @@ func (x *xl) Skill() int {
 		}
 		if tick == next {
 			//make a copy of the snapshot
-			c := combat.Snapshot{}
-			c = d
-			c.ResMod = make(map[combat.EleType]float64)
+			c := d.Clone()
 
 			next += 95
 			count++
@@ -262,9 +267,9 @@ func (x *xl) Burst() int {
 		d.Abil = "Pyronado"
 		d.AbilType = combat.ActionTypeBurst
 		d.Mult = pyronado1[lvl]
-		d.ApplyAura = true
 		d.AuraGauge = 1
 		d.AuraDecayRate = "A"
+		d.ApplyAura = true
 		damage := s.ApplyDamage(d)
 		x.S.Log.Infof("[%v]: Xiangling Pyronado initial hit 1 dealt %.0f damage", s.Frame(), damage)
 		return true
@@ -279,9 +284,9 @@ func (x *xl) Burst() int {
 		d.Abil = "Pyronado"
 		d.AbilType = combat.ActionTypeBurst
 		d.Mult = pyronado2[lvl]
-		d.ApplyAura = true
 		d.AuraGauge = 1
 		d.AuraDecayRate = "A"
+		d.ApplyAura = true
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("[%v]: Xiangling Pyronado initial hit 2 dealt %.0f damage", s.Frame(), damage)
 		return true
@@ -296,9 +301,9 @@ func (x *xl) Burst() int {
 		d.Abil = "Pyronado"
 		d.AbilType = combat.ActionTypeBurst
 		d.Mult = pyronado3[lvl]
-		d.ApplyAura = true
 		d.AuraGauge = 1
 		d.AuraDecayRate = "A"
+		d.ApplyAura = true
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("[%v]: Xiangling Pyronado initial hit 3 dealt %.0f damage", s.Frame(), damage)
 		return true
@@ -331,7 +336,6 @@ func (x *xl) Burst() int {
 		}
 		if tick == next {
 			count++
-			//make a copy of the snapshot
 			next += 70
 			damage := s.ApplyDamage(pd)
 			s.Log.Infof("[%v]: Xiangling (Pyronado - tick #%v) dealt %.0f damage", s.Frame(), count, damage)

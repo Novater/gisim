@@ -19,6 +19,17 @@ type TemplateChar struct {
 	NRTChanged       bool
 }
 
+type ICDType string
+
+const (
+	NormalICD  string = "aura-icd-normal"   //melee, bow users can't infuse (yet)
+	ChargedICD string = "aura-icd-charged"  //only applicable to catalyst
+	AimModeICD string = "aura-icd-aim-mode" //bow users
+	PlungeICD  string = "aura-icd-plunge"   //xiao
+	SkillICD   string = "aura-icd-skill"
+	BurstICD   string = "aura-icd-burst"
+)
+
 func New(s *combat.Sim, p combat.CharacterProfile) (*TemplateChar, error) {
 	c := TemplateChar{}
 	c.S = s
@@ -115,12 +126,11 @@ func (c *TemplateChar) Burst() int {
 
 func (c *TemplateChar) Tick() {
 	//this function gets called for every character every tick
-	for k, v := range c.CD {
-		if v == 0 {
+	for k := range c.CD {
+		c.CD[k]--
+		if c.CD[k] == 0 {
 			c.S.Log.Debugf("\t[%v] cooldown %v finished; deleting", c.S.Frame(), k)
 			delete(c.CD, k)
-		} else {
-			c.CD[k]--
 		}
 	}
 	//check normal reset
