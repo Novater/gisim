@@ -4,6 +4,7 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
 	"github.com/srliao/gisim/pkg/combat"
@@ -30,15 +31,15 @@ import (
 )
 
 func main() {
+	var source []byte
+	var cfg combat.Profile
+	var err error
 
 	debugPtr := flag.String("d", "warn", "output level: debug, info, warn")
 	secondsPtr := flag.Int("s", 60, "how many seconds to run the sim for")
 	pPtr := flag.String("p", "config.yaml", "which profile to use")
+	f := flag.String("o", "", "detailed log file")
 	flag.Parse()
-
-	var source []byte
-	var cfg combat.Profile
-	var err error
 
 	// p := "./xl-base.yaml" //xl.yaml expecting 4659 dps
 
@@ -52,11 +53,14 @@ func main() {
 	}
 
 	cfg.LogLevel = *debugPtr
+	cfg.LogFile = *f
+	os.Remove(*f)
 
 	s, err := combat.New(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	start := time.Now()
 	dmg := s.Run(*secondsPtr)
 	elapsed := time.Since(start)

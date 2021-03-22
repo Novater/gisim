@@ -94,6 +94,9 @@ func New(p Profile) (*Sim, error) {
 	config.EncoderConfig.TimeKey = ""
 	config.EncoderConfig.StacktraceKey = ""
 	config.EncoderConfig.CallerKey = ""
+	if p.LogFile != "" {
+		config.OutputPaths = []string{p.LogFile}
+	}
 
 	logger, err := config.Build()
 	if err != nil {
@@ -271,7 +274,7 @@ func (s *Sim) Run(length int) float64 {
 
 		//check if actor is active
 		if next.index != s.active {
-			s.Log.Debugf("[%v] swapping to char #%v (current = %v)\n", s.f, next.index, s.active)
+			s.Log.Debugf("[%v] swapping to char #%v (current = %v)", s.f, next.index, s.active)
 			//trigger a swap, add 20 to the cooldown
 			cooldown = 20
 			s.swapCD = 150
@@ -433,6 +436,7 @@ type Profile struct {
 	Characters    []CharacterProfile `yaml:"Characters"`
 	Rotation      []RotationItem     `yaml:"Rotation"`
 	LogLevel      string             `yaml:"LogLevel"`
+	LogFile       string             `yaml:"LogFile"`
 }
 
 //EnemyProfile ...

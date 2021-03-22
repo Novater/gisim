@@ -34,9 +34,9 @@ type Enemy struct {
 }
 
 type reaction struct {
-	react bool
-	t     ReactionType
-	next  []aura
+	DidReact bool
+	Type     ReactionType
+	Next     []aura
 }
 
 type aura struct {
@@ -118,9 +118,9 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	//they will only trigger a sep damage calc
 	if ds.ApplyAura {
 		r := s.checkReact(ds)
-		if r.react {
+		if r.DidReact {
 			ds.WillReact = true
-			ds.ReactionType = r.t
+			ds.ReactionType = r.Type
 			s.Log.Debugw("reaction", "r", r, "source", ds.Element)
 			//handle pre reaction
 			for k, f := range s.hooks[PreReaction] {
@@ -130,7 +130,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 				}
 			}
 			//either adjust damage snap, adjust stats, or add effect to deal damage after initial damage
-			switch r.t {
+			switch r.Type {
 			case Melt:
 				if ds.Element == Pyro {
 					//tag it for melt
@@ -153,7 +153,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 				}
 			}
 		}
-		target.Auras = r.next
+		target.Auras = r.Next
 	}
 
 	//for each reaction damage to occur -> call any pre reaction hooks
@@ -285,7 +285,7 @@ func (s *Sim) checkReact(ds Snapshot) reaction {
 	//if target has no aura then we apply the current aura and carry on with damage calc
 	//since no other aura, no reaction will occur
 	if len(target.Auras) == 0 {
-		result.next = append(result.next, aura{
+		result.Next = append(result.Next, aura{
 			Ele:   ds.Element,
 			gauge: ds.AuraGauge,
 			rate:  ds.AuraDecayRate,
@@ -302,7 +302,7 @@ func (s *Sim) checkReact(ds Snapshot) reaction {
 		//same element, refill
 		if r == NoReaction {
 			g := math.Max(ds.AuraGauge, a.gauge)
-			result.next = append(result.next, aura{
+			result.Next = append(result.Next, aura{
 				Ele:   ds.Element,
 				gauge: g,
 				rate:  a.rate,
@@ -311,8 +311,8 @@ func (s *Sim) checkReact(ds Snapshot) reaction {
 			return result
 		}
 
-		result.react = true
-		result.t = r
+		result.DidReact = true
+		result.Type = r
 
 		//melt
 		if r == Melt {
@@ -324,7 +324,7 @@ func (s *Sim) checkReact(ds Snapshot) reaction {
 			s.Log.Debugw("\taura applied", "src ele", ds.Element, "src gu", ds.AuraGauge, "t ele", a.Ele, "t gu", a.gauge, "red", g, "rem", a.gauge-g)
 			//if reduction > a.gauge, remove it completely
 			if g < a.gauge {
-				result.next = append(result.next, aura{
+				result.Next = append(result.Next, aura{
 					Ele:   a.Ele,
 					gauge: a.gauge - g,
 					rate:  a.rate,
@@ -343,7 +343,7 @@ func (s *Sim) checkReact(ds Snapshot) reaction {
 			s.Log.Debugw("\taura applied", "src ele", ds.Element, "src gu", ds.AuraGauge, "t ele", a.Ele, "t gu", a.gauge, "red", g, "rem", a.gauge-g)
 			//if reduction > a.gauge, remove it completely
 			if g < a.gauge {
-				result.next = append(result.next, aura{
+				result.Next = append(result.Next, aura{
 					Ele:   a.Ele,
 					gauge: a.gauge - g,
 					rate:  a.rate,
@@ -358,7 +358,7 @@ func (s *Sim) checkReact(ds Snapshot) reaction {
 			s.Log.Debugw("\taura applied", "src ele", ds.Element, "src gu", ds.AuraGauge, "t ele", a.Ele, "t gu", a.gauge, "red", g, "rem", a.gauge-g)
 			//if reduction > a.gauge, remove it completely
 			if g < a.gauge {
-				result.next = append(result.next, aura{
+				result.Next = append(result.Next, aura{
 					Ele:   a.Ele,
 					gauge: a.gauge - g,
 					rate:  a.rate,
