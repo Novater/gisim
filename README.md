@@ -30,6 +30,7 @@ Typically I would run the command in bash with output piped to a file for debugg
 - not sure how to implement Amos bow yet? maybe add post arrow fire hook? [could just add an initial frame to snapshot, then diff between that and current frame would be travel time]
 - crimson witch does not track stacks yet
 - current overload formula seems to give higher damage than actual; actual 2482, got 2594.3517401129357
+- we don't track self auras. this is a problem for swirl w elemental absorption
 
 ## todo list
 

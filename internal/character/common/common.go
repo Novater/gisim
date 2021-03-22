@@ -28,6 +28,8 @@ const (
 	PlungeICD  string = "aura-icd-plunge"   //xiao
 	SkillICD   string = "aura-icd-skill"
 	BurstICD   string = "aura-icd-burst"
+	SkillCD    string = "skill-cd"
+	BurstCD    string = "burst-cd"
 )
 
 func New(s *combat.Sim, p combat.CharacterProfile) (*TemplateChar, error) {
