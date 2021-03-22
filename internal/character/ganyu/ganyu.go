@@ -3,7 +3,7 @@ package ganyu
 import (
 	"fmt"
 
-	"github.com/srliao/gisim/internal/pkg/character/common"
+	"github.com/srliao/gisim/internal/character/common"
 	"github.com/srliao/gisim/pkg/combat"
 )
 

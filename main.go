@@ -10,22 +10,22 @@ import (
 	"github.com/srliao/gisim/pkg/combat"
 
 	//characters
-	_ "github.com/srliao/gisim/internal/pkg/character/fischl"
-	_ "github.com/srliao/gisim/internal/pkg/character/ganyu"
-	_ "github.com/srliao/gisim/internal/pkg/character/xiangling"
+	_ "github.com/srliao/gisim/internal/character/fischl"
+	_ "github.com/srliao/gisim/internal/character/ganyu"
+	_ "github.com/srliao/gisim/internal/character/xiangling"
 
 	//weapons
-	_ "github.com/srliao/gisim/internal/pkg/weapon/blacktassel"
-	_ "github.com/srliao/gisim/internal/pkg/weapon/favoniuswarbow"
-	_ "github.com/srliao/gisim/internal/pkg/weapon/prototypecrescent"
-	_ "github.com/srliao/gisim/internal/pkg/weapon/skywardspine"
+	_ "github.com/srliao/gisim/internal/weapon/blacktassel"
+	_ "github.com/srliao/gisim/internal/weapon/favoniuswarbow"
+	_ "github.com/srliao/gisim/internal/weapon/prototypecrescent"
+	_ "github.com/srliao/gisim/internal/weapon/skywardspine"
 
 	//sets
-	_ "github.com/srliao/gisim/internal/pkg/artifact/blizzard"
-	_ "github.com/srliao/gisim/internal/pkg/artifact/crimson"
-	_ "github.com/srliao/gisim/internal/pkg/artifact/gladiator"
-	_ "github.com/srliao/gisim/internal/pkg/artifact/noblesse"
-	_ "github.com/srliao/gisim/internal/pkg/artifact/wanderer"
+	_ "github.com/srliao/gisim/internal/artifact/blizzard"
+	_ "github.com/srliao/gisim/internal/artifact/crimson"
+	_ "github.com/srliao/gisim/internal/artifact/gladiator"
+	_ "github.com/srliao/gisim/internal/artifact/noblesse"
+	_ "github.com/srliao/gisim/internal/artifact/wanderer"
 
 	"gopkg.in/yaml.v2"
 )
