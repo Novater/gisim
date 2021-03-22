@@ -93,7 +93,7 @@ func New(p Profile) (*Sim, error) {
 	}
 	config.EncoderConfig.TimeKey = ""
 	config.EncoderConfig.StacktraceKey = ""
-	config.EncoderConfig.CallerKey = ""
+	// config.EncoderConfig.CallerKey = ""
 	if p.LogFile != "" {
 		config.OutputPaths = []string{p.LogFile}
 	}

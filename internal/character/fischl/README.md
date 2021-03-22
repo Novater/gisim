@@ -20,5 +20,10 @@
 
 ## Issues/Bugs
 
-- Oz ICD not implemented correctly yet (wtf is this 3 sep ICD between summon, 1 to 6 and 7 to 11)
+- Oz ICD not implemented correctly yet
 - Fischl turbo interaction not implemented
+
+## Notes
+
+muakasan: Finding:
+Determining Fischl's Elemental skill's ICD. Fischl's E (Oz) will apply electro every 4 hits or when a timer reaches 5 seconds after the first electro application. When the 5 second timer reaches zero, the oz's next hit will apply electro regardless of the hit counter. When the timer reaches 0 the hit counter will be reset and a new 5 sec timer will begin. This is very similar to auto attack ICDs (https://library.keqingmains.com/mechanics/combat/elemental-reactions/internal-cooldown-of-elemental-application), except instead of 3 auto attacks it is 4 oz hits, and instead of a 2.5 sec timer, it is a 5 sec timer. 
