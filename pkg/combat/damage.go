@@ -439,13 +439,17 @@ func calcDmg(ds Snapshot, log *zap.SugaredLogger) dmgResult {
 	if ds.OtherMult > 0 {
 		damage = damage * ds.OtherMult
 	}
-	log.Debugw("\t\tcalc", "def mod", defmod, "res", res, "res mod", resmod, "pre crit damage", damage, "melt/vape", ds.IsMeltVape)
+	log.Debugw("\t\tcalc", "def mod", defmod, "res", res, "res mod", resmod)
+	log.Debugw("\t\tcalc", "pre crit damage", damage, "dmg if crit", damage*(1+ds.Stats[CD]), "melt/vape", ds.IsMeltVape)
 
 	//check melt/vape
 	if ds.IsMeltVape {
-		log.Debugw("\t\tcalc", "react mult", ds.ReactMult, "react bonus", ds.ReactBonus, "pre react damage", damage)
-		damage = damage * (ds.ReactMult + ds.ReactBonus)
-		log.Debugw("\t\tcalc", "pre crit (post react) damage", damage)
+		//calculate em bonus
+		em := ds.Stats[EM]
+		emBonus := (2.78 * em) / (1400 + em)
+		log.Debugw("\t\tcalc", "react mult", ds.ReactMult, "em", em, "em bonus", emBonus, "react bonus", ds.ReactBonus, "pre react damage", damage)
+		damage = damage * (ds.ReactMult * (1 + emBonus + ds.ReactBonus))
+		log.Debugw("\t\tcalc", "pre crit (post react) damage", damage, "pre react if crit", damage*(1+ds.Stats[CD]))
 	}
 
 	//check if crit

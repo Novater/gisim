@@ -13,11 +13,13 @@ import (
 	_ "github.com/srliao/gisim/internal/character/fischl"
 	_ "github.com/srliao/gisim/internal/character/ganyu"
 	_ "github.com/srliao/gisim/internal/character/xiangling"
+	_ "github.com/srliao/gisim/internal/character/xingqiu"
 
 	//weapons
 	_ "github.com/srliao/gisim/internal/weapon/blacktassel"
 	_ "github.com/srliao/gisim/internal/weapon/favoniuswarbow"
 	_ "github.com/srliao/gisim/internal/weapon/prototypecrescent"
+	_ "github.com/srliao/gisim/internal/weapon/sacrificialsword"
 	_ "github.com/srliao/gisim/internal/weapon/skywardspine"
 
 	//sets

@@ -10,6 +10,7 @@
 - charged attack
 - plunge attack
 - c4
+- skill orb generation frame count (assumed 120 frame to get orb for now)
 
 ## Assumptions
 
@@ -23,3 +24,8 @@
 ## Issues/Bugs
 
 - no idea how often E aura applies wet
+
+## Done
+
+- E energy
+- E cd

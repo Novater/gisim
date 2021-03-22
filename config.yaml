@@ -303,6 +303,107 @@ Characters:
             Value: 0.058
           - Type: "HP"
             Value: 568
+  - Name: Xingqiu
+    Level: 70
+    Element: "hydro"
+    BaseHP: 8352
+    BaseAtk: 165
+    BaseDef: 619
+    BaseCR: 0.05
+    BaseCD: 0.50
+    Constellation: 6
+    AscensionBonus:
+      ATK%: 0.18
+    TalentLevel:
+      attack: 1
+      skill: 6
+      burst: 6
+    WeaponName: "Sacrificial Sword"
+    WeaponRefinement: 3
+    WeaponBaseAtk: 401
+    WeaponSecondaryStat:
+      ER%: 0.559
+    Artifacts:
+      Flower:
+        Level: 20
+        Type: "Flower"
+        Set: "Gladiator's Finale"
+        MainStat:
+          Type: "HP"
+          Value: 4780
+        Substat:
+          - Type: "ATK"
+            Value: 45
+          - Type: "DEF"
+            Value: 21
+          - Type: "ATK%"
+            Value: 0.105
+          - Type: "CD"
+            Value: 0.194
+      Feather:
+        Level: 20
+        Type: "Feather"
+        Set: "Gladiator's Finale"
+        MainStat:
+          Type: "ATK"
+          Value: 311
+        Substat:
+          - Type: "CD"
+            Value: 0.218
+          - Type: "DEF"
+            Value: 19
+          - Type: "ATK%"
+            Value: 0.117
+          - Type: "EM"
+            Value: 40
+      Sands:
+        Level: 20
+        Type: "Sands"
+        Set: "Thundersoother"
+        MainStat:
+          Type: "ATK%"
+          Value: 0.466
+        Substat:
+          - Type: "CR"
+            Value: 0.066
+          - Type: "HP"
+            Value: 209
+          - Type: "ER"
+            Value: 0.175
+          - Type: "DEF%"
+            Value: 0.109
+      Goblet:
+        Level: 20
+        Type: "Goblet"
+        Set: "Maiden Beloved"
+        MainStat:
+          Type: "Hydro%"
+          Value: 0.466
+        Substat:
+          - Type: "CD"
+            Value: 0.124
+          - Type: "HP%"
+            Value: 0.047
+          - Type: "ATK%"
+            Value: 0.146
+          - Type: "ATK"
+            Value: 31
+      Circlet:
+        Level: 16
+        Type: "Circlet"
+        Set: "Bloodstained Chivalry"
+        MainStat:
+          Type: "CR"
+          Value: 0.258
+        Substat:
+          - Type: "HP%"
+            Value: 0.093
+          - Type: "ATK"
+            Value: 31
+          - Type: "DEF"
+            Value: 42
+          - Type: "CD"
+            Value: 0.14
 Enemy: #blazing axe mitachurl
   Level: 88
   Resist:
@@ -314,10 +415,12 @@ Enemy: #blazing axe mitachurl
     geo: 0.1
     anemo: 0.1
     physical: 0.3
-InitialActive: "Fischl"
+InitialActive: "Xingqiu"
 Rotation:
-  - CharacterName: "Fischl"
+  - CharacterName: "Xingqiu"
     Action: "skill"
+  # - CharacterName: "Fischl"
+  #   Action: "skill"
   - CharacterName: "Xiangling"
     Action: "skill"
   # - CharacterName: "Xiangling"

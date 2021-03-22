@@ -226,3 +226,12 @@ func (c *TemplateChar) ActionReady(a combat.ActionType) bool {
 	}
 	return true
 }
+
+func (c *TemplateChar) ResetActionCooldown(a combat.ActionType) {
+	switch a {
+	case combat.ActionTypeBurst:
+		delete(c.CD, BurstCD)
+	case combat.ActionTypeSkill:
+		delete(c.CD, SkillCD)
+	}
+}

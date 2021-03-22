@@ -478,6 +478,7 @@ type Character interface {
 	//other actions
 	ApplyOrb(count int, ele EleType, isOrb bool, isActive bool, partyCount int)
 	Snapshot(e EleType) Snapshot
+	ResetActionCooldown(a ActionType)
 }
 
 //CharacterProfile ...

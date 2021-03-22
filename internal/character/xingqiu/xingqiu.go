@@ -25,12 +25,16 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	x.Energy = 80
 	x.MaxEnergy = 80
 
+	a4 := make(map[combat.StatType]float64)
+	a4[combat.HydroP] = 0.2
+	x.AddMod("Xingqiu A4", a4)
+
 	return &x, nil
 }
 
 func (x *xingqiu) Skill() int {
 	//applies wet to self 30 frame after cast
-	if _, ok := x.CD["skill-cd"]; ok {
+	if _, ok := x.CD[common.SkillCD]; ok {
 		x.S.Log.Debugf("\tXingqiu skill still on CD; skipping")
 		return 0
 	}
@@ -51,6 +55,10 @@ func (x *xingqiu) Skill() int {
 	d.ApplyAura = true
 	d.AuraGauge = 1
 	d.AuraDecayRate = "A"
+	d.Mult = rainscreen[0][lvl]
+	d2 := d.Clone()
+	d2.ApplyAura = false
+	d2.Mult = rainscreen[1][lvl]
 
 	tick := 0
 	x.S.AddAction(func(s *combat.Sim) bool {
@@ -58,22 +66,30 @@ func (x *xingqiu) Skill() int {
 		if tick < 50 {
 			return false
 		}
-		d.Mult = rainscreen[0][lvl]
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("[%v]: Xingqiu skill hit 1 dealt %.0f damage", s.Frame(), damage)
 		return true
-	}, fmt.Sprintf("%v-Xingqiu-Skill", x.S.Frame()))
+	}, fmt.Sprintf("%v-Xingqiu-Skill-1", x.S.Frame()))
 
 	x.S.AddAction(func(s *combat.Sim) bool {
 		tick++
-		if tick < 50 {
+		if tick < 51 {
 			return false
 		}
-		d.Mult = rainscreen[1][lvl]
-		damage := s.ApplyDamage(d)
+		damage := s.ApplyDamage(d2)
 		s.Log.Infof("[%v]: Xingqiu skill hit 2 dealt %.0f damage", s.Frame(), damage)
 		return true
-	}, fmt.Sprintf("%v-Xingqiu-Skill", x.S.Frame()))
+	}, fmt.Sprintf("%v-Xingqiu-Skill-2", x.S.Frame()))
+
+	orbDelay := 0
+	x.S.AddAction(func(s *combat.Sim) bool {
+		if orbDelay < 60+60 {
+			orbDelay++
+			return false
+		}
+		s.GenerateOrb(5, combat.Hydro, false)
+		return true
+	}, fmt.Sprintf("%v-Xiangling-Skill-Orb", x.S.Frame()))
 
 	//should last 15s, cd 21s
 	x.CD[common.SkillCD] = 21 * 60
