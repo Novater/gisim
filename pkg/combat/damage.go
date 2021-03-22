@@ -121,6 +121,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 		if r.react {
 			ds.WillReact = true
 			ds.ReactionType = r.t
+			s.Log.Debugw("reaction", "r", r, "source", ds.Element)
 			//handle pre reaction
 			for k, f := range s.hooks[PreReaction] {
 				if f(&ds) {
@@ -164,10 +165,12 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	dr := calcDmg(ds, s.Log)
 	s.Target.Damage += dr.damage
 
-	for k, f := range s.hooks[OnCritDamage] {
-		if f(&ds) {
-			s.Log.Debugf("[%v] effect (on crit dmg) %v expired", s.Frame(), k)
-			delete(s.hooks[PostDamageHook], k)
+	if dr.isCrit {
+		for k, f := range s.hooks[OnCritDamage] {
+			if f(&ds) {
+				s.Log.Debugf("[%v] effect (on crit dmg) %v expired", s.Frame(), k)
+				delete(s.hooks[PostDamageHook], k)
+			}
 		}
 	}
 
@@ -337,6 +340,21 @@ func (s *Sim) checkReact(ds Snapshot) reaction {
 				mult = 2.5
 			}
 			g := ds.AuraGauge * mult
+			s.Log.Debugw("\taura applied", "src ele", ds.Element, "src gu", ds.AuraGauge, "t ele", a.Ele, "t gu", a.gauge, "red", g, "rem", a.gauge-g)
+			//if reduction > a.gauge, remove it completely
+			if g < a.gauge {
+				result.next = append(result.next, aura{
+					Ele:   a.Ele,
+					gauge: a.gauge - g,
+					rate:  a.rate,
+				})
+			}
+			return result
+		}
+
+		//overload
+		if r == Overload || r == Superconduct || r == Freeze {
+			g := ds.AuraGauge * 1.25
 			s.Log.Debugw("\taura applied", "src ele", ds.Element, "src gu", ds.AuraGauge, "t ele", a.Ele, "t gu", a.gauge, "red", g, "rem", a.gauge-g)
 			//if reduction > a.gauge, remove it completely
 			if g < a.gauge {

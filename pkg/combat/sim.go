@@ -285,8 +285,12 @@ func (s *Sim) Run(length int) float64 {
 	return s.Target.Damage
 }
 
-func (s *Sim) AddEffect(effect ActionFunc, key string) {
-	s.effects[key] = effect
+func (s *Sim) AddEffect(f ActionFunc, key string) {
+	if _, ok := s.effects[key]; ok {
+		s.Log.Debugf("\t[%v] effect %v exists; overriding existing", s.Frame(), key)
+	}
+	s.effects[key] = f
+	s.Log.Debugf("\t[%v] new effect %v; action map: %v", s.Frame(), key, s.actions)
 }
 
 func (s *Sim) HasEffect(key string) bool {
@@ -348,6 +352,7 @@ func (s *Sim) tick() {
 	}
 	for k, v := range s.Status {
 		if v == 0 {
+			s.Log.Debugf("\t[%v] status %v expired", s.Frame(), k)
 			delete(s.Status, k)
 		} else {
 			s.Status[k]--
@@ -356,7 +361,7 @@ func (s *Sim) tick() {
 	for k, f := range s.effects {
 		if f(s) {
 			s.Log.Debugf("\t[%v] effect %v expired", s.Frame(), k)
-			delete(s.actions, k)
+			delete(s.effects, k)
 		}
 	}
 	if s.swapCD > 0 {
@@ -498,6 +503,8 @@ const (
 	WeaponClassSword    WeaponClass = "sword"
 	WeaponClassClaymore WeaponClass = "claymore"
 	WeaponClassSpear    WeaponClass = "spear"
+	WeaponClassBow      WeaponClass = "bow"
+	WeaponClassCatalyst WeaponClass = "catalyst"
 )
 
 type ActionType string

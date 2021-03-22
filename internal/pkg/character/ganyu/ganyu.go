@@ -13,6 +13,7 @@ func init() {
 
 type ganyu struct {
 	*common.TemplateChar
+	icd map[string]int
 }
 
 func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error) {
@@ -24,6 +25,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	g.TemplateChar = t
 	g.Energy = 60
 	g.MaxEnergy = 60
+	g.icd = make(map[string]int)
 
 	if g.Profile.Constellation >= 1 {
 		s.Log.Debugf("\tactivating Ganyu C1")
@@ -286,4 +288,14 @@ func (g *ganyu) ActionReady(a combat.ActionType) bool {
 		return false
 	}
 	return true
+}
+
+func (g *ganyu) Tick() {
+	g.TemplateChar.Tick()
+	for k, v := range g.icd {
+		v--
+		if v == 0 {
+			delete(g.icd, k)
+		}
+	}
 }

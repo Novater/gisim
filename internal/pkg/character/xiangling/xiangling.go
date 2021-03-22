@@ -262,6 +262,9 @@ func (x *xl) Burst() int {
 		d.Abil = "Pyronado"
 		d.AbilType = combat.ActionTypeBurst
 		d.Mult = pyronado1[lvl]
+		d.ApplyAura = true
+		d.AuraGauge = 1
+		d.AuraDecayRate = "A"
 		damage := s.ApplyDamage(d)
 		x.S.Log.Infof("[%v]: Xiangling Pyronado initial hit 1 dealt %.0f damage", s.Frame(), damage)
 		return true
@@ -276,6 +279,9 @@ func (x *xl) Burst() int {
 		d.Abil = "Pyronado"
 		d.AbilType = combat.ActionTypeBurst
 		d.Mult = pyronado2[lvl]
+		d.ApplyAura = true
+		d.AuraGauge = 1
+		d.AuraDecayRate = "A"
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("[%v]: Xiangling Pyronado initial hit 2 dealt %.0f damage", s.Frame(), damage)
 		return true
@@ -290,6 +296,9 @@ func (x *xl) Burst() int {
 		d.Abil = "Pyronado"
 		d.AbilType = combat.ActionTypeBurst
 		d.Mult = pyronado3[lvl]
+		d.ApplyAura = true
+		d.AuraGauge = 1
+		d.AuraDecayRate = "A"
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("[%v]: Xiangling Pyronado initial hit 3 dealt %.0f damage", s.Frame(), damage)
 		return true
@@ -308,6 +317,9 @@ func (x *xl) Burst() int {
 	pd.Abil = "Pyronado"
 	pd.AbilType = combat.ActionTypeBurst
 	pd.Mult = pyronadoSpin[lvl]
+	pd.ApplyAura = true
+	pd.AuraGauge = 1
+	pd.AuraDecayRate = "A"
 	x.S.AddAction(func(s *combat.Sim) bool {
 		tick++
 		if tick < next {

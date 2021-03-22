@@ -130,7 +130,7 @@ func (f *fischl) Skill() int {
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("[%v]: Fischl (Oz - summon) dealt %.0f damage", s.Frame(), damage)
 		return true
-	}, fmt.Sprintf("%v-Fischl-Skill", f.S.Frame()))
+	}, fmt.Sprintf("%v-Fischl-Skill-Initial", f.S.Frame()))
 
 	//apply hit every 50 frames thereafter
 	//NOT ENTIRELY ACCURATE BUT OH WELL
@@ -144,6 +144,10 @@ func (f *fischl) Skill() int {
 		if tick < next {
 			return false
 		}
+		if count >= 11 {
+			return true
+		}
+		next += 50
 		damage := s.ApplyDamage(b)
 		//assume fischl has 60% chance of generating orb every attack;
 		if rand.Float64() < .6 {
@@ -155,12 +159,12 @@ func (f *fischl) Skill() int {
 				}
 				s.GenerateOrb(1, combat.Electro, false)
 				return true
-			}, fmt.Sprintf("%v-Fischl-Skill-Orb", s.Frame()))
+			}, fmt.Sprintf("%v-Fischl-Skill-Orb-[%v]", s.Frame(), count))
 		}
-		s.Log.Infof("[%v]: Fischl (Oz - summon) dealt %.0f damage", s.Frame(), damage)
+		s.Log.Infof("[%v]: Fischl (Oz - tick) dealt %.0f damage", s.Frame(), damage)
 		count++
-		return count >= 11
-	}, fmt.Sprintf("%v-Fischl-Skill", f.S.Frame()))
+		return false
+	}, fmt.Sprintf("%v-Fischl-Skill-Tick", f.S.Frame()))
 
 	//register Oz with sim
 	ozOnField := 0

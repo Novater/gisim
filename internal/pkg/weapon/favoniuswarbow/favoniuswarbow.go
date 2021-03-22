@@ -35,13 +35,14 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if snap.CharName != c.Name() {
 			return false
 		}
-		if _, ok := s.Status["Favonius Warbox Proc"]; ok {
+		if _, ok := s.Status["Favonius Warbow Proc"]; ok {
 			return false
 		}
 
 		if rand.Float64() > prob {
 			return false
 		}
+		s.Log.Debugf("[%v] Favonius Warbox proc triggered", s.Frame())
 
 		orbDelay := 0
 		s.AddAction(func(s *combat.Sim) bool {
@@ -51,7 +52,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 			}
 			s.GenerateOrb(1, combat.NonElemental, true)
 			return true
-		}, fmt.Sprintf("%v-FavoniusWarbox-Orb", s.Frame()))
+		}, fmt.Sprintf("%v-FavoniusWarbow-Orb", s.Frame()))
 
 		s.Status["Favonius Warbow Proc"] = cd
 		return false

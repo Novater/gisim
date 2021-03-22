@@ -314,12 +314,16 @@ Enemy: #blazing axe mitachurl
     geo: 0.1
     anemo: 0.1
     physical: 0.3
-InitialActive: "Xiangling"
+InitialActive: "Fischl"
 Rotation:
+  - CharacterName: "Fischl"
+    Action: "skill"
   - CharacterName: "Xiangling"
     Action: "skill"
   - CharacterName: "Xiangling"
     Action: "burst"
+  # - CharacterName: "Xiangling"
+  #   Action: "attack"
   - CharacterName: "Ganyu"
     Action: "skill"
   - CharacterName: "Ganyu"
