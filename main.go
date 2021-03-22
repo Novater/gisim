@@ -41,6 +41,7 @@ func main() {
 	secondsPtr := flag.Int("s", 60, "how many seconds to run the sim for")
 	pPtr := flag.String("p", "config-bare.yaml", "which profile to use")
 	f := flag.String("o", "", "detailed log file")
+	showCaller := flag.Bool("c", false, "show caller in debug low")
 	flag.Parse()
 
 	// p := "./xl-base.yaml" //xl.yaml expecting 4659 dps
@@ -56,6 +57,7 @@ func main() {
 
 	cfg.LogLevel = *debugPtr
 	cfg.LogFile = *f
+	cfg.LogShowCaller = *showCaller
 	os.Remove(*f)
 
 	s, err := combat.New(cfg)

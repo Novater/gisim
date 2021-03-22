@@ -93,7 +93,9 @@ func New(p Profile) (*Sim, error) {
 	}
 	config.EncoderConfig.TimeKey = ""
 	config.EncoderConfig.StacktraceKey = ""
-	// config.EncoderConfig.CallerKey = ""
+	if !p.LogShowCaller {
+		config.EncoderConfig.CallerKey = ""
+	}
 	if p.LogFile != "" {
 		config.OutputPaths = []string{p.LogFile}
 	}
@@ -436,7 +438,8 @@ type Profile struct {
 	Characters    []CharacterProfile `yaml:"Characters"`
 	Rotation      []RotationItem     `yaml:"Rotation"`
 	LogLevel      string             `yaml:"LogLevel"`
-	LogFile       string             `yaml:"LogFile"`
+	LogFile       string
+	LogShowCaller bool
 }
 
 //EnemyProfile ...
