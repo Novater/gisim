@@ -15,7 +15,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 	if count >= 4 {
 		//NOT YET IMPLEMENTED
 		//we now need a weapon type flag....
-		s.AddEffect(func(ds *combat.Snapshot) bool {
+		s.AddHook(func(ds *combat.Snapshot) bool {
 			if ds.AbilType != combat.ActionTypeAttack {
 				return false
 			}

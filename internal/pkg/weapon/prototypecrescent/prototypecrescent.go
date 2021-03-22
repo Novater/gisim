@@ -12,7 +12,7 @@ func init() {
 
 func weapon(c combat.Character, s *combat.Sim, r int) {
 	//add on hit effect to sim?
-	s.AddEffect(func(snap *combat.Snapshot) bool {
+	s.AddHook(func(snap *combat.Snapshot) bool {
 		//check if char is correct?
 		if snap.CharName != c.Name() {
 			return false

@@ -35,7 +35,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 	}
 	c.AddMod("Skyward-Spine-Stats", m)
 	//add on hit effect to sim?
-	s.AddEffect(func(snap *combat.Snapshot) bool {
+	s.AddHook(func(snap *combat.Snapshot) bool {
 		//check if char is correct?
 		if snap.CharName != c.Name() {
 			return false
@@ -57,13 +57,13 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		//add a new action that deals % dmg immediately
 		d := c.Snapshot(combat.Physical)
 		d.Abil = "Skyward Spine Proc"
-		d.AbilType = combat.ActionTypeWeaponProc
+		d.AbilType = combat.ActionTypeSpecialProc
 		d.Mult = dmg
 		s.AddAction(func(s *combat.Sim) bool {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("[%v]: Skyward Spine proc dealt %.0f damage", s.Frame(), damage)
 			return true
-		}, fmt.Sprintf("Skyware-Spine-Proc-%v", c.Name()))
+		}, fmt.Sprintf("%v-Skyware-Spine-Proc-%v", s.Frame(), c.Name()))
 		//trigger cd
 		s.Status["Skyward Spine Proc"] = 2 * 60
 

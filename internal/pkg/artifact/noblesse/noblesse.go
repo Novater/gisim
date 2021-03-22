@@ -10,7 +10,7 @@ func init() {
 
 func set(c combat.Character, s *combat.Sim, count int) {
 	if count >= 2 {
-		s.AddEffect(func(snap *combat.Snapshot) bool {
+		s.AddHook(func(snap *combat.Snapshot) bool {
 			if snap.CharName != c.Name() {
 				return false
 			}

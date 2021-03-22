@@ -28,7 +28,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	if g.Profile.Constellation >= 1 {
 		s.Log.Debugf("\tactivating Ganyu C1")
 
-		s.AddEffect(func(snap *combat.Snapshot) bool {
+		s.AddHook(func(snap *combat.Snapshot) bool {
 			//check if c1 debuff is on, if so, reduce resist by -0.15
 			if _, ok := s.Target.Status["ganyu-c1"]; ok {
 				s.Log.Debugf("\t[%v]: applying Ganyu C1 cryo debuff", s.Frame())
@@ -37,7 +37,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 			return false
 		}, "ganyu-c1", combat.PreDamageHook)
 
-		s.AddEffect(func(snap *combat.Snapshot) bool {
+		s.AddHook(func(snap *combat.Snapshot) bool {
 			if snap.CharName == "Ganyu" && snap.Abil == "Frost Flake Arrow" {
 				//if c1, increase character energy by 2, unaffected by ER; assume assuming arrow always hits here
 				g.Energy += 2

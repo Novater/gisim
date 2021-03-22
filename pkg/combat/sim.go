@@ -20,21 +20,21 @@ var (
 type AbilFunc func(s *Sim) int
 type ActionFunc func(s *Sim) bool
 
-type effectType string
+type hookType string
 
 const (
-	PreDamageHook   effectType = "PRE_DAMAGE"
-	PostDamageHook  effectType = "POST_DAMAGE"
-	PreAuraAppHook  effectType = "PRE_AURA_APP"
-	PostAuraAppHook effectType = "POST_AURA_APP"
+	PreDamageHook   hookType = "PRE_DAMAGE"
+	PostDamageHook  hookType = "POST_DAMAGE"
+	PreAuraAppHook  hookType = "PRE_AURA_APP"
+	PostAuraAppHook hookType = "POST_AURA_APP"
 	// triggered when there will be a reaction
-	PreReaction  effectType = "PRE_REACTION"
-	PostReaction effectType = "POST_REACTION"
+	PreReaction  hookType = "PRE_REACTION"
+	PostReaction hookType = "POST_REACTION"
 	// triggered when a damage crits
-	OnCritDamage effectType = "CRIT_DAMAGE"
+	OnCritDamage hookType = "CRIT_DAMAGE"
 )
 
-type effectFunc func(s *Snapshot) bool
+type hookFunc func(s *Snapshot) bool
 
 //Sim keeps track of one simulation
 type Sim struct {
@@ -50,8 +50,9 @@ type Sim struct {
 	swapCD     int
 	//per tick hooks
 	actions map[string]ActionFunc
-	//effects
-	effects map[effectType]map[string]effectFunc
+	//hooks
+	hooks   map[hookType]map[string]hookFunc
+	effects map[string]ActionFunc
 	field   map[string]map[StatType]float64
 
 	//action priority list
@@ -71,9 +72,10 @@ func New(p Profile) (*Sim, error) {
 	s.Target = u
 
 	s.actions = make(map[string]ActionFunc)
-	s.effects = make(map[effectType]map[string]effectFunc)
+	s.hooks = make(map[hookType]map[string]hookFunc)
 	s.Status = make(map[string]int)
 	s.field = make(map[string]map[StatType]float64)
+	s.effects = make(map[string]ActionFunc)
 
 	s.stam = 240
 
@@ -283,16 +285,30 @@ func (s *Sim) Run(length int) float64 {
 	return s.Target.Damage
 }
 
-func (s *Sim) AddEffect(f effectFunc, key string, hook effectType) {
-	if _, ok := s.effects[hook]; !ok {
-		s.effects[hook] = make(map[string]effectFunc)
-	}
-	s.effects[hook][key] = f
+func (s *Sim) AddEffect(effect ActionFunc, key string) {
+	s.effects[key] = effect
 }
 
-//RemoveEffect forcefully remove an effect even if the call does not return true
-func (s *Sim) RemoveEffect(key string, hook effectType) {
-	delete(s.effects[hook], key)
+func (s *Sim) HasEffect(key string) bool {
+	_, ok := s.effects[key]
+	return ok
+}
+
+func (s *Sim) RemoveEffect(key string) {
+	delete(s.effects, key)
+}
+
+//AddHook adds a hook to sim. Hook will be called based on the type of hook
+func (s *Sim) AddHook(f hookFunc, key string, hook hookType) {
+	if _, ok := s.hooks[hook]; !ok {
+		s.hooks[hook] = make(map[string]hookFunc)
+	}
+	s.hooks[hook][key] = f
+}
+
+//RemoveHook forcefully remove an effect even if the call does not return true
+func (s *Sim) RemoveHook(key string, hook hookType) {
+	delete(s.hooks[hook], key)
 }
 
 func (s *Sim) AddAction(f ActionFunc, key string) {
@@ -301,6 +317,15 @@ func (s *Sim) AddAction(f ActionFunc, key string) {
 	}
 	s.actions[key] = f
 	s.Log.Debugf("\t[%v] new action %v; action map: %v", s.Frame(), key, s.actions)
+}
+
+func (s *Sim) HasAction(key string) bool {
+	_, ok := s.actions[key]
+	return ok
+}
+
+func (s *Sim) RemoveAction(key string) {
+	delete(s.actions, key)
 }
 
 //GenerateOrb is called when an ability generates orb
@@ -326,6 +351,12 @@ func (s *Sim) tick() {
 			delete(s.Status, k)
 		} else {
 			s.Status[k]--
+		}
+	}
+	for k, f := range s.effects {
+		if f(s) {
+			s.Log.Debugf("\t[%v] effect %v expired", s.Frame(), k)
+			delete(s.actions, k)
 		}
 	}
 	if s.swapCD > 0 {
@@ -485,7 +516,7 @@ const (
 	ActionTypeChargedAttack ActionType = "charge"
 	ActionTypePlungeAttack  ActionType = "plunge"
 	//procs
-	ActionTypeWeaponProc ActionType = "proc"
+	ActionTypeSpecialProc ActionType = "proc"
 	//xiao special
 	ActionTypeXiaoLowJump  ActionType = "xiao-low-jump"
 	ActionTypeXiaoHighJump ActionType = "xiao-high-jump"

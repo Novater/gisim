@@ -26,14 +26,24 @@ Typically I would run the command in bash with output piped to a file for debugg
 
 - there should be an animation lock if normal attacks are not chained
 - ICD for aura application not yet tracked
+- sim assumes A4 is available even if lvl specified has not unlocked A4
 - status such as gouba, ganyu lotus etc... should be kept track of under Sim
 - not sure how to implement Amos bow yet? maybe add post arrow fire hook? [could just add an initial frame to snapshot, then diff between that and current frame would be travel time]
 - crimson witch does not track stacks yet
+- only initial application of EC will trigger Fischl A4
+- ReactedTo field is not implemented; Fischl A4 on swirl will not work
+- Fischl A4 is assumed to be 1A
+- Fischl turbo interaction not implemented
 
 ## todo list
 
 - [ ] add fischl E only (up to c4?)
   - [ ] skill
+  - [x] a4
+  - [ ] a2
+  - [x] c1
+  - [ ] c2
+  - [ ] c4
 - [ ] add xingqiu up to c6
   - [ ] e
   - [ ] q
@@ -79,6 +89,10 @@ Typically I would run the command in bash with output piped to a file for debugg
   - [x] c2
   - [x] c4
   - [x] c6
+
+## not sure about
+
+
 
 ## on auras
 

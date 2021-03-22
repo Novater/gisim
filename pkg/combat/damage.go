@@ -105,10 +105,10 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	ds.TargetLvl = target.Level
 	ds.TargetRes = target.Resist
 
-	for k, f := range s.effects[PreDamageHook] {
+	for k, f := range s.hooks[PreDamageHook] {
 		if f(&ds) {
 			s.Log.Debugf("[%v] effect (pre damage) %v expired", s.Frame(), k)
-			delete(s.effects[PreDamageHook], k)
+			delete(s.hooks[PreDamageHook], k)
 		}
 	}
 
@@ -122,10 +122,10 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 			ds.WillReact = true
 			ds.ReactionType = r.t
 			//handle pre reaction
-			for k, f := range s.effects[PreReaction] {
+			for k, f := range s.hooks[PreReaction] {
 				if f(&ds) {
 					s.Log.Debugf("[%v] effect (pre reaction) %v expired", s.Frame(), k)
-					delete(s.effects[PreReaction], k)
+					delete(s.hooks[PreReaction], k)
 				}
 			}
 			//either adjust damage snap, adjust stats, or add effect to deal damage after initial damage
@@ -164,27 +164,27 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	dr := calcDmg(ds, s.Log)
 	s.Target.Damage += dr.damage
 
-	for k, f := range s.effects[OnCritDamage] {
+	for k, f := range s.hooks[OnCritDamage] {
 		if f(&ds) {
 			s.Log.Debugf("[%v] effect (on crit dmg) %v expired", s.Frame(), k)
-			delete(s.effects[PostDamageHook], k)
+			delete(s.hooks[PostDamageHook], k)
 		}
 	}
 
-	for k, f := range s.effects[PostDamageHook] {
+	for k, f := range s.hooks[PostDamageHook] {
 		if f(&ds) {
 			s.Log.Debugf("[%v] effect (pre damage) %v expired", s.Frame(), k)
-			delete(s.effects[PostDamageHook], k)
+			delete(s.hooks[PostDamageHook], k)
 		}
 	}
 
 	//apply reaction damage now! not sure if this timing is right though; maybe we can add this to the next frame as a tick instead?
 	if ds.WillReact {
 		s.applyReactionDamage(ds)
-		for k, f := range s.effects[PostReaction] {
+		for k, f := range s.hooks[PostReaction] {
 			if f(&ds) {
 				s.Log.Debugf("[%v] effect (pre reaction) %v expired", s.Frame(), k)
-				delete(s.effects[PostReaction], k)
+				delete(s.hooks[PostReaction], k)
 			}
 		}
 	}
@@ -491,8 +491,10 @@ type Snapshot struct {
 	AuraDecayRate string  //A, B, or C
 
 	//these are calculated fields
-	WillReact    bool //true if this will react
+	WillReact bool //true if this will react
+	//these two fields will only work if only reaction vs one element?!
 	ReactionType ReactionType
+	ReactedTo    EleType //NOT IMPLEMENTED
 
 	IsMeltVape bool    //trigger melt/vape
 	ReactMult  float64 //reaction multiplier for melt/vape

@@ -28,7 +28,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	if x.Profile.Constellation >= 1 {
 		s.Log.Debugf("\tactivating Xiangling C1")
 
-		s.AddEffect(func(snap *combat.Snapshot) bool {
+		s.AddHook(func(snap *combat.Snapshot) bool {
 			//check if c1 debuff is on, if so, reduce resist by -0.15
 			if _, ok := s.Target.Status["xiangling-c1"]; ok {
 				s.Log.Debugf("\t[%v]: applying Xiangling C1 pyro debuff", s.Frame())
@@ -37,7 +37,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 			return false
 		}, "xiangling-c1", combat.PreDamageHook)
 
-		s.AddEffect(func(snap *combat.Snapshot) bool {
+		s.AddHook(func(snap *combat.Snapshot) bool {
 			if snap.CharName == "Xiangling" && snap.Abil == "Guoba" {
 				// add c1 debuff to target
 				s.Target.Status["xiangling-c1"] = 6 * 60

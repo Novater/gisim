@@ -2,6 +2,7 @@ package fischl
 
 import (
 	"fmt"
+	"math/rand"
 
 	"github.com/srliao/gisim/internal/pkg/character/common"
 	"github.com/srliao/gisim/pkg/combat"
@@ -25,6 +26,77 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	f.Energy = 60
 	f.MaxEnergy = 60
 
+	//register A4
+	s.AddHook(func(ds *combat.Snapshot) bool {
+		//don't trigger A4 if Fischl dealt dmg thereby triggering reaction
+		if ds.CharName == "Fischl" {
+			return false
+		}
+		//check reaction type, only care for overload, electro charge, superconduct
+		ok := false
+		switch ds.ReactionType {
+		case combat.Overload:
+			fallthrough
+		case combat.ElectroCharged:
+			fallthrough
+		case combat.Superconduct:
+			fallthrough
+		case combat.Swirl:
+			ok = true
+		}
+		if !ok {
+			return false
+		}
+		//TODO: swirl with electro need to trigger this as well but how the hell do i check this???
+		if ds.ReactionType == combat.Swirl && ds.ReactedTo != combat.Electro {
+			return false
+		}
+		//check if Oz is on the field
+		skillOz := s.HasEffect("Fischl-Oz-Skill")
+		burstOz := s.HasEffect("Fischl-Oz-Burst")
+		if !skillOz && !burstOz {
+			return false
+		}
+
+		d := f.Snapshot(combat.Electro)
+		d.Abil = "Fischl A4"
+		d.AbilType = combat.ActionTypeSpecialProc
+		d.Mult = 0.8
+		d.ApplyAura = true
+		d.AuraGauge = 1
+		d.AuraDecayRate = "A" //this is just assumed not sure if true
+		s.AddAction(func(s *combat.Sim) bool {
+			damage := s.ApplyDamage(d)
+			s.Log.Infof("[%v]: Fischl (Oz - A4) dealt %.0f damage", s.Frame(), damage)
+			return true
+		}, fmt.Sprintf("%v-Fischl-C1", f.S.Frame()))
+
+		return false
+	}, "fischl a4", combat.PostReaction)
+
+	if p.Constellation >= 1 {
+		//if oz is not on field, trigger effect
+		s.AddHook(func(ds *combat.Snapshot) bool {
+			if ds.CharName != "Fischl" {
+				return false
+			}
+			if ds.AbilType != combat.ActionTypeAttack {
+				return false
+			}
+			d := f.Snapshot(combat.Physical)
+			d.Abil = "Fischl C1"
+			d.AbilType = combat.ActionTypeSpecialProc
+			d.Mult = 0.22
+			s.AddAction(func(s *combat.Sim) bool {
+				damage := s.ApplyDamage(d)
+				s.Log.Infof("[%v]: Fischl (Oz - C1) dealt %.0f damage", s.Frame(), damage)
+				return true
+			}, fmt.Sprintf("%v-Fischl-C1", f.S.Frame()))
+
+			return false
+		}, "fischl c1", combat.PostDamageHook)
+	}
+
 	return &f, nil
 }
 
@@ -39,13 +111,16 @@ func (f *fischl) Skill() int {
 	d.Abil = "Oz"
 	d.AbilType = combat.ActionTypeSkill
 	lvl := f.Profile.TalentLevel[combat.ActionTypeSkill] - 1
-	if f.Profile.Constellation >= 5 {
+	if f.Profile.Constellation >= 3 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14
 		}
 	}
 	d.Mult = birdSum[lvl]
+	if f.Profile.Constellation >= 2 {
+		d.Mult += 2
+	}
 	d.ApplyAura = true
 	d.AuraGauge = 1
 	d.AuraDecayRate = "A"
@@ -55,7 +130,7 @@ func (f *fischl) Skill() int {
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("[%v]: Fischl (Oz - summon) dealt %.0f damage", s.Frame(), damage)
 		return true
-	}, fmt.Sprintf("%v-Fischl-SKill", f.S.Frame()))
+	}, fmt.Sprintf("%v-Fischl-Skill", f.S.Frame()))
 
 	//apply hit every 50 frames thereafter
 	//NOT ENTIRELY ACCURATE BUT OH WELL
@@ -70,10 +145,29 @@ func (f *fischl) Skill() int {
 			return false
 		}
 		damage := s.ApplyDamage(b)
+		//assume fischl has 60% chance of generating orb every attack;
+		if rand.Float64() < .6 {
+			orbDelay := 0
+			s.AddAction(func(s *combat.Sim) bool {
+				if orbDelay < 60+60 { //random guess, 60 frame to generate, 60 frame to collect
+					orbDelay++
+					return false
+				}
+				s.GenerateOrb(1, combat.Electro, false)
+				return true
+			}, fmt.Sprintf("%v-Fischl-Skill-Orb", s.Frame()))
+		}
 		s.Log.Infof("[%v]: Fischl (Oz - summon) dealt %.0f damage", s.Frame(), damage)
 		count++
 		return count >= 11
-	}, fmt.Sprintf("%v-Fischl-SKill", f.S.Frame()))
+	}, fmt.Sprintf("%v-Fischl-Skill", f.S.Frame()))
+
+	//register Oz with sim
+	ozOnField := 0
+	f.S.AddEffect(func(s *combat.Sim) bool {
+		ozOnField++
+		return ozOnField > 10*60
+	}, "Fischl-Oz-Skill")
 
 	f.CD["skill-cd"] = 25 * 60
 	//return animation cd
