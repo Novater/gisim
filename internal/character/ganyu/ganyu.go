@@ -26,14 +26,14 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	g.MaxEnergy = 60
 
 	//add A4
-	s.AddHook(func(snap *combat.Snapshot) bool {
-		//check if c1 debuff is on, if so, reduce resist by -0.15
-		if _, ok := s.Target.Status["ganyu-c1"]; ok {
-			s.Log.Debugf("\t[%v]: applying Ganyu C1 cryo debuff", s.Frame())
-			snap.ResMod[combat.Cryo] -= 0.15
-		}
-		return false
-	}, "ganyu-c1", combat.PreSnapshot)
+	// s.AddHook(func(snap *combat.Snapshot) bool {
+	// 	//check if c1 debuff is on, if so, reduce resist by -0.15
+	// 	if _, ok := s.Target.Status["ganyu-c1"]; ok {
+	// 		s.Log.Debugf("\t[%v]: applying Ganyu C1 cryo debuff", s.Frame())
+	// 		snap.ResMod[combat.Cryo] -= 0.15
+	// 	}
+	// 	return false
+	// }, "ganyu-c1", combat.PreSnapshot)
 
 	if g.Profile.Constellation >= 1 {
 		s.Log.Debugf("\tactivating Ganyu C1")
@@ -73,9 +73,7 @@ func (g *ganyu) ChargeAttack() int {
 			return false
 		}
 		//abil
-		d := g.Snapshot(combat.Cryo)
-		d.Abil = "Frost Flake Arrow"
-		d.AbilType = combat.ActionTypeChargedAttack
+		d := g.Snapshot("Frost Flake Arrow", combat.ActionTypeChargedAttack, combat.Cryo)
 		d.HitWeakPoint = true
 		d.Mult = ffa[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 		d.AuraBase = combat.WeakAuraBase
@@ -103,9 +101,7 @@ func (g *ganyu) ChargeAttack() int {
 			return false
 		}
 		//abil
-		d := g.Snapshot(combat.Cryo)
-		d.Abil = "Frost Flake Bloom"
-		d.AbilType = combat.ActionTypeChargedAttack
+		d := g.Snapshot("Frost Flake Bloom", combat.ActionTypeChargedAttack, combat.Cryo)
 		d.Mult = ffb[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 		d.ApplyAura = true
 		d.AuraBase = combat.WeakAuraBase
@@ -151,9 +147,7 @@ func (g *ganyu) Skill() int {
 	}
 
 	//snap shot stats at cast time here
-	d := g.Snapshot(combat.Cryo)
-	d.Abil = "Ice Lotus"
-	d.AbilType = combat.ActionTypeSkill
+	d := g.Snapshot("Ice Lotus", combat.ActionTypeSkill, combat.Cryo)
 	lvl := g.Profile.TalentLevel[combat.ActionTypeSkill] - 1
 	if g.Profile.Constellation >= 5 {
 		lvl += 3
@@ -209,9 +203,7 @@ func (g *ganyu) Burst() int {
 		return 0
 	}
 	//snap shot stats at cast time here
-	d := g.Snapshot(combat.Cryo)
-	d.Abil = "Celestial Shower"
-	d.AbilType = combat.ActionTypeBurst
+	d := g.Snapshot("Celestial Shower", combat.ActionTypeBurst, combat.Cryo)
 	lvl := g.Profile.TalentLevel[combat.ActionTypeBurst] - 1
 	if g.Profile.Constellation >= 3 {
 		lvl += 3

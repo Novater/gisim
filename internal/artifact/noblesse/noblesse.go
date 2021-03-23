@@ -10,17 +10,19 @@ func init() {
 
 func set(c combat.Character, s *combat.Sim, count int) {
 	if count >= 2 {
-		s.AddHook(func(snap *combat.Snapshot) bool {
-			if snap.CharName != c.Name() {
+		s.AddHook(func(ds *combat.Snapshot) bool {
+			// s.Log.Debugw("\t\tNoblesse 2 pc", "name", ds.CharName, "abil", ds.AbilType)
+			if ds.CharName != c.Name() {
 				return false
 			}
-			if snap.AbilType != combat.ActionTypeBurst {
+			if ds.AbilType != combat.ActionTypeBurst {
 				return false
 			}
-			snap.DmgBonus += 0.2
+			s.Log.Debugf("\t\t\tNoblesse 2 pc adding % damage")
+			ds.DmgBonus += 0.2
 
 			return false
-		}, "noblesse oblige 2pc", combat.PreDamageHook)
+		}, "noblesse oblige 2pc", combat.PreSnapshot)
 	}
 	if count >= 4 {
 		s.Log.Warnf("Noblesse Oblige 4PC bonus not yet implemented")

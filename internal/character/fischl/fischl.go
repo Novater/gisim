@@ -58,9 +58,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 			return false
 		}
 
-		d := f.Snapshot(combat.Electro)
-		d.Abil = "Fischl A4"
-		d.AbilType = combat.ActionTypeSpecialProc
+		d := f.Snapshot("Fischl A4", combat.ActionTypeSpecialProc, combat.Electro)
 		d.Mult = 0.8
 		//apparently a4 doesnt apply electro
 		s.AddAction(func(s *combat.Sim) bool {
@@ -81,9 +79,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 			if ds.AbilType != combat.ActionTypeAttack {
 				return false
 			}
-			d := f.Snapshot(combat.Physical)
-			d.Abil = "Fischl C1"
-			d.AbilType = combat.ActionTypeSpecialProc
+			d := f.Snapshot("Fischl C1", combat.ActionTypeSpecialProc, combat.Physical)
 			d.Mult = 0.22
 			s.AddAction(func(s *combat.Sim) bool {
 				damage := s.ApplyDamage(d)
@@ -105,9 +101,7 @@ func (f *fischl) Skill() int {
 		return 0
 	}
 
-	d := f.Snapshot(combat.Electro)
-	d.Abil = "Oz"
-	d.AbilType = combat.ActionTypeSkill
+	d := f.Snapshot("Oz", combat.ActionTypeSkill, combat.Electro)
 	lvl := f.Profile.TalentLevel[combat.ActionTypeSkill] - 1
 	if f.Profile.Constellation >= 3 {
 		lvl += 3

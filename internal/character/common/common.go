@@ -62,7 +62,7 @@ func (c *TemplateChar) Name() string {
 	return c.Profile.Name
 }
 
-func (c *TemplateChar) Snapshot(e combat.EleType) combat.Snapshot {
+func (c *TemplateChar) Snapshot(name string, t combat.ActionType, e combat.EleType) combat.Snapshot {
 	ds := combat.Snapshot{}
 	ds.Stats = make(map[combat.StatType]float64)
 	for k, v := range c.Stats {
@@ -75,6 +75,8 @@ func (c *TemplateChar) Snapshot(e combat.EleType) combat.Snapshot {
 		}
 	}
 
+	ds.Abil = name
+	ds.AbilType = t
 	ds.CharName = c.Profile.Name
 	ds.BaseAtk = c.Profile.BaseAtk + c.Profile.WeaponBaseAtk
 	ds.CharLvl = c.Profile.Level

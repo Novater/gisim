@@ -15,6 +15,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	ds.TargetRes = target.Resist
 
 	for k, f := range s.hooks[PreDamageHook] {
+		s.Log.Debugf("\trunning pre damage hook: %v", k)
 		if f(&ds) {
 			s.Log.Debugf("[%v] effect (pre damage) %v expired", s.Frame(), k)
 			delete(s.hooks[PreDamageHook], k)
@@ -79,6 +80,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 
 	if dr.isCrit {
 		for k, f := range s.hooks[OnCritDamage] {
+			s.Log.Debugf("\trunning on crit hook: %v", k)
 			if f(&ds) {
 				s.Log.Debugf("[%v] effect (on crit dmg) %v expired", s.Frame(), k)
 				delete(s.hooks[PostDamageHook], k)
@@ -87,6 +89,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	}
 
 	for k, f := range s.hooks[PostDamageHook] {
+		s.Log.Debugf("\trunning post damage hook: %v", k)
 		if f(&ds) {
 			s.Log.Debugf("[%v] effect (pre damage) %v expired", s.Frame(), k)
 			delete(s.hooks[PostDamageHook], k)
@@ -97,6 +100,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	if ds.WillReact {
 		s.applyReactionDamage(ds)
 		for k, f := range s.hooks[PostReaction] {
+			s.Log.Debugf("\trunning post reaction hook: %v", k)
 			if f(&ds) {
 				s.Log.Debugf("[%v] effect (pre reaction) %v expired", s.Frame(), k)
 				delete(s.hooks[PostReaction], k)
@@ -119,7 +123,7 @@ func calcDmg(ds Snapshot, log *zap.SugaredLogger) dmgResult {
 	st := EleToDmgP(ds.Element)
 	ds.DmgBonus += ds.Stats[st]
 
-	log.Debugw("\t\tcalc", "base atk", ds.BaseAtk, "flat +", ds.Stats[ATK], "% +", ds.Stats[ATKP], "bonus dmg", ds.DmgBonus, "mul", ds.Mult)
+	log.Debugw("\t\tcalc", "base atk", ds.BaseAtk, "flat +", ds.Stats[ATK], "% +", ds.Stats[ATKP], "ele", st, "ele %", ds.Stats[st], "bonus dmg", ds.DmgBonus, "mul", ds.Mult)
 	//calculate attack or def
 	var a float64
 	if ds.UseDef {

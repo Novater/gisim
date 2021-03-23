@@ -37,10 +37,10 @@ func main() {
 	var cfg combat.Profile
 	var err error
 
-	debugPtr := flag.String("d", "warn", "output level: debug, info, warn")
+	debugPtr := flag.String("d", "debug", "output level: debug, info, warn")
 	secondsPtr := flag.Int("s", 60, "how many seconds to run the sim for")
 	pPtr := flag.String("p", "config.yaml", "which profile to use")
-	f := flag.String("o", "", "detailed log file")
+	f := flag.String("o", "out.log", "detailed log file")
 	showCaller := flag.Bool("c", false, "show caller in debug low")
 	flag.Parse()
 

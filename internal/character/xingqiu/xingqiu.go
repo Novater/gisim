@@ -38,9 +38,7 @@ func (x *xingqiu) Skill() int {
 		x.S.Log.Debugf("\tXingqiu skill still on CD; skipping")
 		return 0
 	}
-	d := x.Snapshot(combat.Hydro)
-	d.Abil = "Guhua Sword: Fatal Rainscreen"
-	d.AbilType = combat.ActionTypeSkill
+	d := x.Snapshot("Guhua Sword: Fatal Rainscreen", combat.ActionTypeSkill, combat.Hydro)
 	lvl := x.Profile.TalentLevel[combat.ActionTypeSkill] - 1
 	if x.Profile.Constellation >= 5 {
 		lvl += 3

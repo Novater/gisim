@@ -76,9 +76,7 @@ func (x *xl) FillerFrames() int {
 func (x *xl) Attack() int {
 	//register action depending on number in chain
 	//3 and 4 need to be registered as multi action
-	d := x.Snapshot(combat.Physical)
-	d.Abil = "Normal"
-	d.AbilType = combat.ActionTypeAttack
+	d := x.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
 	//figure out which hit it is
 	var hits [][]float64
 	reset := false
@@ -149,9 +147,7 @@ func (x *xl) Attack() int {
 }
 
 func (x *xl) ChargeAttack() int {
-	d := x.Snapshot(combat.Physical)
-	d.Abil = "Charge Attack"
-	d.AbilType = combat.ActionTypeChargedAttack
+	d := x.Snapshot("Charge Attack", combat.ActionTypeChargedAttack, combat.Physical)
 	d.Mult = nc[x.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 
 	x.S.AddAction(func(s *combat.Sim) bool {
@@ -177,9 +173,7 @@ func (x *xl) Skill() int {
 		return 0
 	}
 
-	d := x.Snapshot(combat.Pyro)
-	d.Abil = "Guoba"
-	d.AbilType = combat.ActionTypeSkill
+	d := x.Snapshot("Guoba", combat.ActionTypeSkill, combat.Pyro)
 	lvl := x.Profile.TalentLevel[combat.ActionTypeSkill] - 1
 	if x.Profile.Constellation >= 5 {
 		lvl += 3
@@ -263,9 +257,7 @@ func (x *xl) Burst() int {
 		if h1d < 20 {
 			return false
 		}
-		d := x.Snapshot(combat.Pyro)
-		d.Abil = "Pyronado"
-		d.AbilType = combat.ActionTypeBurst
+		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)
 		d.Mult = pyronado1[lvl]
 		d.AuraBase = combat.WeakAuraBase
 		d.AuraUnits = 1
@@ -280,9 +272,7 @@ func (x *xl) Burst() int {
 		if h2d < 50 {
 			return false
 		}
-		d := x.Snapshot(combat.Pyro)
-		d.Abil = "Pyronado"
-		d.AbilType = combat.ActionTypeBurst
+		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)
 		d.Mult = pyronado2[lvl]
 		d.AuraBase = combat.WeakAuraBase
 		d.AuraUnits = 1
@@ -297,9 +287,7 @@ func (x *xl) Burst() int {
 		if h3d < 75 {
 			return false
 		}
-		d := x.Snapshot(combat.Pyro)
-		d.Abil = "Pyronado"
-		d.AbilType = combat.ActionTypeBurst
+		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)
 		d.Mult = pyronado3[lvl]
 		d.AuraBase = combat.WeakAuraBase
 		d.AuraUnits = 1
@@ -318,9 +306,7 @@ func (x *xl) Burst() int {
 	}
 	count := 0
 	//pyronado snaps at cast time
-	pd := x.Snapshot(combat.Pyro)
-	pd.Abil = "Pyronado"
-	pd.AbilType = combat.ActionTypeBurst
+	pd := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)
 	pd.Mult = pyronadoSpin[lvl]
 	pd.ApplyAura = true
 	pd.AuraBase = combat.WeakAuraBase
@@ -354,7 +340,8 @@ func (x *xl) Burst() int {
 			}
 			if c6tick == 70 {
 				s.AddHook(func(ds *combat.Snapshot) bool {
-					ds.ExtraStatMod[combat.PyroP] += 0.15
+					s.Log.Debugf("\txiangling c6 adding pyro damage")
+					ds.Stats[combat.PyroP] += 0.15
 					return false
 				}, "xiangling c6", combat.PreSnapshot)
 				return false

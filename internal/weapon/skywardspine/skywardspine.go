@@ -55,9 +55,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		}
 
 		//add a new action that deals % dmg immediately
-		d := c.Snapshot(combat.Physical)
-		d.Abil = "Skyward Spine Proc"
-		d.AbilType = combat.ActionTypeSpecialProc
+		d := c.Snapshot("Skyward Spine Proc", combat.ActionTypeSpecialProc, combat.Physical)
 		d.Mult = dmg
 		s.AddAction(func(s *combat.Sim) bool {
 			damage := s.ApplyDamage(d)

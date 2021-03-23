@@ -56,7 +56,6 @@ type Sim struct {
 	//hooks
 	hooks   map[hookType]map[string]hookFunc
 	effects map[string]ActionFunc
-	field   map[string]map[StatType]float64
 
 	//action priority list
 	priority []RotationItem
@@ -77,7 +76,6 @@ func New(p Profile) (*Sim, error) {
 	s.actions = make(map[string]ActionFunc)
 	s.hooks = make(map[hookType]map[string]hookFunc)
 	s.Status = make(map[string]int)
-	s.field = make(map[string]map[StatType]float64)
 	s.effects = make(map[string]ActionFunc)
 
 	s.stam = 240
@@ -202,24 +200,6 @@ func New(p Profile) (*Sim, error) {
 	}
 
 	return s, nil
-}
-
-func (s *Sim) AddFieldEffect(key string, val map[StatType]float64) {
-	s.field[key] = val
-}
-
-func (s *Sim) RemoveFieldEffect(key string) {
-	delete(s.field, key)
-}
-
-func (s *Sim) FieldEffects() map[StatType]float64 {
-	r := make(map[StatType]float64)
-	for _, m := range s.field {
-		for t, v := range m {
-			r[t] += v
-		}
-	}
-	return r
 }
 
 //Run the sim; length in seconds
@@ -490,7 +470,7 @@ type Character interface {
 	FillerFrames() int
 	//other actions
 	ApplyOrb(count int, ele EleType, isOrb bool, isActive bool, partyCount int)
-	Snapshot(e EleType) Snapshot
+	Snapshot(name string, t ActionType, e EleType) Snapshot
 	ResetActionCooldown(a ActionType)
 }
 
