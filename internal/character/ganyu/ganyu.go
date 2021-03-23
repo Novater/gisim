@@ -13,7 +13,6 @@ func init() {
 
 type ganyu struct {
 	*common.TemplateChar
-	icd map[string]int
 }
 
 func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error) {
@@ -25,7 +24,16 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	g.TemplateChar = t
 	g.Energy = 60
 	g.MaxEnergy = 60
-	g.icd = make(map[string]int)
+
+	//add A4
+	s.AddHook(func(snap *combat.Snapshot) bool {
+		//check if c1 debuff is on, if so, reduce resist by -0.15
+		if _, ok := s.Target.Status["ganyu-c1"]; ok {
+			s.Log.Debugf("\t[%v]: applying Ganyu C1 cryo debuff", s.Frame())
+			snap.ResMod[combat.Cryo] -= 0.15
+		}
+		return false
+	}, "ganyu-c1", combat.PreSnapshot)
 
 	if g.Profile.Constellation >= 1 {
 		s.Log.Debugf("\tactivating Ganyu C1")
@@ -288,14 +296,4 @@ func (g *ganyu) ActionReady(a combat.ActionType) bool {
 		return false
 	}
 	return true
-}
-
-func (g *ganyu) Tick() {
-	g.TemplateChar.Tick()
-	for k, v := range g.icd {
-		v--
-		if v == 0 {
-			delete(g.icd, k)
-		}
-	}
 }

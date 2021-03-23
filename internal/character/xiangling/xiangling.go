@@ -353,13 +353,14 @@ func (x *xl) Burst() int {
 				return false
 			}
 			if c6tick == 70 {
-				m := make(map[combat.StatType]float64)
-				m[combat.PyroP] = 0.15
-				s.AddFieldEffect("Xiangling C6", m)
+				s.AddHook(func(ds *combat.Snapshot) bool {
+					ds.ExtraStatMod[combat.PyroP] += 0.15
+					return false
+				}, "xiangling c6", combat.PreSnapshot)
 				return false
 			}
 			if c6tick >= max {
-				s.RemoveFieldEffect("Xiangling C6")
+				s.RemoveHook("xiangling c6", combat.PreSnapshot)
 				return true
 			}
 			return false

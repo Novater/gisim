@@ -63,35 +63,37 @@ func (c *TemplateChar) Name() string {
 }
 
 func (c *TemplateChar) Snapshot(e combat.EleType) combat.Snapshot {
-	s := combat.Snapshot{}
-	s.Stats = make(map[combat.StatType]float64)
+	ds := combat.Snapshot{}
+	ds.Stats = make(map[combat.StatType]float64)
 	for k, v := range c.Stats {
-		s.Stats[k] = v
+		ds.Stats[k] = v
 	}
 	for key, m := range c.Mods {
 		c.S.Log.Debugw("\t\tchar stat mod", "key", key, "mods", m)
 		for k, v := range m {
-			s.Stats[k] += v
+			ds.Stats[k] += v
 		}
 	}
-	//grab field effects
-	for k, v := range c.S.FieldEffects() {
-		c.S.Log.Debugw("\t\tfield effect", "stat", k, "val", v)
-		s.Stats[k] += v
+
+	ds.CharName = c.Profile.Name
+	ds.BaseAtk = c.Profile.BaseAtk + c.Profile.WeaponBaseAtk
+	ds.CharLvl = c.Profile.Level
+	ds.BaseDef = c.Profile.BaseDef
+	ds.Element = e
+	ds.Stats[combat.CR] += c.Profile.BaseCR
+	ds.Stats[combat.CD] += c.Profile.BaseCD
+
+	ds.ResMod = make(map[combat.EleType]float64)
+	ds.TargetRes = make(map[combat.EleType]float64)
+	ds.ExtraStatMod = make(map[combat.StatType]float64)
+
+	hooks := c.S.Hooks(combat.PreSnapshot)
+	for key, f := range hooks {
+		c.S.Log.Debugf("\t\texecuting pre snapshot hook: %v", key)
+		f(&ds)
 	}
-	s.CharName = c.Profile.Name
-	s.BaseAtk = c.Profile.BaseAtk + c.Profile.WeaponBaseAtk
-	s.CharLvl = c.Profile.Level
-	s.BaseDef = c.Profile.BaseDef
-	s.Element = e
-	s.Stats[combat.CR] += c.Profile.BaseCR
-	s.Stats[combat.CD] += c.Profile.BaseCD
 
-	s.ResMod = make(map[combat.EleType]float64)
-	s.TargetRes = make(map[combat.EleType]float64)
-	s.ExtraStatMod = make(map[combat.StatType]float64)
-
-	return s
+	return ds
 }
 
 func (c *TemplateChar) Attack() int {

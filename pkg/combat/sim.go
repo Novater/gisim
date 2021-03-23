@@ -32,6 +32,8 @@ const (
 	PostReaction hookType = "POST_REACTION"
 	// triggered when a damage crits
 	OnCritDamage hookType = "CRIT_DAMAGE"
+	// presnap shot
+	PreSnapshot hookType = "PRE_SNAPSHOT"
 )
 
 type hookFunc func(s *Snapshot) bool
@@ -44,6 +46,7 @@ type Sim struct {
 	Status map[string]int
 
 	active     int
+	ActiveChar string
 	characters []Character
 	f          int
 	stam       float64
@@ -145,6 +148,7 @@ func New(p Profile) (*Sim, error) {
 
 		if v.Name == p.InitialActive {
 			s.active = i
+			s.ActiveChar = p.InitialActive
 		}
 
 		if _, ok := dup[v.Name]; ok {
@@ -281,6 +285,7 @@ func (s *Sim) Run(length int) float64 {
 			cooldown = 20
 			s.swapCD = 150
 			s.active = next.index
+			s.ActiveChar = s.characters[next.index].Name()
 		}
 
 		cooldown += s.handleAction(s.active, next)
@@ -313,6 +318,11 @@ func (s *Sim) AddHook(f hookFunc, key string, hook hookType) {
 		s.hooks[hook] = make(map[string]hookFunc)
 	}
 	s.hooks[hook][key] = f
+}
+
+//Hooks return hooks of the requested type
+func (s *Sim) Hooks(key hookType) map[string]hookFunc {
+	return s.hooks[key]
 }
 
 //RemoveHook forcefully remove an effect even if the call does not return true
