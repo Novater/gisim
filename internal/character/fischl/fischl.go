@@ -119,8 +119,8 @@ func (f *fischl) Skill() int {
 	if f.Profile.Constellation >= 2 {
 		d.Mult += 2
 	}
-	d.AuraGauge = 1
-	d.AuraDecayRate = "A"
+	d.AuraBase = combat.WeakAuraBase
+	d.AuraUnits = 1
 	//clone b without info re aura
 	b := d.Clone()
 	b.Mult = birdAtk[lvl]

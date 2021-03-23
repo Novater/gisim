@@ -189,8 +189,8 @@ func (x *xl) Skill() int {
 	}
 	d.Mult = guoba[lvl]
 	d.ApplyAura = true //apparently every hit applies
-	d.AuraGauge = 1
-	d.AuraDecayRate = "A"
+	d.AuraBase = combat.WeakAuraBase
+	d.AuraUnits = 1
 
 	//we get orb after a delay each tick, tick 4 times
 	tick := 0
@@ -267,8 +267,8 @@ func (x *xl) Burst() int {
 		d.Abil = "Pyronado"
 		d.AbilType = combat.ActionTypeBurst
 		d.Mult = pyronado1[lvl]
-		d.AuraGauge = 1
-		d.AuraDecayRate = "A"
+		d.AuraBase = combat.WeakAuraBase
+		d.AuraUnits = 1
 		d.ApplyAura = true
 		damage := s.ApplyDamage(d)
 		x.S.Log.Infof("[%v]: Xiangling Pyronado initial hit 1 dealt %.0f damage", s.Frame(), damage)
@@ -284,8 +284,8 @@ func (x *xl) Burst() int {
 		d.Abil = "Pyronado"
 		d.AbilType = combat.ActionTypeBurst
 		d.Mult = pyronado2[lvl]
-		d.AuraGauge = 1
-		d.AuraDecayRate = "A"
+		d.AuraBase = combat.WeakAuraBase
+		d.AuraUnits = 1
 		d.ApplyAura = true
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("[%v]: Xiangling Pyronado initial hit 2 dealt %.0f damage", s.Frame(), damage)
@@ -301,8 +301,8 @@ func (x *xl) Burst() int {
 		d.Abil = "Pyronado"
 		d.AbilType = combat.ActionTypeBurst
 		d.Mult = pyronado3[lvl]
-		d.AuraGauge = 1
-		d.AuraDecayRate = "A"
+		d.AuraBase = combat.WeakAuraBase
+		d.AuraUnits = 1
 		d.ApplyAura = true
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("[%v]: Xiangling Pyronado initial hit 3 dealt %.0f damage", s.Frame(), damage)
@@ -323,8 +323,8 @@ func (x *xl) Burst() int {
 	pd.AbilType = combat.ActionTypeBurst
 	pd.Mult = pyronadoSpin[lvl]
 	pd.ApplyAura = true
-	pd.AuraGauge = 1
-	pd.AuraDecayRate = "A"
+	pd.AuraBase = combat.WeakAuraBase
+	pd.AuraUnits = 1
 	x.S.AddAction(func(s *combat.Sim) bool {
 		tick++
 		if tick < next {

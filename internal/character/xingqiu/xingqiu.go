@@ -53,8 +53,8 @@ func (x *xingqiu) Skill() int {
 		d.OtherMult = 1 //not implemented for now
 	}
 	d.ApplyAura = true
-	d.AuraGauge = 1
-	d.AuraDecayRate = "A"
+	d.AuraBase = combat.WeakAuraBase
+	d.AuraUnits = 1
 	d.Mult = rainscreen[0][lvl]
 	d2 := d.Clone()
 	d2.ApplyAura = false

@@ -31,6 +31,7 @@ Typically I would run the command in bash with output piped to a file for debugg
 - crimson witch does not track stacks yet
 - current overload formula seems to give higher damage than actual; actual 2482, got 2594.3517401129357
 - we don't track self auras. this is a problem for swirl w elemental absorption
+- frozen interaction isn't quite accurate. need better understanding of elemental system before this can be improved. However the current implement SHOULD result in lower than max theoritical damage (as frozen is removed completely so you can't have multiple reacts and the duration is probably a bit shorter than actual) so it's acceptable
 
 ## todo list
 

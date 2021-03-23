@@ -24,6 +24,7 @@ type Enemy struct {
 	Status map[string]int //countdown to how long status last
 	//ec store
 	ecTrigger []byte
+	IsFrozen  bool
 
 	//stats
 	Damage float64 //total damage received
@@ -51,11 +52,15 @@ func (e *Enemy) auraTick(s *Sim) {
 	//decay per frame (60fps) = 1 unit / (mult * 60)
 	//if only 1 aura we just decay it down
 	if len(e.Auras) == 1 {
-		v := e.Auras[0]
-		v.Gauge -= 1 / (gaugeMul(v.Rate) * 60)
-		if v.Gauge > 0 {
-			e.Auras[0] = v
-		} else {
+
+		e.Auras[0].Duration--
+
+		if e.Auras[0].Duration == 0 {
+			s.Log.Debugf("[%v] aura %v expired", s.Frame(), e.Auras[0].Ele)
+			//unfreeze
+			if e.Auras[0].Ele == Frozen {
+				e.IsFrozen = false
+			}
 			e.Auras = nil
 		}
 		return
@@ -74,8 +79,8 @@ func (e *Enemy) auraTick(s *Sim) {
 		expired := false
 		//do our regular decay business
 		for i := 0; i < len(e.Auras); i++ {
-			e.Auras[i].Gauge -= 1 / (gaugeMul(e.Auras[i].Rate) * 60)
-			if e.Auras[i].Gauge < 0 {
+			e.Auras[i].Duration--
+			if e.Auras[i].Duration < 0 {
 				expired = true
 			}
 		}
@@ -94,43 +99,19 @@ func (e *Enemy) auraTick(s *Sim) {
 			ds.ReactionType = ElectroCharged
 			damage := s.applyReactionDamage(ds)
 			//reduce both auras
-			e.Auras[0].Gauge -= 0.5
-			e.Auras[1].Gauge -= 0.4
+			e.Auras[0].Duration -= int64(0.5 * float64(e.Auras[0].Base))
+			e.Auras[1].Duration -= int64(0.4 * float64(e.Auras[1].Base))
 			s.Log.Debugf("[%v] EC reaction tick triggered", s.Frame())
 			s.Log.Debugw("\telectrocharged", "damage", damage, "auras", e.Auras)
 			e.Status["electrocharge icd"] = 60
 		}
 		//build next
 		for _, v := range e.Auras {
-			if v.Gauge > 0 {
+			if v.Duration > 0 {
 				next = append(next, v)
 			} else {
 				s.Log.Debugf("[%v] aura %v expired", s.Frame(), v.Ele)
 			}
-		}
-		e.Auras = next
-		return
-	}
-
-	//also freeze is weird - assuming for now that the hydro portion ticks
-	//down on the same decay as the cryo portion regardless if it's true or not
-	//NEEDS MORE TESTING ON THIS
-	if e.Auras[0].Ele == Cryo {
-		//we need to use the cryo rate
-		rate := e.Auras[0].Rate
-		for _, v := range e.Auras {
-			//decay first, then delete if < -1
-			v.Gauge -= 1 / (gaugeMul(rate) * 60)
-			if v.Gauge > 0 {
-				next = append(next, v)
-			} else {
-				s.Log.Debugf("[%v] aura %v expired", s.Frame(), v.Ele)
-			}
-		}
-		//as a sanity check, the length here is either 2, or 0
-		l := len(e.Auras)
-		if l == 1 {
-			s.Log.Warnw("Freeze target: cryo and hydro should have decayed together but did not!!", "aura", e.Auras)
 		}
 		e.Auras = next
 		return

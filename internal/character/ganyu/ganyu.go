@@ -70,8 +70,8 @@ func (g *ganyu) ChargeAttack() int {
 		d.AbilType = combat.ActionTypeChargedAttack
 		d.HitWeakPoint = true
 		d.Mult = ffa[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
-		d.AuraGauge = 1
-		d.AuraDecayRate = "A"
+		d.AuraBase = combat.WeakAuraBase
+		d.AuraUnits = 1
 		d.ApplyAura = true
 		//if not ICD, apply aura
 		if _, ok := g.CD["ICD-charge"]; !ok {
@@ -100,8 +100,8 @@ func (g *ganyu) ChargeAttack() int {
 		d.AbilType = combat.ActionTypeChargedAttack
 		d.Mult = ffb[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 		d.ApplyAura = true
-		d.AuraGauge = 1
-		d.AuraDecayRate = "A"
+		d.AuraBase = combat.WeakAuraBase
+		d.AuraUnits = 1
 		//if not ICD, apply aura
 		if _, ok := g.CD["ICD-charge"]; !ok {
 			d.ApplyAura = true
@@ -155,8 +155,8 @@ func (g *ganyu) Skill() int {
 	}
 	d.Mult = lotus[lvl]
 	d.ApplyAura = true
-	d.AuraGauge = 1
-	d.AuraDecayRate = "A"
+	d.AuraBase = combat.WeakAuraBase
+	d.AuraUnits = 1
 
 	//we get the orbs right away
 	//add delayed orb for travel time
@@ -213,8 +213,8 @@ func (g *ganyu) Burst() int {
 	}
 	d.Mult = shower[lvl]
 	d.ApplyAura = true
-	d.AuraGauge = 1
-	d.AuraDecayRate = "A"
+	d.AuraBase = combat.WeakAuraBase
+	d.AuraUnits = 1
 
 	//apply weapon stats here
 	//burst should be instant

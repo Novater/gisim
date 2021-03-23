@@ -28,10 +28,10 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	//they will only trigger a sep damage calc
 	if ds.ApplyAura {
 		r := s.checkReact(ds)
+		s.Log.Debugw("reaction result", "r", r, "source", ds.Element)
 		if r.DidReact {
 			ds.WillReact = true
 			ds.ReactionType = r.Type
-			s.Log.Debugw("reaction", "r", r, "source", ds.Element)
 			//handle pre reaction
 			for k, f := range s.hooks[PreReaction] {
 				if f(&ds) {
@@ -213,9 +213,9 @@ type Snapshot struct {
 	ResMod       map[EleType]float64
 
 	//reaction stuff
-	ApplyAura     bool    //if aura should be applied; false if under ICD
-	AuraGauge     float64 //1 2 or 4
-	AuraDecayRate string  //A, B, or C
+	ApplyAura bool  //if aura should be applied; false if under ICD
+	AuraBase  int64 //unit base
+	AuraUnits int64 //number of units
 
 	//these are calculated fields
 	WillReact bool //true if this will react
