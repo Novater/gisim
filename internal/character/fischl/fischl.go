@@ -25,6 +25,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	f.TemplateChar = t
 	f.Energy = 60
 	f.MaxEnergy = 60
+	f.Profile.WeaponClass = combat.WeaponClassBow
 
 	//register A4
 	s.AddHook(func(ds *combat.Snapshot) bool {
@@ -52,8 +53,8 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 			return false
 		}
 		//check if Oz is on the field
-		skillOz := s.HasEffect("Fischl-Oz-Skill")
-		burstOz := s.HasEffect("Fischl-Oz-Burst")
+		_, skillOz := s.Status["Fischl-Oz-Skill"]
+		_, burstOz := s.Status["Fischl-Oz-Burst"]
 		if !skillOz && !burstOz {
 			return false
 		}
@@ -175,11 +176,7 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 	}, fmt.Sprintf("%v-Fischl-Skill-Tick", f.S.Frame()))
 
 	//register Oz with sim
-	ozOnField := 0
-	f.S.AddEffect(func(s *combat.Sim) bool {
-		ozOnField++
-		return ozOnField > 10*60
-	}, "Fischl-Oz-Skill")
+	f.S.Status["Fischl-Oz-Skill"] = 10 * 60
 
 	f.CD["skill-cd"] = 25 * 60
 	//return animation cd

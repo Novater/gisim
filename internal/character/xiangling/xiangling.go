@@ -24,6 +24,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	x.TemplateChar = t
 	x.Energy = 60
 	x.MaxEnergy = 60
+	x.Profile.WeaponClass = combat.WeaponClassSpear
 
 	if x.Profile.Constellation >= 1 {
 		s.Log.Debugf("\tactivating Xiangling C1")
@@ -33,24 +34,9 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 			if _, ok := s.Target.Status["xiangling-c1"]; ok {
 				s.Log.Debugf("\t[%v]: applying Xiangling C1 pyro debuff", s.Frame())
 				snap.ResMod[combat.Pyro] -= 0.15
-				if v, cd := x.CD[common.NormalICD]; cd {
-					snap.ApplyAura = false
-					s.Log.Infof("[%v]: Xiangling (Pyronado - initial hit 1) - aura app still on ICD (%v)", s.Frame(), v)
-				} else {
-					snap.ApplyAura = true
-					x.CD[common.BurstICD] = 150
-				}
 			}
 			return false
 		}, "xiangling-c1", combat.PreDamageHook)
-
-		s.AddHook(func(snap *combat.Snapshot) bool {
-			if snap.CharName == "Xiangling" && snap.Abil == "Guoba" {
-				// add c1 debuff to target
-				s.Target.Status["xiangling-c1"] = 6 * 60
-			}
-			return false
-		}, "xiangling-c1", combat.PostDamageHook)
 	}
 
 	return &x, nil
@@ -189,6 +175,10 @@ func (x *xl) Skill(p map[string]interface{}) int {
 			count++
 			damage := s.ApplyDamage(c)
 			s.Log.Infof("[%v]: Xiangling (Gouba - tick) dealt %.0f damage", s.Frame(), damage)
+			//apply c1 after damage
+			if x.Profile.Constellation >= 1 {
+				s.Target.Status["xiangling-c1"] = 6 * 60
+			}
 			//generate orbs
 			//add delayed orb for travel time
 			orbDelay := 0

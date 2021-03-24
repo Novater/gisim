@@ -25,6 +25,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	b.TemplateChar = t
 	b.Energy = 60
 	b.MaxEnergy = 60
+	b.Profile.WeaponClass = combat.WeaponClassSword
 
 	a4 := make(map[combat.StatType]float64)
 	a4[combat.HydroP] = 0.2

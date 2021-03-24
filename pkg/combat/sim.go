@@ -54,8 +54,8 @@ type Sim struct {
 	//per tick hooks
 	actions map[string]ActionFunc
 	//hooks
-	hooks   map[hookType]map[string]hookFunc
-	effects map[string]ActionFunc
+	hooks map[hookType]map[string]hookFunc
+	// effects map[string]ActionFunc
 
 	//action priority list
 	priority []RotationItem
@@ -76,7 +76,7 @@ func New(p Profile) (*Sim, error) {
 	s.actions = make(map[string]ActionFunc)
 	s.hooks = make(map[hookType]map[string]hookFunc)
 	s.Status = make(map[string]int)
-	s.effects = make(map[string]ActionFunc)
+	// s.effects = make(map[string]ActionFunc)
 
 	s.stam = 240
 
@@ -275,22 +275,22 @@ func (s *Sim) Run(length int) float64 {
 	return s.Target.Damage
 }
 
-func (s *Sim) AddEffect(f ActionFunc, key string) {
-	if _, ok := s.effects[key]; ok {
-		s.Log.Debugf("\t[%v] effect %v exists; overriding existing", s.Frame(), key)
-	}
-	s.effects[key] = f
-	s.Log.Debugf("\t[%v] new effect %v; action map: %v", s.Frame(), key, s.actions)
-}
+// func (s *Sim) AddEffect(f ActionFunc, key string) {
+// 	if _, ok := s.effects[key]; ok {
+// 		s.Log.Debugf("\t[%v] effect %v exists; overriding existing", s.Frame(), key)
+// 	}
+// 	s.effects[key] = f
+// 	s.Log.Debugf("\t[%v] new effect %v; action map: %v", s.Frame(), key, s.actions)
+// }
 
-func (s *Sim) HasEffect(key string) bool {
-	_, ok := s.effects[key]
-	return ok
-}
+// func (s *Sim) HasEffect(key string) bool {
+// 	_, ok := s.effects[key]
+// 	return ok
+// }
 
-func (s *Sim) RemoveEffect(key string) {
-	delete(s.effects, key)
-}
+// func (s *Sim) RemoveEffect(key string) {
+// 	delete(s.effects, key)
+// }
 
 //AddHook adds a hook to sim. Hook will be called based on the type of hook
 func (s *Sim) AddHook(f hookFunc, key string, hook hookType) {
@@ -353,12 +353,12 @@ func (s *Sim) tick() {
 			s.Status[k]--
 		}
 	}
-	for k, f := range s.effects {
-		if f(s) {
-			s.Log.Debugf("\t[%v] effect %v expired", s.Frame(), k)
-			delete(s.effects, k)
-		}
-	}
+	// for k, f := range s.effects {
+	// 	if f(s) {
+	// 		s.Log.Debugf("\t[%v] effect %v expired", s.Frame(), k)
+	// 		delete(s.effects, k)
+	// 	}
+	// }
 	if s.swapCD > 0 {
 		s.swapCD--
 	}
@@ -454,6 +454,7 @@ type Character interface {
 	Name() string
 	//affect the unit
 	Attack(p map[string]interface{}) int
+	Aimed(p map[string]interface{}) int
 	ChargeAttack(p map[string]interface{}) int
 	PlungeAttack(p map[string]interface{}) int
 	Skill(p map[string]interface{}) int
@@ -513,9 +514,10 @@ const (
 	ActionTypeDash ActionType = "dash"
 	ActionTypeJump ActionType = "jump"
 	//main actions
-	ActionTypeAttack ActionType = "attack"
-	ActionTypeSkill  ActionType = "skill"
-	ActionTypeBurst  ActionType = "burst"
+	ActionTypeAttack    ActionType = "attack"
+	ActionTypeAimedShot ActionType = "aimed"
+	ActionTypeSkill     ActionType = "skill"
+	ActionTypeBurst     ActionType = "burst"
 	//derivative actions
 	ActionTypeChargedAttack ActionType = "charge"
 	ActionTypePlungeAttack  ActionType = "plunge"

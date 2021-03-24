@@ -24,6 +24,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	g.TemplateChar = t
 	g.Energy = 60
 	g.MaxEnergy = 60
+	g.Profile.WeaponClass = combat.WeaponClassBow
 
 	//add A4
 	// s.AddHook(func(snap *combat.Snapshot) bool {
@@ -65,7 +66,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	return &g, nil
 }
 
-func (g *ganyu) ChargeAttack(p map[string]interface{}) int {
+func (g *ganyu) Aimed(p map[string]interface{}) int {
 	i := 0
 	g.S.AddAction(func(s *combat.Sim) bool {
 		if i < 20+137 { //assume 20 frame travel time
@@ -73,7 +74,7 @@ func (g *ganyu) ChargeAttack(p map[string]interface{}) int {
 			return false
 		}
 		//abil
-		d := g.Snapshot("Frost Flake Arrow", combat.ActionTypeChargedAttack, combat.Cryo)
+		d := g.Snapshot("Frost Flake Arrow", combat.ActionTypeAimedShot, combat.Cryo)
 		d.HitWeakPoint = true
 		d.Mult = ffa[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 		d.AuraBase = combat.WeakAuraBase
@@ -101,7 +102,7 @@ func (g *ganyu) ChargeAttack(p map[string]interface{}) int {
 			return false
 		}
 		//abil
-		d := g.Snapshot("Frost Flake Bloom", combat.ActionTypeChargedAttack, combat.Cryo)
+		d := g.Snapshot("Frost Flake Bloom", combat.ActionTypeAimedShot, combat.Cryo)
 		d.Mult = ffb[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 		d.ApplyAura = true
 		d.AuraBase = combat.WeakAuraBase

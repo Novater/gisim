@@ -2,6 +2,7 @@
 
 ## Todo
 
+- skill hit 1/hit 2 frame count required
 - skill dmg reduction + duration
 - skill hydro app after the hit
 - skill self hydro app???
@@ -15,6 +16,7 @@
 ## Assumptions
 
 - E does damage after 50 frames. This is a completely random number not tested
+- Q triggers off both normal and charge damage. not sure if this is true...
 
 ## Data
 
@@ -24,8 +26,10 @@
 ## Issues/Bugs
 
 - no idea how often E aura applies wet
+- A2 not implemented
 
 ## Done
 
 - E energy
 - E cd
+- A4

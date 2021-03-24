@@ -102,6 +102,10 @@ func (c *TemplateChar) Attack(p map[string]interface{}) int {
 	return 0
 }
 
+func (c *TemplateChar) Aimed(p map[string]interface{}) int {
+	return 0
+}
+
 func (c *TemplateChar) ChargeAttack(p map[string]interface{}) int {
 	return 0
 }
