@@ -2,16 +2,13 @@
 
 ## Todo
 
-- skill hit 1/hit 2 frame count required
 - skill dmg reduction + duration
 - skill self hydro app???
 - normal attack
 - charged attack
 - plunge attack
 - c4
-- skill orb generation frame count (assumed 120 frame to get orb for now)
-- E does damage after 50 frames. This is a completely random number not tested
-- Q sword delay frames
+- Q hydro application to target on cast (no damage)
 
 ## Assumptions
 

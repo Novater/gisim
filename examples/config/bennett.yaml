@@ -1,0 +1,122 @@
+Label: "Test"
+Characters:
+  - Name: Bennett
+    Level: 70
+    Element: "pyro"
+    BaseHP: 10129
+    BaseAtk: 156
+    BaseDef: 630
+    BaseCR: 0.05
+    BaseCD: 0.50
+    Constellation: 2
+    AscensionBonus:
+      ER: 0.2
+    TalentLevel:
+      attack: 2
+      skill: 3
+      burst: 6
+    WeaponName: "Festering Desire"
+    WeaponRefinement: 5
+    WeaponBaseAtk: 510
+    WeaponSecondaryStat:
+      ER: 0.459
+    Artifacts:
+      Flower:
+        Level: 16
+        Type: "Flower"
+        Set: "Noblesse Oblige"
+        MainStat:
+          Type: "HP"
+          Value: 3967
+        Substat:
+          - Type: "DEF"
+            Value: 44
+          - Type: "ER"
+            Value: 0.065
+          - Type: "CR"
+            Value: 0.097
+          - Type: "CD"
+            Value: 0.07
+      Feather:
+        Level: 16
+        Type: "Feather"
+        Set: "Noblesse Oblige"
+        MainStat:
+          Type: "ATK"
+          Value: 258
+        Substat:
+          - Type: "ATK%"
+            Value: .117
+          - Type: "DEF"
+            Value: 16
+          - Type: "ER"
+            Value: 0.104
+          - Type: "EM"
+            Value: 42
+      Sands:
+        Level: 16
+        Type: "Sands"
+        Set: "Noblesse Oblige"
+        MainStat:
+          Type: "ER"
+          Value: 0.43
+        Substat:
+          - Type: "ATK%"
+            Value: 0.163
+          - Type: "HP%"
+            Value: 0.058
+          - Type: "CD"
+            Value: 0.117
+          - Type: "HP"
+            Value: 209
+      Goblet:
+        Level: 16
+        Type: "Goblet"
+        Set: "Noblesse Oblige"
+        MainStat:
+          Type: "ATK%"
+          Value: 0.387
+        Substat:
+          - Type: "ER"
+            Value: 0.097
+          - Type: "HP"
+            Value: 538
+          - Type: "CR"
+            Value: 0.031
+          - Type: "EM"
+            Value: 35
+      Circlet:
+        Level: 20
+        Type: "Circlet"
+        Set: "Thundering Fury"
+        MainStat:
+          Type: "ATK%"
+          Value: 0.387
+        Substat:
+          - Type: "EM"
+            Value: 63
+          - Type: "HP"
+            Value: 209
+          - Type: "CR"
+            Value: 0.031
+          - Type: "ATK"
+            Value: 35
+Enemy:
+  Level: 88
+  Resist:
+    pyro: 0.1
+    dendro: 0.1
+    hydro: 0.1
+    cryo: 0.1
+    electro: 0.1
+    geo: 0.1
+    anemo: 0.1
+    physical: 0.3
+InitialActive: "Bennett"
+Rotation:
+  - CharacterName: "Bennett"
+    Action: "skill"
+  - CharacterName: "Bennett"
+    Action: "burst"
+  - CharacterName: "Bennett"
+    Action: "attack"

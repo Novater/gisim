@@ -15,7 +15,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 		c.AddMod("Crimson Witch of Flames 2PC", m)
 	}
 	if count >= 4 {
-		s.AddHook(func(snap *combat.Snapshot) bool {
+		s.AddCombatHook(func(snap *combat.Snapshot) bool {
 			if snap.CharName != c.Name() {
 				return false
 			}

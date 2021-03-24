@@ -27,10 +27,6 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	b.MaxEnergy = 60
 	b.Profile.WeaponClass = combat.WeaponClassSword
 
-	a4 := make(map[combat.StatType]float64)
-	a4[combat.HydroP] = 0.2
-	b.AddMod("Xingqiu A4", a4)
-
 	return &b, nil
 }
 
@@ -235,7 +231,7 @@ func (b *bennett) Burst(p map[string]interface{}) int {
 		b.S.Log.Debugf("\tBennett burst still on CD; skipping")
 		return 0
 	}
-	d := b.Snapshot("Fantastic Voyage", combat.ActionTypeBurst, combat.Pyro)
+
 	lvl := b.Profile.TalentLevel[combat.ActionTypeBurst] - 1
 	if b.Profile.Constellation >= 5 {
 		lvl += 3
@@ -243,20 +239,6 @@ func (b *bennett) Burst(p map[string]interface{}) int {
 			lvl = 14
 		}
 	}
-	d.ApplyAura = true
-	d.AuraBase = combat.MedAuraBase
-	d.AuraUnits = 2
-	d.Mult = burst[lvl]
-	burstDelay := 0
-	b.S.AddAction(func(s *combat.Sim) bool {
-		burstDelay++
-		if burstDelay < 43 { //TODO: fix delay
-			return false
-		}
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Bennett burst dealt %.0f damage", s.Frame(), damage)
-		return true
-	}, fmt.Sprintf("%v-Bennett-Burst", b.S.Frame()))
 
 	//add field effect timer
 	ft := 0
@@ -266,13 +248,17 @@ func (b *bennett) Burst(p map[string]interface{}) int {
 			return false
 		}
 		//TODO: should heal here but no one takes damage...
-		b.S.RemoveHook("Bennett-Burst-Field", combat.PreSnapshot)
+		b.S.RemoveCombatHook("Bennett-Burst-Field", combat.PreSnapshot)
 		return true
 	}, fmt.Sprintf("%v-Bennett-Burst-Field", b.S.Frame()))
 
 	//hook for buffs; active right away after cast
-	atk := burstatk[lvl] * float64(b.Profile.BaseAtk+b.Profile.WeaponBaseAtk)
-	b.S.AddHook(func(ds *combat.Snapshot) bool {
+	pc := burstatk[lvl]
+	if b.Profile.Constellation >= 1 {
+		pc += 0.2
+	}
+	atk := pc * float64(b.Profile.BaseAtk+b.Profile.WeaponBaseAtk)
+	b.S.AddCombatHook(func(ds *combat.Snapshot) bool {
 		if b.S.ActiveChar != ds.CharName {
 			return false
 		}
@@ -288,6 +274,22 @@ func (b *bennett) Burst(p map[string]interface{}) int {
 		}
 		return false
 	}, "Bennett-Burst-Field", combat.PreSnapshot)
+
+	d := b.Snapshot("Fantastic Voyage", combat.ActionTypeBurst, combat.Pyro)
+	d.ApplyAura = true
+	d.AuraBase = combat.MedAuraBase
+	d.AuraUnits = 2
+	d.Mult = burst[lvl]
+	burstDelay := 0
+	b.S.AddAction(func(s *combat.Sim) bool {
+		burstDelay++
+		if burstDelay < 43 { //TODO: fix delay
+			return false
+		}
+		damage := s.ApplyDamage(d)
+		s.Log.Infof("[%v]: Bennett burst dealt %.0f damage", s.Frame(), damage)
+		return true
+	}, fmt.Sprintf("%v-Bennett-Burst", b.S.Frame()))
 
 	//add a status
 	b.S.Status["Bennett Burst"] = 12 * 60

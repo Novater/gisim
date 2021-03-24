@@ -89,7 +89,7 @@ func (c *TemplateChar) Snapshot(name string, t combat.ActionType, e combat.EleTy
 	ds.TargetRes = make(map[combat.EleType]float64)
 	ds.ExtraStatMod = make(map[combat.StatType]float64)
 
-	hooks := c.S.Hooks(combat.PreSnapshot)
+	hooks := c.S.CombatHooks(combat.PreSnapshot)
 	for key, f := range hooks {
 		c.S.Log.Debugf("\t\texecuting pre snapshot hook: %v", key)
 		f(&ds)

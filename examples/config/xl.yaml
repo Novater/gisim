@@ -112,6 +112,7 @@ Enemy:
     geo: 0.1
     anemo: 0.1
     physical: 0.3
+InitialActive: "Xiangling"
 Rotation:
   - CharacterName: "Xiangling"
     Action: "normal"

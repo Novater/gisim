@@ -34,7 +34,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	if x.Profile.Constellation >= 2 {
 		s.Log.Debugf("\tactivating Xingqiu C2")
 
-		s.AddHook(func(snap *combat.Snapshot) bool {
+		s.AddCombatHook(func(snap *combat.Snapshot) bool {
 			//check if c1 debuff is on, if so, reduce resist by -0.15
 			if _, ok := s.Target.Status["xingqiu-c2"]; ok {
 				s.Log.Debugf("\t[%v]: applying Xingqiu C2 hydro debuff", s.Frame())
@@ -211,7 +211,7 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 
 	burstCounter := 0
 	swords := 2
-	x.S.AddHook(func(ds *combat.Snapshot) bool {
+	x.S.AddCombatHook(func(ds *combat.Snapshot) bool {
 		//check if buff is up
 		if _, ok := x.S.Status["Xingqiu-Burst"]; !ok {
 			return true //remove
@@ -288,7 +288,7 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 	x.S.AddAction(func(s *combat.Sim) bool {
 		_, ok := s.Status["Xingqiu-Burst"]
 		if !ok {
-			s.RemoveHook("Xingqiu-Burst", combat.PostDamageHook)
+			s.RemoveCombatHook("Xingqiu-Burst", combat.PostDamageHook)
 		}
 		return !ok
 	}, fmt.Sprintf("%v-Xingqiu-Burst", x.S.Frame()))

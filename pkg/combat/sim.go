@@ -17,26 +17,33 @@ var (
 	weaponMap = make(map[string]NewWeaponFunc)
 )
 
-type AbilFunc func(s *Sim) int
 type ActionFunc func(s *Sim) bool
 
-type hookType string
+type combatHookType string
 
 const (
-	PreDamageHook   hookType = "PRE_DAMAGE"
-	PostDamageHook  hookType = "POST_DAMAGE"
-	PreAuraAppHook  hookType = "PRE_AURA_APP"
-	PostAuraAppHook hookType = "POST_AURA_APP"
+	PreDamageHook   combatHookType = "PRE_DAMAGE"
+	PostDamageHook  combatHookType = "POST_DAMAGE"
+	PreAuraAppHook  combatHookType = "PRE_AURA_APP"
+	PostAuraAppHook combatHookType = "POST_AURA_APP"
 	// triggered when there will be a reaction
-	PreReaction  hookType = "PRE_REACTION"
-	PostReaction hookType = "POST_REACTION"
+	PreReaction  combatHookType = "PRE_REACTION"
+	PostReaction combatHookType = "POST_REACTION"
 	// triggered when a damage crits
-	OnCritDamage hookType = "CRIT_DAMAGE"
+	OnCritDamage combatHookType = "CRIT_DAMAGE"
 	// presnap shot
-	PreSnapshot hookType = "PRE_SNAPSHOT"
+	PreSnapshot combatHookType = "PRE_SNAPSHOT"
 )
 
-type hookFunc func(s *Snapshot) bool
+type eventHookType string
+
+const (
+	PreBurstHook  eventHookType = "PRE_BURST_HOOK"
+	PostBurstHook eventHookType = "POSt_BURST_HOOK"
+)
+
+type combatHookFunc func(s *Snapshot) bool
+type eventHookFunc func(s *Sim) bool
 
 //Sim keeps track of one simulation
 type Sim struct {
@@ -53,8 +60,9 @@ type Sim struct {
 	swapCD     int
 	//per tick hooks
 	actions map[string]ActionFunc
-	//hooks
-	hooks map[hookType]map[string]hookFunc
+	//combatHooks
+	combatHooks map[combatHookType]map[string]combatHookFunc
+	eventHooks  map[eventHookType]map[string]eventHookFunc
 	// effects map[string]ActionFunc
 
 	//action priority list
@@ -74,7 +82,8 @@ func New(p Profile) (*Sim, error) {
 	s.Target = u
 
 	s.actions = make(map[string]ActionFunc)
-	s.hooks = make(map[hookType]map[string]hookFunc)
+	s.combatHooks = make(map[combatHookType]map[string]combatHookFunc)
+	s.eventHooks = make(map[eventHookType]map[string]eventHookFunc)
 	s.Status = make(map[string]int)
 	// s.effects = make(map[string]ActionFunc)
 
@@ -292,22 +301,40 @@ func (s *Sim) Run(length int) float64 {
 // 	delete(s.effects, key)
 // }
 
-//AddHook adds a hook to sim. Hook will be called based on the type of hook
-func (s *Sim) AddHook(f hookFunc, key string, hook hookType) {
-	if _, ok := s.hooks[hook]; !ok {
-		s.hooks[hook] = make(map[string]hookFunc)
+//AddCombatHook adds a hook to sim. Hook will be called based on the type of hook
+func (s *Sim) AddCombatHook(f combatHookFunc, key string, hook combatHookType) {
+	if _, ok := s.combatHooks[hook]; !ok {
+		s.combatHooks[hook] = make(map[string]combatHookFunc)
 	}
-	s.hooks[hook][key] = f
+	s.combatHooks[hook][key] = f
+}
+
+//CombatHooks return hooks of the requested type
+func (s *Sim) CombatHooks(key combatHookType) map[string]combatHookFunc {
+	return s.combatHooks[key]
+}
+
+//RemoveCombatHook forcefully remove an effect even if the call does not return true
+func (s *Sim) RemoveCombatHook(key string, hook combatHookType) {
+	delete(s.combatHooks[hook], key)
+}
+
+//AddHook adds a hook to sim. Hook will be called based on the type of hook
+func (s *Sim) AddEventHook(f eventHookFunc, key string, hook eventHookType) {
+	if _, ok := s.eventHooks[hook]; !ok {
+		s.eventHooks[hook] = make(map[string]eventHookFunc)
+	}
+	s.eventHooks[hook][key] = f
 }
 
 //Hooks return hooks of the requested type
-func (s *Sim) Hooks(key hookType) map[string]hookFunc {
-	return s.hooks[key]
+func (s *Sim) EventHooks(key eventHookType) map[string]eventHookFunc {
+	return s.eventHooks[key]
 }
 
 //RemoveHook forcefully remove an effect even if the call does not return true
-func (s *Sim) RemoveHook(key string, hook hookType) {
-	delete(s.hooks[hook], key)
+func (s *Sim) RemoveEventHook(key string, hook eventHookType) {
+	delete(s.eventHooks[hook], key)
 }
 
 func (s *Sim) AddAction(f ActionFunc, key string) {
@@ -369,6 +396,7 @@ func (s *Sim) handleAction(active int, a RotationItem) int {
 	//if active see what ability we want to use
 	c := s.characters[active]
 	s.Log.Infof("[%v] executing %v", s.Frame(), a.Action)
+	f := 0
 	switch a.Action {
 	case ActionTypeDash:
 		return 30
@@ -379,14 +407,26 @@ func (s *Sim) handleAction(active int, a RotationItem) int {
 	case ActionTypeChargedAttack:
 		return c.ChargeAttack(a.Params)
 	case ActionTypeBurst:
-		return c.Burst(a.Params)
+		for k, f := range s.eventHooks[PreBurstHook] {
+			if f(s) {
+				s.Log.Debugf("[%v] hook (pre burst) %v expired", s.Frame(), k)
+				delete(s.eventHooks[PreBurstHook], k)
+			}
+		}
+		f = c.Burst(a.Params)
+		for k, f := range s.eventHooks[PostBurstHook] {
+			if f(s) {
+				s.Log.Debugf("[%v] hook (post burst) %v expired", s.Frame(), k)
+				delete(s.eventHooks[PostBurstHook], k)
+			}
+		}
 	case ActionTypeSkill:
 		return c.Skill(a.Params)
 	default:
 		//do nothing
 	}
 
-	return 0
+	return f
 }
 
 func (s *Sim) Frame() string {

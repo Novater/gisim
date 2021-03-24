@@ -213,6 +213,7 @@ Enemy:
     geo: 0.1
     anemo: 0.1
     physical: -0.2
+InitialActive: "Ganyu"
 Rotation:
   - CharacterName: "Ganyu"
     Action: "charge"

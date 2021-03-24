@@ -10,6 +10,7 @@ import (
 	"github.com/srliao/gisim/pkg/combat"
 
 	//characters
+	_ "github.com/srliao/gisim/internal/character/bennett"
 	_ "github.com/srliao/gisim/internal/character/fischl"
 	_ "github.com/srliao/gisim/internal/character/ganyu"
 	_ "github.com/srliao/gisim/internal/character/xiangling"
@@ -18,6 +19,7 @@ import (
 	//weapons
 	_ "github.com/srliao/gisim/internal/weapon/blacktassel"
 	_ "github.com/srliao/gisim/internal/weapon/favoniuswarbow"
+	_ "github.com/srliao/gisim/internal/weapon/festeringdesire"
 	_ "github.com/srliao/gisim/internal/weapon/prototypecrescent"
 	_ "github.com/srliao/gisim/internal/weapon/sacrificialsword"
 	_ "github.com/srliao/gisim/internal/weapon/skywardspine"

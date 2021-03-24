@@ -99,6 +99,7 @@ Characters:
 Enemy:
   Level: 88
   Resist: 0.1
+InitialActive: "Ganyu"
 Rotation:
   - CharacterName: "Ganyu"
     Action: "charge"

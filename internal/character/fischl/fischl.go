@@ -28,7 +28,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	f.Profile.WeaponClass = combat.WeaponClassBow
 
 	//register A4
-	s.AddHook(func(ds *combat.Snapshot) bool {
+	s.AddCombatHook(func(ds *combat.Snapshot) bool {
 		//don't trigger A4 if Fischl dealt dmg thereby triggering reaction
 		if ds.CharName == "Fischl" {
 			return false
@@ -73,7 +73,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 
 	if p.Constellation >= 1 {
 		//if oz is not on field, trigger effect
-		s.AddHook(func(ds *combat.Snapshot) bool {
+		s.AddCombatHook(func(ds *combat.Snapshot) bool {
 			if ds.CharName != "Fischl" {
 				return false
 			}

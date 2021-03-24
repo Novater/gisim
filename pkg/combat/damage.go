@@ -14,11 +14,11 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	ds.TargetLvl = target.Level
 	ds.TargetRes = target.Resist
 
-	for k, f := range s.hooks[PreDamageHook] {
+	for k, f := range s.combatHooks[PreDamageHook] {
 		s.Log.Debugf("\trunning pre damage hook: %v", k)
 		if f(&ds) {
 			s.Log.Debugf("[%v] effect (pre damage) %v expired", s.Frame(), k)
-			delete(s.hooks[PreDamageHook], k)
+			delete(s.combatHooks[PreDamageHook], k)
 		}
 	}
 
@@ -34,10 +34,10 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 			ds.WillReact = true
 			ds.ReactionType = r.Type
 			//handle pre reaction
-			for k, f := range s.hooks[PreReaction] {
+			for k, f := range s.combatHooks[PreReaction] {
 				if f(&ds) {
 					s.Log.Debugf("[%v] effect (pre reaction) %v expired", s.Frame(), k)
-					delete(s.hooks[PreReaction], k)
+					delete(s.combatHooks[PreReaction], k)
 				}
 			}
 			//either adjust damage snap, adjust stats, or add effect to deal damage after initial damage
@@ -79,31 +79,31 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	s.Target.Damage += dr.damage
 
 	if dr.isCrit {
-		for k, f := range s.hooks[OnCritDamage] {
+		for k, f := range s.combatHooks[OnCritDamage] {
 			s.Log.Debugf("\trunning on crit hook: %v", k)
 			if f(&ds) {
 				s.Log.Debugf("[%v] effect (on crit dmg) %v expired", s.Frame(), k)
-				delete(s.hooks[PostDamageHook], k)
+				delete(s.combatHooks[PostDamageHook], k)
 			}
 		}
 	}
 
-	for k, f := range s.hooks[PostDamageHook] {
+	for k, f := range s.combatHooks[PostDamageHook] {
 		s.Log.Debugf("\trunning post damage hook: %v", k)
 		if f(&ds) {
 			s.Log.Debugf("[%v] effect (pre damage) %v expired", s.Frame(), k)
-			delete(s.hooks[PostDamageHook], k)
+			delete(s.combatHooks[PostDamageHook], k)
 		}
 	}
 
 	//apply reaction damage now! not sure if this timing is right though; maybe we can add this to the next frame as a tick instead?
 	if ds.WillReact {
 		s.applyReactionDamage(ds)
-		for k, f := range s.hooks[PostReaction] {
+		for k, f := range s.combatHooks[PostReaction] {
 			s.Log.Debugf("\trunning post reaction hook: %v", k)
 			if f(&ds) {
 				s.Log.Debugf("[%v] effect (pre reaction) %v expired", s.Frame(), k)
-				delete(s.hooks[PostReaction], k)
+				delete(s.combatHooks[PostReaction], k)
 			}
 		}
 	}

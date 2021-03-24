@@ -29,7 +29,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	if x.Profile.Constellation >= 1 {
 		s.Log.Debugf("\tactivating Xiangling C1")
 
-		s.AddHook(func(snap *combat.Snapshot) bool {
+		s.AddCombatHook(func(snap *combat.Snapshot) bool {
 			//check if c1 debuff is on, if so, reduce resist by -0.15
 			if _, ok := s.Target.Status["xiangling-c1"]; ok {
 				s.Log.Debugf("\t[%v]: applying Xiangling C1 pyro debuff", s.Frame())
@@ -319,7 +319,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 				return false
 			}
 			if c6tick == 70 {
-				s.AddHook(func(ds *combat.Snapshot) bool {
+				s.AddCombatHook(func(ds *combat.Snapshot) bool {
 					s.Log.Debugf("\txiangling c6 adding pyro damage")
 					ds.Stats[combat.PyroP] += 0.15
 					return false
@@ -327,7 +327,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 				return false
 			}
 			if c6tick >= max {
-				s.RemoveHook("xiangling c6", combat.PreSnapshot)
+				s.RemoveCombatHook("xiangling c6", combat.PreSnapshot)
 				return true
 			}
 			return false
