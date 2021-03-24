@@ -173,7 +173,7 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 		s.Log.Infof("[%v]: Fischl (Oz - tick) dealt %.0f damage", s.Frame(), damage)
 		count++
 		return false
-	}, fmt.Sprintf("%v-Fischl-Skill-Tick", f.S.Frame()))
+	}, "Fischl-Skill-Oz")
 
 	//register Oz with sim
 	f.S.Status["Fischl-Oz-Skill"] = 10 * 60
@@ -186,3 +186,89 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 //first hit 40+50
 //next + 50 at150
 //last @ 620
+
+func (f *fischl) Burst(p map[string]interface{}) int {
+	if _, ok := f.CD[common.BurstCD]; ok {
+		f.S.Log.Debugf("\tFischl burst still on CD; skipping")
+		return 0
+	}
+
+	d := f.Snapshot("Midnight Phantasmagoria", combat.ActionTypeBurst, combat.Electro)
+	lvl := f.Profile.TalentLevel[combat.ActionTypeBurst] - 1
+	if f.Profile.Constellation >= 5 {
+		lvl += 3
+		if lvl > 14 {
+			lvl = 14
+		}
+	}
+	d.Mult = burst[lvl]
+	d.AuraBase = combat.WeakAuraBase
+	d.AuraUnits = 1
+	//apply initial damage
+	f.S.AddAction(func(s *combat.Sim) bool {
+		if v, cd := f.CD[common.BurstICD]; cd {
+			d.ApplyAura = false
+			s.Log.Infof("[%v]: Fischl (burst) - aura app still on ICD (%v)", s.Frame(), v)
+		} else {
+			d.ApplyAura = true
+			f.CD[common.BurstICD] = 150
+		}
+		damage := s.ApplyDamage(d)
+		s.Log.Infof("[%v]: Fischl (burst) dealt %.0f damage", s.Frame(), damage)
+		return true
+	}, fmt.Sprintf("%v-Fischl-Burst-Initial", f.S.Frame()))
+
+	//cancel existing bird right away if any
+	f.S.RemoveAction("Fischl-Oz-Skill")
+
+	//add new bird after a delay
+
+	//apply hit every 50 frames thereafter
+	//NOT ENTIRELY ACCURATE BUT OH WELL
+	tick := 0
+	next := 40 + 50
+	count := 0
+
+	b := f.Snapshot("Midnight Phantasmagoria", combat.ActionTypeBurst, combat.Electro)
+
+	f.S.AddAction(func(s *combat.Sim) bool {
+		tick++
+		if tick < next {
+			return false
+		}
+		if count >= 11 {
+			return true
+		}
+		next += 50
+		//share same icd
+		if v, cd := f.CD[common.SkillICD]; cd {
+			b.ApplyAura = false
+			s.Log.Infof("[%v]: Fischl (Oz - tick) - aura app still on ICD (%v)", s.Frame(), v)
+		} else {
+			b.ApplyAura = true
+			f.CD[common.SkillICD] = 150
+		}
+		damage := s.ApplyDamage(b)
+		//assume fischl has 60% chance of generating orb every attack;
+		if rand.Float64() < .6 {
+			orbDelay := 0
+			s.AddAction(func(s *combat.Sim) bool {
+				if orbDelay < 60+60 { //random guess, 60 frame to generate, 60 frame to collect
+					orbDelay++
+					return false
+				}
+				s.GenerateOrb(1, combat.Electro, false)
+				return true
+			}, fmt.Sprintf("%v-Fischl-Skill-Orb-[%v]", s.Frame(), count))
+		}
+		s.Log.Infof("[%v]: Fischl (Oz - tick) dealt %.0f damage", s.Frame(), damage)
+		count++
+		return false
+	}, fmt.Sprintf("%v-Fischl-Skill-Tick", f.S.Frame()))
+
+	//register Oz with sim
+	f.S.Status["Fischl-Oz-Skill"] = 10 * 60
+
+	f.CD[common.BurstCD] = 15 * 60
+	return 100
+}
