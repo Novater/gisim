@@ -395,7 +395,7 @@ func (s *Sim) tick() {
 func (s *Sim) handleAction(active int, a RotationItem) int {
 	//if active see what ability we want to use
 	c := s.characters[active]
-	s.Log.Infof("[%v] executing %v", s.Frame(), a.Action)
+	s.Log.Infof("[%v] %v executing %v", s.Frame(), s.ActiveChar, a.Action)
 	f := 0
 	switch a.Action {
 	case ActionTypeDash:

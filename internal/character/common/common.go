@@ -189,14 +189,14 @@ func (c *TemplateChar) ApplyOrb(count int, ele combat.EleType, isOrb bool, isAct
 	}
 	amt = amt * (1 + er) * float64(count)
 
-	c.S.Log.Debugw("\torb", "name", c.Profile.Name, "count", count, "ele", ele, "isOrb", isOrb, "on field", isActive, "party count", partyCount)
+	c.S.Log.Debugw("\torb", "name", c.Profile.Name, "count", count, "ele", ele, "isOrb", isOrb, "on field", isActive, "party count", partyCount, "pre energ", c.Energy)
 
 	c.Energy += amt
 	if c.Energy > c.MaxEnergy {
 		c.Energy = c.MaxEnergy
 	}
 
-	c.S.Log.Debugw("\torb", "energy rec'd", amt, "current energy", c.Energy, "ER", er)
+	c.S.Log.Debugw("\torb", "energy rec'd", amt, "next energy", c.Energy, "ER", er)
 
 }
 

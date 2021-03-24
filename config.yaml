@@ -1,106 +1,106 @@
 Label: "Test"
 Characters:
-  - Name: Ganyu
-    Level: 90
-    Element: "cryo"
-    BaseHP: 9797
-    BaseAtk: 335
+  - Name: Bennett
+    Level: 70
+    Element: "pyro"
+    BaseHP: 10129
+    BaseAtk: 156
     BaseDef: 630
     BaseCR: 0.05
     BaseCD: 0.50
-    Constellation: 1
+    Constellation: 2
     AscensionBonus:
-      CD: 0.384
+      ER: 0.2
     TalentLevel:
-      attack: 10
-      skill: 6
+      attack: 2
+      skill: 3
       burst: 6
-    WeaponName: "Prototype Crescent"
-    WeaponRefinement: 4
+    WeaponName: "Festering Desire"
+    WeaponRefinement: 5
     WeaponBaseAtk: 510
     WeaponSecondaryStat:
-      ATK%: 0.413
+      ER: 0.459
     Artifacts:
       Flower:
-        Level: 20
+        Level: 16
         Type: "Flower"
-        Set: "Blizzard Strayer"
+        Set: "Noblesse Oblige"
         MainStat:
           Type: "HP"
-          Value: 4780
+          Value: 3967
         Substat:
-          - Type: "EM"
-            Value: 21
-          - Type: "ATK"
-            Value: 47
-          - Type: "CD"
-            Value: 0.179
           - Type: "DEF"
-            Value: 19
+            Value: 44
+          - Type: "ER"
+            Value: 0.065
+          - Type: "CR"
+            Value: 0.097
+          - Type: "CD"
+            Value: 0.07
       Feather:
-        Level: 20
+        Level: 16
         Type: "Feather"
-        Set: "Blizzard Strayer"
+        Set: "Noblesse Oblige"
         MainStat:
           Type: "ATK"
-          Value: 311
+          Value: 258
         Substat:
-          - Type: "CD"
-            Value: 0.062
-          - Type: "EM"
-            Value: 35
           - Type: "ATK%"
-            Value: 0.157
-          - Type: "CR"
-            Value: 0.07
-      Sands:
-        Level: 20
-        Type: "Sands"
-        Set: "Blizzard Strayer"
-        MainStat:
-          Type: "ATK%"
-          Value: 0.466
-        Substat:
-          - Type: "ATK"
-            Value: 31
-          - Type: "CD"
-            Value: 0.225
-          - Type: "HP%"
-            Value: 0.047
-          - Type: "ER"
-            Value: 0.168
-      Goblet:
-        Level: 20
-        Type: "Goblet"
-        Set: "Crimson Witch of Flames"
-        MainStat:
-          Type: "Cryo%"
-          Value: 0.466
-        Substat:
-          - Type: "CD"
-            Value: 0.07
-          - Type: "CR"
-            Value: 0.093
-          - Type: "HP"
-            Value: 717
+            Value: .117
           - Type: "DEF"
             Value: 16
+          - Type: "ER"
+            Value: 0.104
+          - Type: "EM"
+            Value: 42
+      Sands:
+        Level: 16
+        Type: "Sands"
+        Set: "Noblesse Oblige"
+        MainStat:
+          Type: "ER"
+          Value: 0.43
+        Substat:
+          - Type: "ATK%"
+            Value: 0.163
+          - Type: "HP%"
+            Value: 0.058
+          - Type: "CD"
+            Value: 0.117
+          - Type: "HP"
+            Value: 209
+      Goblet:
+        Level: 16
+        Type: "Goblet"
+        Set: "Noblesse Oblige"
+        MainStat:
+          Type: "ATK%"
+          Value: 0.387
+        Substat:
+          - Type: "ER"
+            Value: 0.097
+          - Type: "HP"
+            Value: 538
+          - Type: "CR"
+            Value: 0.031
+          - Type: "EM"
+            Value: 35
       Circlet:
         Level: 20
         Type: "Circlet"
-        Set: "Blizzard Strayer"
+        Set: "Thundering Fury"
         MainStat:
-          Type: "CD"
-          Value: 0.622
+          Type: "ATK%"
+          Value: 0.387
         Substat:
+          - Type: "EM"
+            Value: 63
+          - Type: "HP"
+            Value: 209
           - Type: "CR"
-            Value: 0.097
-          - Type: "DEF"
-            Value: 21
-          - Type: "ATK%"
-            Value: 0.14
-          - Type: "DEF%"
-            Value: 0.066
+            Value: 0.031
+          - Type: "ATK"
+            Value: 35
   - Name: Xiangling
     Level: 80
     Element: "pyro"
@@ -322,7 +322,7 @@ Characters:
     WeaponRefinement: 3
     WeaponBaseAtk: 401
     WeaponSecondaryStat:
-      ER%: 0.559
+      ER: 0.559
     Artifacts:
       Flower:
         Level: 20
@@ -417,16 +417,24 @@ Enemy: #blazing axe mitachurl
     physical: 0.3
 InitialActive: "Xingqiu"
 Rotation:
-  # - CharacterName: "Xingqiu"
-  #   Action: "skill"
-  # - CharacterName: "Fischl"
-  #   Action: "skill"
+  - CharacterName: "Xingqiu"
+    Action: "burst"
+  - CharacterName: "Xingqiu"
+    Action: "skill"
+  - CharacterName: "Bennett"
+    Action: "skill"
+  - CharacterName: "Bennett"
+    Action: "burst"
+  # - CharacterName: "Bennett"
+  #   Action: "attack"
+  - CharacterName: "Fischl"
+    Action: "skill"
   - CharacterName: "Xiangling"
     Action: "skill"
   - CharacterName: "Xiangling"
     Action: "burst"
-  # - CharacterName: "Xiangling"
-  #   Action: "attack"
+  - CharacterName: "Xiangling"
+    Action: "attack"
   # - CharacterName: "Ganyu"
   #   Action: "skill"
   # - CharacterName: "Ganyu"

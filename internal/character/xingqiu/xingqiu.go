@@ -294,6 +294,6 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 	}, fmt.Sprintf("%v-Xingqiu-Burst", x.S.Frame()))
 
 	x.CD[common.BurstCD] = 20 * 60
-
+	x.Energy = 0
 	return 39
 }

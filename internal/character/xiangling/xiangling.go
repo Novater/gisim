@@ -144,7 +144,7 @@ func (x *xl) ChargeAttackStam() float64 {
 
 func (x *xl) Skill(p map[string]interface{}) int {
 	//check if on cd first
-	if _, ok := x.CD["skill-cd"]; ok {
+	if _, ok := x.CD[common.SkillCD]; ok {
 		x.S.Log.Debugf("\tXiangling skill still on CD; skipping")
 		return 0
 	}
@@ -206,7 +206,7 @@ func (x *xl) Skill(p map[string]interface{}) int {
 	}
 	x.S.AddAction(g, fmt.Sprintf("%v-Xiangling-Skill", x.S.Frame()))
 	//add cooldown to sim
-	x.CD["skill-cd"] = 12 * 60
+	x.CD[common.SkillCD] = 12 * 60
 	x.NormalResetTimer = 0
 	//return animation cd
 	return 26
@@ -214,7 +214,7 @@ func (x *xl) Skill(p map[string]interface{}) int {
 
 func (x *xl) Burst(p map[string]interface{}) int {
 	//check if on cd first
-	if _, ok := x.CD["burst-cd"]; ok {
+	if _, ok := x.CD[common.BurstCD]; ok {
 		x.S.Log.Debugf("\tXiangling skill still on CD; skipping")
 		return 0
 	}
@@ -336,7 +336,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 	}
 
 	//add cooldown to sim
-	x.CD["burst-cd"] = 20 * 60
+	x.CD[common.BurstCD] = 20 * 60
 	//use up energy
 	x.Energy = 0
 

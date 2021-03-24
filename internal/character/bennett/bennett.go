@@ -293,7 +293,7 @@ func (b *bennett) Burst(p map[string]interface{}) int {
 
 	//add a status
 	b.S.Status["Bennett Burst"] = 12 * 60
-
+	b.Energy = 0
 	b.CD[common.BurstCD] = 15 * 60
 	return 51 //todo fix field cast time
 }
