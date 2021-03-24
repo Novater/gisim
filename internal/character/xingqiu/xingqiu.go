@@ -52,6 +52,68 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	return &x, nil
 }
 
+func (x *xingqiu) Attack(p map[string]interface{}) int {
+	//register action depending on number in chain
+	//3 and 4 need to be registered as multi action
+	//figure out which hit it is
+	var hits [][]float64
+	reset := false
+	frames := 21 //first hit
+	n := 1
+	switch x.NormalCounter {
+	case 1:
+		hits = n2
+		frames = 48 - 21
+		n = 2
+	case 2:
+		hits = n3
+		frames = 74 - 48
+		n = 3
+	case 3:
+		hits = n4
+		frames = 114 - 74
+		n = 4
+	case 4:
+		hits = n5
+		frames = 180 - 114
+		n = 5
+		reset = true
+	default:
+		hits = n1
+	}
+	x.NormalCounter++
+	//apply attack speed
+	frames = int(float64(frames) / (1 + x.Stats[combat.AtkSpd]))
+	for i, hit := range hits {
+		d := x.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
+		d.Mult = hit[x.Profile.TalentLevel[combat.ActionTypeAttack]-1]
+		//add a 5 frame delay
+		delay := 0
+		x.S.AddAction(func(s *combat.Sim) bool {
+			if delay < 5 {
+				delay++
+				return false
+			}
+			//no delay for now? realistically the hits should have delay but not sure if it actually makes a diff
+			//since it doesnt apply any elements, only trigger weapon procs
+			c := d.Clone()
+			damage := s.ApplyDamage(c)
+			s.Log.Infof("[%v]: Xingqiu normal %v (hit %v) dealt %.0f damage", s.Frame(), n, i+1, damage)
+			return true
+		}, fmt.Sprintf("%v-Xingqiu-Normal-%v-%v", x.S.Frame(), n, i))
+	}
+
+	//add a 75 frame attackcounter reset
+	x.NormalResetTimer = 70
+
+	if reset {
+		x.NormalResetTimer = 0
+	}
+	//return animation cd
+	//this also depends on which hit in the chain this is
+	return frames
+}
+
 func (x *xingqiu) Skill(p map[string]interface{}) int {
 	//applies wet to self 30 frame after cast
 	if _, ok := x.CD[common.SkillCD]; ok {
@@ -147,16 +209,14 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 	burstCounter := 0
 	swords := 2
 	x.S.AddHook(func(ds *combat.Snapshot) bool {
-		dur--
-		if dur < 0 {
-			return true
+		//check if buff is up
+		if _, ok := x.S.Status["Xingqiu-Burst"]; !ok {
+			return true //remove
 		}
-
 		//check if off ICD
-		if _, ok := x.CD["Xingqiu-Burst-ICD"]; !ok {
+		if _, ok := x.CD["Xingqiu-Burst-ICD"]; ok {
 			return false
 		}
-
 		//check if normal attack
 		if ds.AbilType != combat.ActionTypeAttack && ds.AbilType != combat.ActionTypeChargedAttack {
 			return false
@@ -187,9 +247,11 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 			delay := 0
 			x.S.AddAction(func(s *combat.Sim) bool {
 				if delay < 20+(i*2) { //20 frames after trigger to do dmg, + i*2 for each sword; TODO
+					delay++
 					return false
 				}
-				s.ApplyDamage(d)
+				damage := s.ApplyDamage(d)
+				s.Log.Infof("[%v]: Xingqiu burst proc hit %v dealt %.0f damage", s.Frame(), i+1, damage)
 				//add hydro debuff for 4s
 				if x.Profile.Constellation >= 2 {
 					s.Target.Status["xingqiu-c2"] = 4 * 60

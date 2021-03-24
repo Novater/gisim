@@ -77,10 +77,17 @@ func (x *xl) Attack(p map[string]interface{}) int {
 	x.NormalCounter++
 	//apply attack speed
 	frames = int(float64(frames) / (1 + x.Stats[combat.AtkSpd]))
+
 	for i, hit := range hits {
 		d.Mult = hit[x.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 		t := i + 1
+		//add a 5 frame delay
+		delay := 0
 		x.S.AddAction(func(s *combat.Sim) bool {
+			if delay < 5 {
+				delay++
+				return false
+			}
 			//no delay for now? realistically the hits should have delay but not sure if it actually makes a diff
 			//since it doesnt apply any elements, only trigger weapon procs
 			c := d.Clone()

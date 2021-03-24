@@ -6,7 +6,7 @@
 - aimed mode no charge
 - aimed mode charge lvl 1
 - plunge attack
-- A4 field effect (doesn't seem to affect Ganyu herself?)
+- A4 field effect needs to affect Ganyu as well
 - Q aura ICD
 
 ## Assumptions

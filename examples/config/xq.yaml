@@ -1,0 +1,73 @@
+Label: "Test"
+Characters:
+  - Name: Fischl
+    Level: 70
+    Element: "electro"
+    BaseHP: 7508
+    BaseAtk: 200
+    BaseDef: 485
+    BaseCR: 0.05
+    BaseCD: 0.50
+    Constellation: 4
+    AscensionBonus:
+      ATK%: 0.18
+    TalentLevel:
+      attack: 4
+      skill: 6
+      burst: 2
+    WeaponName: "Favonius Warbow"
+    WeaponRefinement: 5
+    WeaponBaseAtk: 401
+    WeaponSecondaryStat:
+      ER%: 0.559
+  - Name: Xingqiu
+    Level: 70
+    Element: "hydro"
+    BaseHP: 8352
+    BaseAtk: 165
+    BaseDef: 619
+    BaseCR: 0.05
+    BaseCD: 0.50
+    Constellation: 6
+    AscensionBonus:
+      ATK%: 0.18
+    TalentLevel:
+      attack: 1
+      skill: 6
+      burst: 6
+    WeaponName: "Sacrificial Sword"
+    WeaponRefinement: 1
+    WeaponBaseAtk: 41
+    WeaponSecondaryStat:
+      ER: 0.133
+Enemy: #blazing axe mitachurl
+  Level: 88
+  Resist:
+    pyro: 0.1
+    dendro: 0.1
+    hydro: 0.1
+    cryo: 0.1
+    electro: 0.1
+    geo: 0.1
+    anemo: 0.1
+    physical: 0.3
+InitialActive: "Xingqiu"
+Rotation:
+  - CharacterName: "Xingqiu"
+    Action: "burst"
+  - CharacterName: "Xingqiu"
+    Action: "skill"
+  - CharacterName: "Xingqiu"
+    Action: "attack"
+  # - CharacterName: "Fischl"
+  #   Action: "skill"
+  # - CharacterName: "Xiangling"
+  #   Action: "skill"
+  # - CharacterName: "Xiangling"
+  #   Action: "burst"
+  # - CharacterName: "Ganyu"
+  #   Action: "skill"
+  # - CharacterName: "Ganyu"
+  #   Action: "burst"
+  # - CharacterName: "Ganyu"
+  #   Action: "charge"
