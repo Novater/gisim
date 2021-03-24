@@ -124,6 +124,15 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 		return 0
 	}
 
+	/**
+	The number of Hydro Swords summoned per wave follows a specific pattern, usually alternating between 2 and 3 swords.
+	At C6, this is upgraded and follows a pattern of 2 → 3 → 5… which then repeats.
+
+	There is an approximately 1 second interval between summoned Hydro Sword waves, so that means a theoretical maximum of 15 or 18 waves.
+
+	Each wave of Hydro Swords is capable of applying one (1) source of Hydro status, and each individual sword is capable of getting a crit.
+	**/
+
 	/** c2
 	Extends the duration of Guhua Sword: Raincutter by 3s.
 	Decreases the Hydro RES of opponents hit by sword rain attacks by 15% for 4s.
@@ -136,6 +145,7 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 	x.S.Status["Xingqiu-Burst"] = dur
 
 	burstCounter := 0
+	swords := 2
 	x.S.AddHook(func(ds *combat.Snapshot) bool {
 		dur--
 		if dur < 0 {
@@ -152,7 +162,6 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 			return false
 		}
 
-		d := x.Snapshot("Guhua Sword: Raincutter", combat.ActionTypeBurst, combat.Hydro)
 		lvl := x.Profile.TalentLevel[combat.ActionTypeBurst] - 1
 		if x.Profile.Constellation >= 3 {
 			lvl += 3
@@ -160,26 +169,51 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 				lvl = 14
 			}
 		}
-		d.Mult = burst[lvl]
 
-		//apply aura every 3rd hit -> hit 0, 3, 6, etc...
-		if burstCounter%3 == 0 {
-			d.ApplyAura = true
-			d.AuraBase = combat.WeakAuraBase
-			d.AuraUnits = 1
+		//trigger swords, only first sword applies hydro
+		for i := 0; i < swords; i++ {
+
+			d := x.Snapshot("Guhua Sword: Raincutter", combat.ActionTypeBurst, combat.Hydro)
+			d.Mult = burst[lvl]
+
+			//apply aura every 3rd hit -> hit 0, 3, 6, etc...
+			//only first sword summoned can apply aura
+			if burstCounter%3 == 0 && i == 0 {
+				d.ApplyAura = true
+				d.AuraBase = combat.WeakAuraBase
+				d.AuraUnits = 1
+			}
+
+			delay := 0
+			x.S.AddAction(func(s *combat.Sim) bool {
+				if delay < 20+(i*2) { //20 frames after trigger to do dmg, + i*2 for each sword; TODO
+					return false
+				}
+				s.ApplyDamage(d)
+				//add hydro debuff for 4s
+				if x.Profile.Constellation >= 2 {
+					s.Target.Status["xingqiu-c2"] = 4 * 60
+				}
+				return true
+			}, fmt.Sprintf("%v-Xingqiu-Burst-Proc-Hit-%v", x.S.Frame(), i+1))
 		}
 
-		x.S.AddAction(func(s *combat.Sim) bool {
-			s.ApplyDamage(d)
-			//add hydro debuff for 4s
-			if x.Profile.Constellation >= 2 {
-				s.Target.Status["xingqiu-c2"] = 4 * 60
+		//figure out next wave # of swords
+		switch swords {
+		case 2:
+			swords = 3
+		case 3:
+			if x.Profile.Constellation == 6 {
+				swords = 5
+			} else {
+				swords = 2
 			}
-			return true
-		}, fmt.Sprintf("%v-Xingqiu-Burst-Proc", x.S.Frame()))
+		case 5:
+			swords = 2
+		}
 
-		//TODO: how long is his ICD?
-		x.CD["Xingqiu-Burst-ICD"] = 1
+		//estimated 1 second ICD
+		x.CD["Xingqiu-Burst-ICD"] = 60
 		burstCounter++
 
 		return false
