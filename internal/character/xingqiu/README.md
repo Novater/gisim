@@ -26,6 +26,7 @@
 
 - no idea how often E aura applies wet
 - A2 not implemented
+- Q applies hydro on cast (not swords) not implemented yet
 
 ## Done
 

@@ -58,24 +58,24 @@ func (x *xingqiu) Attack(p map[string]interface{}) int {
 	//figure out which hit it is
 	var hits [][]float64
 	reset := false
-	frames := 21 //first hit
+	frames := 23 //first hit
 	n := 1
 	switch x.NormalCounter {
 	case 1:
 		hits = n2
-		frames = 48 - 21
+		frames = 49 - 23
 		n = 2
 	case 2:
 		hits = n3
-		frames = 74 - 48
+		frames = 79 - 49 //61 for first half
 		n = 3
 	case 3:
 		hits = n4
-		frames = 114 - 74
+		frames = 106 - 79
 		n = 4
 	case 4:
 		hits = n5
-		frames = 180 - 114
+		frames = 178 - 106 //135 for first half
 		n = 5
 		reset = true
 	default:
@@ -87,10 +87,11 @@ func (x *xingqiu) Attack(p map[string]interface{}) int {
 	for i, hit := range hits {
 		d := x.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
 		d.Mult = hit[x.Profile.TalentLevel[combat.ActionTypeAttack]-1]
-		//add a 5 frame delay
+		//add a 20 frame delay; should be 18 and 42 for combo 3 and 5 actual
 		delay := 0
+		t := i + 1
 		x.S.AddAction(func(s *combat.Sim) bool {
-			if delay < 5 {
+			if delay < 20 {
 				delay++
 				return false
 			}
@@ -98,7 +99,7 @@ func (x *xingqiu) Attack(p map[string]interface{}) int {
 			//since it doesnt apply any elements, only trigger weapon procs
 			c := d.Clone()
 			damage := s.ApplyDamage(c)
-			s.Log.Infof("[%v]: Xingqiu normal %v (hit %v) dealt %.0f damage", s.Frame(), n, i+1, damage)
+			s.Log.Infof("[%v]: Xingqiu normal %v (hit %v) dealt %.0f damage", s.Frame(), n, t, damage)
 			return true
 		}, fmt.Sprintf("%v-Xingqiu-Normal-%v-%v", x.S.Frame(), n, i))
 	}
@@ -144,7 +145,7 @@ func (x *xingqiu) Skill(p map[string]interface{}) int {
 	tick := 0
 	x.S.AddAction(func(s *combat.Sim) bool {
 		tick++
-		if tick < 50 {
+		if tick < 19 { //first hit 19 frames
 			return false
 		}
 		damage := s.ApplyDamage(d)
@@ -154,7 +155,7 @@ func (x *xingqiu) Skill(p map[string]interface{}) int {
 
 	x.S.AddAction(func(s *combat.Sim) bool {
 		tick++
-		if tick < 51 {
+		if tick < 39 { //second 39
 			return false
 		}
 		damage := s.ApplyDamage(d2)
@@ -164,7 +165,7 @@ func (x *xingqiu) Skill(p map[string]interface{}) int {
 
 	orbDelay := 0
 	x.S.AddAction(func(s *combat.Sim) bool {
-		if orbDelay < 60+60 {
+		if orbDelay < 100 { //generated on the 37th, 100 frames to get orbs if standing right up against
 			orbDelay++
 			return false
 		}
@@ -185,6 +186,8 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 		x.S.Log.Debugf("\tXingqiu skill still on CD; skipping")
 		return 0
 	}
+	//also applies hydro on cast
+	//how we doing that?? trigger 0 dmg?
 
 	/**
 	The number of Hydro Swords summoned per wave follows a specific pattern, usually alternating between 2 and 3 swords.
@@ -246,7 +249,7 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 
 			delay := 0
 			x.S.AddAction(func(s *combat.Sim) bool {
-				if delay < 20+(i*2) { //20 frames after trigger to do dmg, + i*2 for each sword; TODO
+				if delay < 20+(i) { //20 frames after trigger to do dmg, + i for each sword; TODO
 					delay++
 					return false
 				}
@@ -292,5 +295,5 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 
 	x.CD[common.BurstCD] = 20 * 60
 
-	return 0
+	return 39
 }
