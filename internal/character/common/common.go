@@ -98,19 +98,11 @@ func (c *TemplateChar) Snapshot(name string, t combat.ActionType, e combat.EleTy
 	return ds
 }
 
-func (c *TemplateChar) Attack() int {
+func (c *TemplateChar) Attack(p map[string]interface{}) int {
 	return 0
 }
 
-func (c *TemplateChar) Filler() int {
-	return c.Attack()
-}
-
-func (c *TemplateChar) FillerFrames() int {
-	return 0
-}
-
-func (c *TemplateChar) ChargeAttack() int {
+func (c *TemplateChar) ChargeAttack(p map[string]interface{}) int {
 	return 0
 }
 
@@ -118,15 +110,15 @@ func (c *TemplateChar) ChargeAttackStam() float64 {
 	return 0
 }
 
-func (c *TemplateChar) PlungeAttack() int {
+func (c *TemplateChar) PlungeAttack(p map[string]interface{}) int {
 	return 0
 }
 
-func (c *TemplateChar) Skill() int {
+func (c *TemplateChar) Skill(p map[string]interface{}) int {
 	return 0
 }
 
-func (c *TemplateChar) Burst() int {
+func (c *TemplateChar) Burst(p map[string]interface{}) int {
 	return 0
 }
 

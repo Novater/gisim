@@ -56,24 +56,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	return &x, nil
 }
 
-func (x *xl) FillerFrames() int {
-	frames := 26
-	//hit one starts at 1955 end 2097
-	//1480 to 1677, 1853, 2045
-	switch x.NormalCounter {
-	case 1:
-		frames = 41
-	case 2:
-		frames = 66
-	case 3:
-		frames = 49
-	case 4:
-		frames = 17
-	}
-	return frames
-}
-
-func (x *xl) Attack() int {
+func (x *xl) Attack(p map[string]interface{}) int {
 	//register action depending on number in chain
 	//3 and 4 need to be registered as multi action
 	d := x.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
@@ -146,7 +129,7 @@ func (x *xl) Attack() int {
 	return frames
 }
 
-func (x *xl) ChargeAttack() int {
+func (x *xl) ChargeAttack(p map[string]interface{}) int {
 	d := x.Snapshot("Charge Attack", combat.ActionTypeChargedAttack, combat.Physical)
 	d.Mult = nc[x.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 
@@ -166,7 +149,7 @@ func (x *xl) ChargeAttackStam() float64 {
 	return 25
 }
 
-func (x *xl) Skill() int {
+func (x *xl) Skill(p map[string]interface{}) int {
 	//check if on cd first
 	if _, ok := x.CD["skill-cd"]; ok {
 		x.S.Log.Debugf("\tXiangling skill still on CD; skipping")
@@ -232,7 +215,7 @@ func (x *xl) Skill() int {
 	return 26
 }
 
-func (x *xl) Burst() int {
+func (x *xl) Burst(p map[string]interface{}) int {
 	//check if on cd first
 	if _, ok := x.CD["burst-cd"]; ok {
 		x.S.Log.Debugf("\tXiangling skill still on CD; skipping")

@@ -95,7 +95,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 }
 
 //42
-func (f *fischl) Skill() int {
+func (f *fischl) Skill(p map[string]interface{}) int {
 	if _, ok := f.CD["skill-cd"]; ok {
 		f.S.Log.Debugf("\tFischl skill still on CD; skipping")
 		return 0

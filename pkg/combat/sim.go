@@ -375,13 +375,13 @@ func (s *Sim) handleAction(active int, a RotationItem) int {
 	case ActionTypeJump:
 		return 30
 	case ActionTypeAttack:
-		return c.Attack()
+		return c.Attack(a.Params)
 	case ActionTypeChargedAttack:
-		return c.ChargeAttack()
+		return c.ChargeAttack(a.Params)
 	case ActionTypeBurst:
-		return c.Burst()
+		return c.Burst(a.Params)
 	case ActionTypeSkill:
-		return c.Skill()
+		return c.Skill(a.Params)
 	default:
 		//do nothing
 	}
@@ -442,23 +442,23 @@ type EnemyProfile struct {
 type RotationItem struct {
 	CharacterName   string `yaml:"CharacterName"`
 	index           int
-	Action          ActionType `yaml:"Action"`
-	ConditionType   string     `yaml:"ConditionType"`   //for now either a status or aura
-	ConditionTarget string     `yaml:"ConditionTarget"` //which status or aura
-	Condition       bool       `yaml:"Condition"`       //true or false
+	Action          ActionType             `yaml:"Action"`
+	Params          map[string]interface{} `yaml:"Params"`
+	ConditionType   string                 `yaml:"ConditionType"`   //for now either a status or aura
+	ConditionTarget string                 `yaml:"ConditionTarget"` //which status or aura
+	Condition       bool                   `yaml:"Condition"`       //true or false
 }
 
 type Character interface {
 	//ability functions to be defined by each character on how they will
 	Name() string
 	//affect the unit
-	Attack() int
-	ChargeAttack() int
-	PlungeAttack() int
-	Skill() int
-	Burst() int
-	Filler() int //action to be called when we don't want to switch and need something to fill time until cd comes up
-	Tick()       //function to be called every frame
+	Attack(p map[string]interface{}) int
+	ChargeAttack(p map[string]interface{}) int
+	PlungeAttack(p map[string]interface{}) int
+	Skill(p map[string]interface{}) int
+	Burst(p map[string]interface{}) int
+	Tick() //function to be called every frame
 	//special char mods
 	AddMod(key string, val map[StatType]float64)
 	RemoveMod(key string)
@@ -467,7 +467,6 @@ type Character interface {
 	ActionCooldown(a ActionType) int
 	ActionReady(a ActionType) bool
 	ChargeAttackStam() float64
-	FillerFrames() int
 	//other actions
 	ApplyOrb(count int, ele EleType, isOrb bool, isActive bool, partyCount int)
 	Snapshot(name string, t ActionType, e EleType) Snapshot

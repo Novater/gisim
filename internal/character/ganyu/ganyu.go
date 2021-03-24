@@ -65,7 +65,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	return &g, nil
 }
 
-func (g *ganyu) ChargeAttack() int {
+func (g *ganyu) ChargeAttack(p map[string]interface{}) int {
 	i := 0
 	g.S.AddAction(func(s *combat.Sim) bool {
 		if i < 20+137 { //assume 20 frame travel time
@@ -122,11 +122,7 @@ func (g *ganyu) ChargeAttack() int {
 	return 137
 }
 
-func (g *ganyu) FillerFrames() int {
-	return 137
-}
-
-func (g *ganyu) Skill() int {
+func (g *ganyu) Skill(p map[string]interface{}) int {
 	//if c2, check if either cd is cooldown
 	charge := ""
 	_, c2ok := g.CD["skill-cd-2"]
@@ -191,7 +187,7 @@ func (g *ganyu) Skill() int {
 	return 30
 }
 
-func (g *ganyu) Burst() int {
+func (g *ganyu) Burst(p map[string]interface{}) int {
 	//check if on cd first
 	if _, ok := g.CD["burst-cd"]; ok {
 		g.S.Log.Debugf("\tGanyu burst still on CD; skipping")

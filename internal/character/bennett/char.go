@@ -1,4 +1,4 @@
-package xingqiu
+package bennett
 
 import (
 	"fmt"
@@ -8,36 +8,47 @@ import (
 )
 
 func init() {
-	combat.RegisterCharFunc("Xingqiu", NewChar)
+	combat.RegisterCharFunc("Bennett", NewChar)
 }
 
-type xingqiu struct {
+type bennett struct {
 	*common.TemplateChar
 }
 
 func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error) {
-	x := xingqiu{}
+	b := bennett{}
 	t, err := common.New(s, p)
+
 	if err != nil {
 		return nil, err
 	}
-	x.TemplateChar = t
-	x.Energy = 80
-	x.MaxEnergy = 80
+	b.TemplateChar = t
+	b.Energy = 80
+	b.MaxEnergy = 80
 
 	a4 := make(map[combat.StatType]float64)
 	a4[combat.HydroP] = 0.2
-	x.AddMod("Xingqiu A4", a4)
+	b.AddMod("Xingqiu A4", a4)
 
-	return &x, nil
+	return &b, nil
 }
 
-func (x *xingqiu) Skill(p map[string]interface{}) int {
-	//applies wet to self 30 frame after cast
+func (x *bennett) Skill(p map[string]interface{}) int {
 	if _, ok := x.CD[common.SkillCD]; ok {
-		x.S.Log.Debugf("\tXingqiu skill still on CD; skipping")
+		x.S.Log.Debugf("\tBennett skill still on CD; skipping")
 		return 0
 	}
+
+	hold := 0
+	if v, ok := p["Hold"]; ok {
+		if h, isInt := v.(int); isInt {
+			hold = int(h)
+		}
+	}
+	if hold > 0 {
+		x.S.Log.Debugf("\tBennet using skill, hold level = %v", hold)
+	}
+
 	d := x.Snapshot("Guhua Sword: Fatal Rainscreen", combat.ActionTypeSkill, combat.Hydro)
 	lvl := x.Profile.TalentLevel[combat.ActionTypeSkill] - 1
 	if x.Profile.Constellation >= 5 {
@@ -92,4 +103,8 @@ func (x *xingqiu) Skill(p map[string]interface{}) int {
 	//should last 15s, cd 21s
 	x.CD[common.SkillCD] = 21 * 60
 	return 77
+}
+
+func (b *bennett) Burst(p map[string]interface{}) int {
+	return 0
 }
