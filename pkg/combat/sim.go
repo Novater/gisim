@@ -207,7 +207,7 @@ func New(p Profile) (*Sim, error) {
 }
 
 //Run the sim; length in seconds
-func (s *Sim) Run(length int) float64 {
+func (s *Sim) Run(length int) (float64, map[string]map[string]float64) {
 	var cooldown int
 	rand.Seed(time.Now().UnixNano())
 	//60fps, 60s/min, 2min
@@ -294,14 +294,13 @@ func (s *Sim) Run(length int) float64 {
 
 	}
 
-	for char, t := range s.Target.DamageDetails {
-		fmt.Printf("%v dealt the following damage:\n", char)
-		for k, v := range t {
-			fmt.Printf("\t%v: %.2f (%.2f%%)\n", k, v, 100*v/s.Target.Damage)
-		}
-	}
+	return s.Target.Damage, s.Target.DamageDetails
+}
 
-	return s.Target.Damage
+func (s *Sim) AddCharMod(c string, key string, val map[StatType]float64) {
+	if _, ok := s.characters[c]; ok {
+		s.characters[c].AddMod(key, val)
+	}
 }
 
 //GenerateOrb is called when an ability generates orb
