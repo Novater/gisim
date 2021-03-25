@@ -26,8 +26,11 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 	}
 
 	s.AddCombatHook(func(ds *combat.Snapshot) bool {
+		if ds.CharName != c.Name() {
+			return false
+		}
 		if ds.AbilType == combat.ActionTypeSkill {
-			s.Log.Debugf("\t\tFestinger desire adding %v dmg %v crit", dmg, crit)
+			s.Log.Debugf("\t\tFestering desire adding %v dmg %v crit", dmg, crit)
 			ds.Stats[combat.CR] += crit
 			ds.DmgBonus += dmg
 		}

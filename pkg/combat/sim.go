@@ -420,23 +420,6 @@ func (s *Sim) handleAction(a RotationItem) int {
 	return f
 }
 
-// func (s *Sim) AddEffect(f ActionFunc, key string) {
-// 	if _, ok := s.effects[key]; ok {
-// 		s.Log.Debugf("\t[%v] effect %v exists; overriding existing", s.Frame(), key)
-// 	}
-// 	s.effects[key] = f
-// 	s.Log.Debugf("\t[%v] new effect %v; action map: %v", s.Frame(), key, s.actions)
-// }
-
-// func (s *Sim) HasEffect(key string) bool {
-// 	_, ok := s.effects[key]
-// 	return ok
-// }
-
-// func (s *Sim) RemoveEffect(key string) {
-// 	delete(s.effects, key)
-// }
-
 //AddCombatHook adds a hook to sim. Hook will be called based on the type of hook
 func (s *Sim) AddCombatHook(f combatHookFunc, key string, hook combatHookType) {
 	if _, ok := s.combatHooks[hook]; !ok {

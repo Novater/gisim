@@ -18,12 +18,12 @@ import (
 	_ "github.com/srliao/gisim/internal/character/xingqiu"
 
 	//weapons
-	_ "github.com/srliao/gisim/internal/weapon/blacktassel"
-	_ "github.com/srliao/gisim/internal/weapon/favoniuswarbow"
-	_ "github.com/srliao/gisim/internal/weapon/festeringdesire"
-	_ "github.com/srliao/gisim/internal/weapon/prototypecrescent"
-	_ "github.com/srliao/gisim/internal/weapon/sacrificialsword"
-	_ "github.com/srliao/gisim/internal/weapon/skywardspine"
+	_ "github.com/srliao/gisim/internal/weapon/bow/favoniuswarbow"
+	_ "github.com/srliao/gisim/internal/weapon/bow/prototypecrescent"
+	_ "github.com/srliao/gisim/internal/weapon/spear/blacktassel"
+	_ "github.com/srliao/gisim/internal/weapon/spear/skywardspine"
+	_ "github.com/srliao/gisim/internal/weapon/sword/festeringdesire"
+	_ "github.com/srliao/gisim/internal/weapon/sword/sacrificialsword"
 
 	//sets
 	_ "github.com/srliao/gisim/internal/artifact/blizzard"
@@ -45,7 +45,7 @@ func main() {
 	pPtr := flag.String("p", "config.yaml", "which profile to use")
 	f := flag.String("o", "out.log", "detailed log file")
 	showCaller := flag.Bool("c", false, "show caller in debug low")
-	w := flag.Bool("w", false, "test weights for each character")
+	w := flag.String("w", "", "test weights for specified character")
 	flag.Parse()
 
 	// p := "./xl-base.yaml" //xl.yaml expecting 4659 dps
@@ -64,7 +64,7 @@ func main() {
 	cfg.LogShowCaller = *showCaller
 	os.Remove(*f)
 
-	if *w {
+	if *w != "" {
 		stat := []combat.Stat{
 			{
 				Type:  combat.ATK,
@@ -93,44 +93,52 @@ func main() {
 		}
 
 		start := time.Now()
-		result := make(map[string]map[combat.StatType]float64)
+		result := make(map[combat.StatType]float64)
 
 		cfg.LogFile = ""
 		cfg.LogLevel = "error"
 
-		dur := 1000000
-
-		for _, p := range cfg.Characters {
-			result[p.Name] = make(map[combat.StatType]float64)
-
-			for _, v := range stat {
-
-				start := time.Now()
-				fmt.Printf("Testing %v stat %v\n", p.Name, v.Type)
-
-				s, err := combat.New(cfg)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				val := make(map[combat.StatType]float64)
-				val[v.Type] = v.Value
-				s.AddCharMod(p.Name, "test", val)
-				d, _ := s.Run(dur)
-
-				s2, err := combat.New(cfg)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				d1, _ := s2.Run(dur)
-
-				elapsed := time.Since(start)
-
-				fmt.Printf("Next: %0.2f current: %0.2f; increase %0.6f, took %v\n", d/float64(dur), d1/float64(dur), d/d1-1, elapsed)
-				result[p.Name][v.Type] = d/d1 - 1
+		ok := false
+		name := *w
+		for _, c := range cfg.Characters {
+			if c.Name == name {
+				ok = true
 			}
 		}
+		if !ok {
+			log.Panic("invalid character to test weights")
+		}
+
+		dur := 120000
+
+		s2, err := combat.New(cfg)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		d1, _ := s2.Run(dur)
+
+		for _, v := range stat {
+
+			start := time.Now()
+			fmt.Printf("Testing %v stat %v\n", name, v.Type)
+
+			s, err := combat.New(cfg)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			val := make(map[combat.StatType]float64)
+			val[v.Type] = v.Value * 2
+			s.AddCharMod(name, "test", val)
+			d, _ := s.Run(dur)
+
+			elapsed := time.Since(start)
+
+			fmt.Printf("Increasing %v by %0.4f; New dps: %0.2f old dps: %0.2f;  team dps increased %0.6f%%, took %v\n", v.Type, v.Value*2, d/float64(dur), d1/float64(dur), (d/d1-1)*100, elapsed)
+			result[v.Type] = d/d1 - 1
+		}
+
 		elapsed := time.Since(start)
 		fmt.Printf("Finished in %v seconds\n", elapsed)
 	} else {

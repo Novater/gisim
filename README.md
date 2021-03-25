@@ -37,18 +37,13 @@ Typically I would run the command in bash with output piped to a file for debugg
 ## todo list
 
 - [ ] aura ICD
-- [ ] xingqiu
 - [ ] EC testing
-- [ ] fischl
 - [ ] refactor weapon and artifact equip code into character; this way weapons can keep track of their own internal icd etc..
 - [ ] jump/dash/char switch/burst/skill force reset all char normal counter
 - [ ] ningguang
 - [ ] crystallize
 - [ ] sucrose
 - [ ] swirl
-- [ ] resonance
-- [ ] rotation conditions
-- [ ] field effects
 - [ ] frames returned per action should have at least 2 number, avg cancellable and avg normal; may actually required more than 2, 1 into each trailling action such as swap, dash, jump, burst, skill, auto
 
 ## credits
