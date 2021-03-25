@@ -2,6 +2,7 @@ package bennett
 
 import (
 	"fmt"
+	"math/rand"
 
 	"github.com/srliao/gisim/internal/character/common"
 	"github.com/srliao/gisim/pkg/combat"
@@ -108,7 +109,7 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 		}
 	}
 	switch hold {
-	case 0:
+	default:
 		d := b.Snapshot("Passion Overload", combat.ActionTypeSkill, combat.Pyro)
 		d.ApplyAura = true
 		d.AuraBase = combat.MedAuraBase
@@ -120,6 +121,20 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 			if delay < 26 { //TODO: fix delay
 				return false
 			}
+			orbDelay := 0
+			s.AddAction(func(s *combat.Sim) bool {
+				if orbDelay < 100 { //random guess, 60 frame to generate, 60 frame to collect
+					orbDelay++
+					return false
+				}
+				count := 3
+				if rand.Float64() < .5 {
+					count = 2
+				}
+				s.GenerateOrb(count, combat.Electro, false)
+				return true
+			}, fmt.Sprintf("%v-Bennett-Skill-Orb", s.Frame()))
+
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("[%v]: Bennett skill dealt %.0f damage", s.Frame(), damage)
 			return true
@@ -136,6 +151,20 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 			if delay < 89 {
 				return false
 			}
+			orbDelay := 0
+			s.AddAction(func(s *combat.Sim) bool {
+				if orbDelay < 100 { //random guess, 60 frame to generate, 60 frame to collect
+					orbDelay++
+					return false
+				}
+				count := 3
+				if rand.Float64() < .5 {
+					count = 2
+				}
+				s.GenerateOrb(count, combat.Electro, false)
+				return true
+			}, fmt.Sprintf("%v-Bennett-Skill-Hold-1-Orb", s.Frame()))
+
 			damage := s.ApplyDamage(d1)
 			s.Log.Infof("[%v]: Bennett skill (hold 1 - hit 1) dealt %.0f damage", s.Frame(), damage)
 			return true
@@ -167,6 +196,20 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 			if delay < 136 {
 				return false
 			}
+			orbDelay := 0
+			s.AddAction(func(s *combat.Sim) bool {
+				if orbDelay < 100 { //random guess, 60 frame to generate, 60 frame to collect
+					orbDelay++
+					return false
+				}
+				count := 3
+				if rand.Float64() < .5 {
+					count = 2
+				}
+				s.GenerateOrb(count, combat.Electro, false)
+				return true
+			}, fmt.Sprintf("%v-Bennett-Skill-Hold-2-Orb", s.Frame()))
+
 			damage := s.ApplyDamage(d1)
 			s.Log.Infof("[%v]: Bennett skill (hold 2 - hit 1) dealt %.0f damage", s.Frame(), damage)
 			return true

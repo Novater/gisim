@@ -414,7 +414,7 @@ Enemy: #blazing axe mitachurl
     electro: 0.1
     geo: 0.1
     anemo: 0.1
-    physical: 0.3
+    physical: 0.1
 InitialActive: "Fischl"
 Rotation:
   - CharacterName: "Xingqiu"
@@ -422,11 +422,11 @@ Rotation:
   - CharacterName: "Xingqiu"
     Action: "skill"
     SwapLock: 100
-  # - CharacterName: "Bennett"
-  #   Action: "skill"
-  #   ConditionType: "energy lt"
-  #   ConditionTarget: "Bennett"
-  #   ConditionFloat: 5
+  - CharacterName: "Bennett"
+    Action: "skill"
+    ConditionType: "status"
+    ConditionTarget: "Bennett Burst"
+    ConditionFloat: 5
   - CharacterName: "Bennett"
     Action: "burst"
   # - CharacterName: "Bennett"

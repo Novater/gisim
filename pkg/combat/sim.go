@@ -268,7 +268,7 @@ func (s *Sim) Run(length int) float64 {
 					cond = t <= v.ConditionFloat
 				}
 				if !cond {
-					s.Log.Debugw("Skill ready but condition not met", "action", v, "status", s.Status)
+					// s.Log.Debugw("Skill ready but condition not met", "action", v, "status", s.Status)
 					//condition not met, skip
 					found = false
 				} else {
