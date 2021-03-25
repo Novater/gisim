@@ -8,6 +8,7 @@ import (
 type reaction struct {
 	DidReact bool
 	Type     ReactionType
+	Types    []ReactionType
 	Next     []aura
 }
 
@@ -114,8 +115,23 @@ func (s *Sim) checkReact(ds Snapshot) reaction {
 	//single reaction
 	if len(target.Auras) == 1 {
 		a := target.Auras[0]
+		//check for shatter first
+		if a.Ele == Frozen && ds.IsHeavyAttack {
+			result.DidReact = true
+			result.Type = Shatter
+			//the next aura is just the remaining aura but as water
+			result.Next = []aura{
+				{
+					Ele:      Hydro,
+					Duration: a.Duration,
+					Base:     a.Base,
+					Units:    a.Units,
+				},
+			}
+			return result
+		}
+		//otherwise find the type
 		r := reactType(a.Ele, ds.Element)
-
 		//same element, refill
 		if r == NoReaction {
 			g := max(min(ds.AuraBase*ds.AuraUnits, a.Base*a.Units), a.Duration)
@@ -278,8 +294,39 @@ func (s *Sim) checkReact(ds Snapshot) reaction {
 	}
 
 	if len(target.Auras) == 2 {
-		//the first should either be electro for EC
-		//or cryo for frozen
+		a := target.Auras[0]
+		//for now the first should only be electro for electro charged; otherwise
+		//we wouldn't know what to do
+		if a.Ele != Electro {
+			s.Log.Warnw("multi aura, first element not electro. not implemented", "aura", target.Auras)
+			return result
+		}
+
+		//implement each reaction separately
+
+		switch ds.Element {
+		case Pyro:
+			//overload + vaporize
+		case Cryo:
+			//superconduct no freeze no aura left
+			result.DidReact = true
+			result.Type = Superconduct
+			return result
+		case Electro:
+			// don't know what to do here
+			s.Log.Warnw("reapply electro to EC, not implemented", "aura", target.Auras)
+			result.Next = target.Auras
+			return result
+		case Hydro:
+			// don't know what to do here
+			s.Log.Warnw("reapply hydro to EC, not implemented", "aura", target.Auras)
+			result.Next = target.Auras
+			return result
+		case Geo:
+			//crystallize only electro and remove
+		case Anemo:
+			//????
+		}
 		return result
 	}
 
@@ -329,7 +376,7 @@ func reactType(a EleType, b EleType) ReactionType {
 		fallthrough
 	case a == Electro && b == Pyro:
 		return Overload
-		//superconduct
+	//superconduct
 	case a == Frozen && b == Electro:
 		fallthrough
 	case a == Electro && b == Frozen:

@@ -14,14 +14,6 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	ds.TargetLvl = target.Level
 	ds.TargetRes = target.Resist
 
-	for k, f := range s.combatHooks[PreDamageHook] {
-		s.Log.Debugf("\trunning pre damage hook: %v", k)
-		if f(&ds) {
-			s.Log.Debugf("[%v] effect (pre damage) %v expired", s.Frame(), k)
-			delete(s.combatHooks[PreDamageHook], k)
-		}
-	}
-
 	s.Log.Debugf("[%v] %v - %v triggered dmg", s.Frame(), ds.CharName, ds.Abil)
 	s.Log.Debugw("\ttarget", "auras", target.Auras)
 
@@ -40,6 +32,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 					delete(s.combatHooks[PreReaction], k)
 				}
 			}
+
 			//either adjust damage snap, adjust stats, or add effect to deal damage after initial damage
 			switch r.Type {
 			case Melt:
@@ -62,11 +55,21 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 					ds.IsMeltVape = true
 					ds.ReactMult = 2.0 //strong, triggered by hydro
 				}
+			case Superconduct:
+				s.Status["Superconduct"] = 12 * 60 //add a debuff for superconduct
 			case ElectroCharged:
 				target.Status["electrocharge icd"] = 60
 			}
 		}
 		target.Auras = r.Next
+	}
+
+	for k, f := range s.combatHooks[PreDamageHook] {
+		s.Log.Debugf("\trunning pre damage hook: %v", k)
+		if f(&ds) {
+			s.Log.Debugf("[%v] effect (pre damage) %v expired", s.Frame(), k)
+			delete(s.combatHooks[PreDamageHook], k)
+		}
 	}
 
 	//for each reaction damage to occur -> call any pre reaction hooks
@@ -218,9 +221,10 @@ type Snapshot struct {
 	ResMod       map[EleType]float64
 
 	//reaction stuff
-	ApplyAura bool  //if aura should be applied; false if under ICD
-	AuraBase  int64 //unit base
-	AuraUnits int64 //number of units
+	ApplyAura     bool  //if aura should be applied; false if under ICD
+	AuraBase      int64 //unit base
+	AuraUnits     int64 //number of units
+	IsHeavyAttack bool
 
 	//these are calculated fields
 	WillReact bool //true if this will react

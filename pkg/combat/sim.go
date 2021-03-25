@@ -203,6 +203,15 @@ func New(p Profile) (*Sim, error) {
 
 	s.resonance(res)
 
+	//add other hooks
+	//we need to add a predamage hook that reduces physical res
+	s.combatHooks[PreDamageHook]["superconduct"] = func(snap *Snapshot) bool {
+		if _, ok := s.Status["Superconduct"]; ok {
+			snap.ResMod[Physical] -= 0.4
+		}
+		return false
+	}
+
 	return s, nil
 }
 
