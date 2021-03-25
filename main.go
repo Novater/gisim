@@ -41,7 +41,7 @@ func main() {
 	var err error
 
 	debugPtr := flag.String("d", "debug", "output level: debug, info, warn")
-	secondsPtr := flag.Int("s", 60, "how many seconds to run the sim for")
+	secondsPtr := flag.Int("s", 300, "how many seconds to run the sim for")
 	pPtr := flag.String("p", "config.yaml", "which profile to use")
 	f := flag.String("o", "out.log", "detailed log file")
 	showCaller := flag.Bool("c", false, "show caller in debug low")
@@ -109,7 +109,7 @@ func main() {
 			log.Panic("invalid character to test weights")
 		}
 
-		dur := 120000
+		dur := 6000
 
 		s2, err := combat.New(cfg)
 		if err != nil {
@@ -129,35 +129,35 @@ func main() {
 			}
 
 			val := make(map[combat.StatType]float64)
-			val[v.Type] = v.Value * 2
+			val[v.Type] = v.Value * 4
 			s.AddCharMod(name, "test", val)
 			d, _ := s.Run(dur)
 
 			elapsed := time.Since(start)
 
-			fmt.Printf("Increasing %v by %0.4f; New dps: %0.2f old dps: %0.2f;  team dps increased %0.6f%%, took %v\n", v.Type, v.Value*2, d/float64(dur), d1/float64(dur), (d/d1-1)*100, elapsed)
+			fmt.Printf("Increasing %v by %0.4f; New dps: %0.2f old dps: %0.2f;  team dps increased %0.6f%%, took %v\n", v.Type, v.Value*4, d/float64(dur), d1/float64(dur), (d/d1-1)*100, elapsed)
 			result[v.Type] = d/d1 - 1
 		}
 
 		elapsed := time.Since(start)
 		fmt.Printf("Finished in %v seconds\n", elapsed)
-	} else {
-
-		s, err := combat.New(cfg)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		start := time.Now()
-		dmg, details := s.Run(*secondsPtr)
-		elapsed := time.Since(start)
-		for char, t := range details {
-			fmt.Printf("%v dealt the following damage:\n", char)
-			for k, v := range t {
-				fmt.Printf("\t%v: %.2f (%.2f%%)\n", k, v, 100*v/dmg)
-			}
-		}
-		fmt.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", *pPtr, dmg, *secondsPtr, dmg/float64(*secondsPtr), elapsed)
+		return
 	}
+
+	s, err := combat.New(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	start := time.Now()
+	dmg, details := s.Run(*secondsPtr)
+	elapsed := time.Since(start)
+	for char, t := range details {
+		fmt.Printf("%v contributed the following dps:\n", char)
+		for k, v := range t {
+			fmt.Printf("\t%v: %.2f (%.2f%%)\n", k, v/float64(*secondsPtr), 100*v/dmg)
+		}
+	}
+	fmt.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", *pPtr, dmg, *secondsPtr, dmg/float64(*secondsPtr), elapsed)
 
 }
