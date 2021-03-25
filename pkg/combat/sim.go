@@ -392,6 +392,8 @@ func (s *Sim) handleAction(a RotationItem) int {
 		f = c.Attack(a.Params)
 	case ActionTypeChargedAttack:
 		f = c.ChargeAttack(a.Params)
+	case ActionTypeAimedShot:
+		f = c.Aimed(a.Params)
 	case ActionTypeBurst:
 		for k, f := range s.eventHooks[PreBurstHook] {
 			if f(s) {
