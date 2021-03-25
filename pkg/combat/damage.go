@@ -200,7 +200,8 @@ type Snapshot struct {
 	AbilType    ActionType  //type of ability triggering the damage
 	WeaponClass WeaponClass //b.c. Gladiators...
 
-	HitWeakPoint bool
+	HitWeakPoint  bool
+	IsHeavyAttack bool
 
 	TargetLvl int64
 	TargetRes map[EleType]float64
@@ -221,10 +222,9 @@ type Snapshot struct {
 	ResMod       map[EleType]float64
 
 	//reaction stuff
-	ApplyAura     bool  //if aura should be applied; false if under ICD
-	AuraBase      int64 //unit base
-	AuraUnits     int64 //number of units
-	IsHeavyAttack bool
+	ApplyAura bool  //if aura should be applied; false if under ICD
+	AuraBase  int64 //unit base
+	AuraUnits int64 //number of units
 
 	//these are calculated fields
 	WillReact bool //true if this will react

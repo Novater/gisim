@@ -5,6 +5,15 @@ import (
 	"log"
 )
 
+type Aura interface {
+	React()
+	Tick() bool //remove if true
+}
+
+type Reaction struct {
+	Next Aura //the resultant aura, can be nil?
+}
+
 type reaction struct {
 	DidReact bool
 	Type     ReactionType
