@@ -52,9 +52,8 @@ type Sim struct {
 	//track whatever status, ticked down by 1 each tick
 	Status map[string]int
 
-	active     int
 	ActiveChar string
-	characters []Character
+	characters map[string]Character
 	f          int
 	stam       float64
 	swapCD     int
@@ -74,7 +73,6 @@ func New(p Profile) (*Sim, error) {
 	s := &Sim{}
 
 	u := &Enemy{}
-
 	u.Status = make(map[string]int)
 	u.Level = p.Enemy.Level
 	u.Resist = p.Enemy.Resist
@@ -86,6 +84,7 @@ func New(p Profile) (*Sim, error) {
 	s.combatHooks = make(map[combatHookType]map[string]combatHookFunc)
 	s.eventHooks = make(map[eventHookType]map[string]eventHookFunc)
 	s.Status = make(map[string]int)
+	s.characters = make(map[string]Character)
 	// s.effects = make(map[string]ActionFunc)
 
 	s.stam = 240
@@ -119,9 +118,9 @@ func New(p Profile) (*Sim, error) {
 	zap.ReplaceGlobals(logger)
 
 	dup := make(map[string]bool)
-	s.active = -1
+	res := make(map[EleType]int)
 	//create the characters
-	for i, v := range p.Characters {
+	for _, v := range p.Characters {
 
 		f, ok := charMap[v.Name]
 		if !ok {
@@ -152,10 +151,9 @@ func New(p Profile) (*Sim, error) {
 			return nil, fmt.Errorf("char %v missing talent level for %v", v.Name, ActionTypeBurst)
 		}
 
-		s.characters = append(s.characters, c)
+		s.characters[v.Name] = c
 
 		if v.Name == p.InitialActive {
-			s.active = i
 			s.ActiveChar = p.InitialActive
 		}
 
@@ -164,8 +162,8 @@ func New(p Profile) (*Sim, error) {
 		}
 
 		dup[v.Name] = true
-
 		s.Target.DamageDetails[v.Name] = make(map[string]float64)
+		res[v.Element]++
 
 		//initialize weapon
 		wf, ok := weaponMap[v.WeaponName]
@@ -191,25 +189,19 @@ func New(p Profile) (*Sim, error) {
 		}
 
 	}
-	if s.active == -1 {
+	if s.ActiveChar == "" {
 		return nil, fmt.Errorf("invalid active initial character %v", p.InitialActive)
 	}
 	for _, v := range p.Rotation {
-		//find index
-		index := -1
-		for i, c := range s.characters {
-			if c.Name() == v.CharacterName {
-				index = i
-				break
-			}
-		}
-		if index == -1 {
+		//make sure char exists
+		if _, ok := s.characters[v.CharacterName]; !ok {
 			return nil, fmt.Errorf("invalid character %v in rotation list", v.CharacterName)
 		}
-		next := v
-		next.index = index
-		s.priority = append(s.priority, next)
 	}
+
+	s.priority = p.Rotation
+
+	s.resonance(res)
 
 	return s, nil
 }
@@ -244,19 +236,19 @@ func (s *Sim) Run(length int) float64 {
 		for _, v := range s.priority {
 			//check if swap is required for this action
 			//if true, then this action is only executable if swapCD = 0
-			if v.index != s.active {
+			if v.CharacterName != s.ActiveChar {
 				if s.swapCD > 0 {
 					continue prio
 				}
 			}
 			if v.Action == ActionTypeChargedAttack {
-				scost := s.characters[v.index].ChargeAttackStam()
+				scost := s.characters[v.CharacterName].ChargeAttackStam()
 				if scost < s.stam {
 					next = v
 					found = true
 				}
 			} else {
-				ok := s.characters[v.index].ActionReady(v.Action)
+				ok := s.characters[v.CharacterName].ActionReady(v.Action)
 				if ok {
 					next = v
 					found = true
@@ -269,7 +261,11 @@ func (s *Sim) Run(length int) float64 {
 				switch v.ConditionType {
 				case "status":
 					_, ok := s.Status[v.ConditionTarget]
-					cond = ok == v.Condition
+					cond = ok == v.ConditionBool
+				case "energy lt":
+					//check if target energy < threshold
+					t := s.characters[v.ConditionTarget].E()
+					cond = t <= v.ConditionFloat
 				}
 				if !cond {
 					s.Log.Debugw("Skill ready but condition not met", "action", v, "status", s.Status)
@@ -286,16 +282,15 @@ func (s *Sim) Run(length int) float64 {
 		}
 
 		//check if actor is active
-		if next.index != s.active {
-			s.Log.Debugf("[%v] swapping to char #%v (current = %v)", s.f, next.index, s.active)
+		if next.CharacterName != s.ActiveChar {
+			s.Log.Debugf("[%v] swapping to %v (current = %v)", s.f, next.CharacterName, s.ActiveChar)
 			//trigger a swap, add 20 to the cooldown
 			cooldown = 20
 			s.swapCD = 150
-			s.active = next.index
-			s.ActiveChar = s.characters[next.index].Name()
+			s.ActiveChar = next.CharacterName
 		}
 
-		cooldown += s.handleAction(s.active, next)
+		cooldown += s.handleAction(next)
 
 	}
 
@@ -307,6 +302,123 @@ func (s *Sim) Run(length int) float64 {
 	}
 
 	return s.Target.Damage
+}
+
+//GenerateOrb is called when an ability generates orb
+func (s *Sim) GenerateOrb(n int, ele EleType, isOrb bool) {
+	s.Log.Debugf("[%v]: particle/orbs picked up: %v of %v (isOrb: %v), active char: %v", s.Frame(), n, ele, isOrb, s.ActiveChar)
+	count := len(s.characters)
+	for name, c := range s.characters {
+		active := s.ActiveChar == name
+		c.ApplyOrb(n, ele, isOrb, active, count)
+	}
+}
+
+func (s *Sim) resonance(count map[EleType]int) {
+	for k, v := range count {
+		if v > 2 {
+			switch k {
+			case Pyro:
+				s.AddCombatHook(func(ds *Snapshot) bool {
+					s.Log.Debugf("\tapplying pyro resonance + 25%% atk")
+					ds.Stats[ATKP] += 0.25
+					return false
+				}, "Pyro Resonance", PreSnapshot)
+			case Hydro:
+				//heal not implemented yet
+			case Cryo:
+				s.AddCombatHook(func(ds *Snapshot) bool {
+					if len(s.Target.Auras) == 0 {
+						return false
+					}
+
+					if s.Target.Auras[0].Ele == Cryo {
+						s.Log.Debugf("\tapplying cryo resonance on cryo target")
+						ds.Stats[CR] += .15
+					}
+
+					if s.Target.Auras[0].Ele == Frozen {
+						s.Log.Debugf("\tapplying cryo resonance on cryo target")
+						ds.Stats[CR] += .15
+					}
+					return false
+				}, "Cryo Resonance", PreDamageHook)
+			case Electro:
+			case Geo:
+			case Anemo:
+			}
+		}
+	}
+}
+
+//tick
+func (s *Sim) tick() {
+	for k, f := range s.actions {
+		if f(s) {
+			s.Log.Debugf("\t[%v] action %v expired", s.Frame(), k)
+			delete(s.actions, k)
+		}
+	}
+	for k, v := range s.Status {
+		if v == 0 {
+			s.Log.Debugf("\t[%v] status %v expired", s.Frame(), k)
+			delete(s.Status, k)
+		} else {
+			s.Status[k]--
+		}
+	}
+	// for k, f := range s.effects {
+	// 	if f(s) {
+	// 		s.Log.Debugf("\t[%v] effect %v expired", s.Frame(), k)
+	// 		delete(s.effects, k)
+	// 	}
+	// }
+	if s.swapCD > 0 {
+		s.swapCD--
+	}
+}
+
+//handleAction executes the next action, returns the cooldown
+func (s *Sim) handleAction(a RotationItem) int {
+	//if active see what ability we want to use
+	c := s.characters[s.ActiveChar]
+	s.Log.Infof("[%v] %v executing %v", s.Frame(), s.ActiveChar, a.Action)
+	f := 0
+	switch a.Action {
+	case ActionTypeDash:
+		return 30
+	case ActionTypeJump:
+		return 30
+	case ActionTypeAttack:
+		f = c.Attack(a.Params)
+	case ActionTypeChargedAttack:
+		f = c.ChargeAttack(a.Params)
+	case ActionTypeBurst:
+		for k, f := range s.eventHooks[PreBurstHook] {
+			if f(s) {
+				s.Log.Debugf("[%v] hook (pre burst) %v expired", s.Frame(), k)
+				delete(s.eventHooks[PreBurstHook], k)
+			}
+		}
+		f = c.Burst(a.Params)
+		for k, f := range s.eventHooks[PostBurstHook] {
+			if f(s) {
+				s.Log.Debugf("[%v] hook (post burst) %v expired", s.Frame(), k)
+				delete(s.eventHooks[PostBurstHook], k)
+			}
+		}
+	case ActionTypeSkill:
+		f = c.Skill(a.Params)
+	default:
+		//do nothing
+		return 0
+	}
+	if a.SwapLock > 0 {
+		//add to swap cooldown to force unable to swap
+		s.swapCD = +a.SwapLock
+	}
+
+	return f
 }
 
 // func (s *Sim) AddEffect(f ActionFunc, key string) {
@@ -379,81 +491,6 @@ func (s *Sim) RemoveAction(key string) {
 	delete(s.actions, key)
 }
 
-//GenerateOrb is called when an ability generates orb
-func (s *Sim) GenerateOrb(n int, ele EleType, isOrb bool) {
-	s.Log.Debugf("[%v]: particle/orbs picked up: %v of %v (isOrb: %v)", s.Frame(), n, ele, isOrb)
-	count := len(s.characters)
-	for i, c := range s.characters {
-		active := s.active == i
-		c.ApplyOrb(n, ele, isOrb, active, count)
-	}
-}
-
-//tick
-func (s *Sim) tick() {
-	for k, f := range s.actions {
-		if f(s) {
-			s.Log.Debugf("\t[%v] action %v expired", s.Frame(), k)
-			delete(s.actions, k)
-		}
-	}
-	for k, v := range s.Status {
-		if v == 0 {
-			s.Log.Debugf("\t[%v] status %v expired", s.Frame(), k)
-			delete(s.Status, k)
-		} else {
-			s.Status[k]--
-		}
-	}
-	// for k, f := range s.effects {
-	// 	if f(s) {
-	// 		s.Log.Debugf("\t[%v] effect %v expired", s.Frame(), k)
-	// 		delete(s.effects, k)
-	// 	}
-	// }
-	if s.swapCD > 0 {
-		s.swapCD--
-	}
-}
-
-//handleAction executes the next action, returns the cooldown
-func (s *Sim) handleAction(active int, a RotationItem) int {
-	//if active see what ability we want to use
-	c := s.characters[active]
-	s.Log.Infof("[%v] %v executing %v", s.Frame(), s.ActiveChar, a.Action)
-	f := 0
-	switch a.Action {
-	case ActionTypeDash:
-		return 30
-	case ActionTypeJump:
-		return 30
-	case ActionTypeAttack:
-		return c.Attack(a.Params)
-	case ActionTypeChargedAttack:
-		return c.ChargeAttack(a.Params)
-	case ActionTypeBurst:
-		for k, f := range s.eventHooks[PreBurstHook] {
-			if f(s) {
-				s.Log.Debugf("[%v] hook (pre burst) %v expired", s.Frame(), k)
-				delete(s.eventHooks[PreBurstHook], k)
-			}
-		}
-		f = c.Burst(a.Params)
-		for k, f := range s.eventHooks[PostBurstHook] {
-			if f(s) {
-				s.Log.Debugf("[%v] hook (post burst) %v expired", s.Frame(), k)
-				delete(s.eventHooks[PostBurstHook], k)
-			}
-		}
-	case ActionTypeSkill:
-		return c.Skill(a.Params)
-	default:
-		//do nothing
-	}
-
-	return f
-}
-
 func (s *Sim) Frame() string {
 	return fmt.Sprintf("%.2fs|%v", float64(s.f)/60, s.f)
 }
@@ -505,18 +542,20 @@ type EnemyProfile struct {
 
 //RotationItem ...
 type RotationItem struct {
-	CharacterName   string `yaml:"CharacterName"`
-	index           int
+	CharacterName   string                 `yaml:"CharacterName"`
 	Action          ActionType             `yaml:"Action"`
 	Params          map[string]interface{} `yaml:"Params"`
 	ConditionType   string                 `yaml:"ConditionType"`   //for now either a status or aura
 	ConditionTarget string                 `yaml:"ConditionTarget"` //which status or aura
-	Condition       bool                   `yaml:"Condition"`       //true or false
+	ConditionBool   bool                   `yaml:"ConditionBool"`   //true or false
+	ConditionFloat  float64                `yaml:"ConditionFloat"`
+	SwapLock        int                    `yaml:"SwapLock"` //number of frames the sim is restricted from swapping after executing this ability
 }
 
 type Character interface {
 	//ability functions to be defined by each character on how they will
 	Name() string
+	E() float64 //current energy
 	//affect the unit
 	Attack(p map[string]interface{}) int
 	Aimed(p map[string]interface{}) int

@@ -62,6 +62,10 @@ func (c *TemplateChar) Name() string {
 	return c.Profile.Name
 }
 
+func (c *TemplateChar) E() float64 {
+	return c.Energy
+}
+
 func (c *TemplateChar) Snapshot(name string, t combat.ActionType, e combat.EleType) combat.Snapshot {
 	ds := combat.Snapshot{}
 	ds.Stats = make(map[combat.StatType]float64)

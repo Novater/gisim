@@ -246,6 +246,7 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 				d.AuraBase = combat.WeakAuraBase
 				d.AuraUnits = 1
 			}
+			t := i + 1
 
 			delay := 0
 			x.S.AddAction(func(s *combat.Sim) bool {
@@ -254,10 +255,18 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 					return false
 				}
 				damage := s.ApplyDamage(d)
-				s.Log.Infof("[%v]: Xingqiu burst proc hit %v dealt %.0f damage", s.Frame(), i+1, damage)
+				s.Log.Infof("[%v]: Xingqiu burst proc hit %v dealt %.0f damage", s.Frame(), t, damage)
 				//add hydro debuff for 4s
 				if x.Profile.Constellation >= 2 {
 					s.Target.Status["xingqiu-c2"] = 4 * 60
+				}
+				//on first hit, if C6, recover 3 energy
+				if x.Profile.Constellation == 6 && t-1 == 0 {
+					s.Log.Debugf("\tXingqiu C6 regenerating energy previous % next %v", x.Energy, x.Energy+3)
+					x.Energy += 3
+					if x.Energy > x.MaxEnergy {
+						x.Energy = x.MaxEnergy
+					}
 				}
 				return true
 			}, fmt.Sprintf("%v-Xingqiu-Burst-Proc-Hit-%v", x.S.Frame(), i+1))

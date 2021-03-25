@@ -421,8 +421,12 @@ Rotation:
     Action: "burst"
   - CharacterName: "Xingqiu"
     Action: "skill"
-  - CharacterName: "Bennett"
-    Action: "skill"
+    SwapLock: 100
+  # - CharacterName: "Bennett"
+  #   Action: "skill"
+  #   ConditionType: "energy lt"
+  #   ConditionTarget: "Bennett"
+  #   ConditionFloat: 5
   - CharacterName: "Bennett"
     Action: "burst"
   # - CharacterName: "Bennett"
@@ -431,17 +435,19 @@ Rotation:
     Action: "burst"
     ConditionType: "status"
     ConditionTarget: "Fischl-Oz-Skill"
-    Condition: false
+    ConditionBool: false
   - CharacterName: "Fischl"
     Action: "skill"
     ConditionType: "status"
     ConditionTarget: "Fischl-Oz-Burst"
-    Condition: false
+    ConditionBool: false
   - CharacterName: "Xiangling"
     Action: "skill"
   - CharacterName: "Xiangling"
     Action: "burst"
   - CharacterName: "Xiangling"
+    Action: "attack"
+  - CharacterName: "Xingqiu"
     Action: "attack"
   # - CharacterName: "Ganyu"
   #   Action: "skill"
