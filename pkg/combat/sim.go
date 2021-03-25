@@ -78,6 +78,7 @@ func New(p Profile) (*Sim, error) {
 	u.Status = make(map[string]int)
 	u.Level = p.Enemy.Level
 	u.Resist = p.Enemy.Resist
+	u.DamageDetails = make(map[string]map[string]float64)
 
 	s.Target = u
 
@@ -163,6 +164,8 @@ func New(p Profile) (*Sim, error) {
 		}
 
 		dup[v.Name] = true
+
+		s.Target.DamageDetails[v.Name] = make(map[string]float64)
 
 		//initialize weapon
 		wf, ok := weaponMap[v.WeaponName]
@@ -251,13 +254,28 @@ func (s *Sim) Run(length int) float64 {
 				if scost < s.stam {
 					next = v
 					found = true
-					break prio
 				}
 			} else {
 				ok := s.characters[v.index].ActionReady(v.Action)
 				if ok {
 					next = v
 					found = true
+				}
+			}
+			//check condition if found
+			if found {
+				//check if conditions are met
+				cond := true
+				switch v.ConditionType {
+				case "status":
+					_, ok := s.Status[v.ConditionTarget]
+					cond = ok == v.Condition
+				}
+				if !cond {
+					s.Log.Debugw("Skill ready but condition not met", "action", v, "status", s.Status)
+					//condition not met, skip
+					found = false
+				} else {
 					break prio
 				}
 			}
@@ -279,6 +297,13 @@ func (s *Sim) Run(length int) float64 {
 
 		cooldown += s.handleAction(s.active, next)
 
+	}
+
+	for char, t := range s.Target.DamageDetails {
+		fmt.Printf("%v dealt the following damage:\n", char)
+		for k, v := range t {
+			fmt.Printf("\t%v: %.2f (%.2f%%)\n", k, v, 100*v/s.Target.Damage)
+		}
 	}
 
 	return s.Target.Damage

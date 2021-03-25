@@ -27,7 +27,8 @@ type Enemy struct {
 	IsFrozen  bool
 
 	//stats
-	Damage float64 //total damage received
+	Damage        float64 //total damage received
+	DamageDetails map[string]map[string]float64
 }
 
 func (e *Enemy) tick(s *Sim) {

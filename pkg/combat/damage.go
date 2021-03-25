@@ -77,6 +77,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 
 	dr := calcDmg(ds, s.Log)
 	s.Target.Damage += dr.damage
+	s.Target.DamageDetails[ds.CharName][ds.Abil] += dr.damage
 
 	if dr.isCrit {
 		for k, f := range s.combatHooks[OnCritDamage] {

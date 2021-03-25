@@ -415,7 +415,7 @@ Enemy: #blazing axe mitachurl
     geo: 0.1
     anemo: 0.1
     physical: 0.3
-InitialActive: "Xingqiu"
+InitialActive: "Fischl"
 Rotation:
   - CharacterName: "Xingqiu"
     Action: "burst"
@@ -428,7 +428,15 @@ Rotation:
   # - CharacterName: "Bennett"
   #   Action: "attack"
   - CharacterName: "Fischl"
+    Action: "burst"
+    ConditionType: "status"
+    ConditionTarget: "Fischl-Oz-Skill"
+    Condition: false
+  - CharacterName: "Fischl"
     Action: "skill"
+    ConditionType: "status"
+    ConditionTarget: "Fischl-Oz-Burst"
+    Condition: false
   - CharacterName: "Xiangling"
     Action: "skill"
   - CharacterName: "Xiangling"
