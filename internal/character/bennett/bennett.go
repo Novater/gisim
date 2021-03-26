@@ -13,17 +13,17 @@ func init() {
 }
 
 type bennett struct {
-	*common.TemplateChar
+	*combat.CharacterTemplate
 }
 
 func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error) {
 	b := bennett{}
-	t, err := common.New(s, p)
+	t, err := combat.NewTemplateChar(s, p)
 
 	if err != nil {
 		return nil, err
 	}
-	b.TemplateChar = t
+	b.CharacterTemplate = t
 	b.Energy = 60
 	b.MaxEnergy = 60
 	b.Profile.WeaponClass = combat.WeaponClassSword

@@ -62,8 +62,42 @@ func (c *TemplateChar) Name() string {
 	return c.Profile.Name
 }
 
-func (c *TemplateChar) E() float64 {
+func (c *TemplateChar) CurrentEnergy() float64 {
 	return c.Energy
+}
+
+func (c *TemplateChar) ReceiveParticle(p combat.Particle, isActive bool, partyCount int) {
+	var amt, er, r float64
+	r = 1.0
+	if !isActive {
+		r = 1.0 - 0.1*float64(partyCount)
+	}
+	//recharge amount - particles: same = 3, non-ele = 2, diff = 1
+	//recharge amount - orbs: same = 9, non-ele = 6, diff = 3 (3x particles)
+	switch {
+	case p.Ele == c.Profile.Element:
+		amt = 3
+	case p.Ele == combat.NonElemental:
+		amt = 2
+	default:
+		amt = 1
+	}
+	amt = amt * r //apply off field reduction
+	//apply energy regen stat
+	er = c.Stats[combat.ER]
+	for _, m := range c.Mods {
+		er += m[combat.ER]
+	}
+	amt = amt * (1 + er) * float64(p.Num)
+
+	c.S.Log.Debugw("\torb", "name", c.Profile.Name, "count", p.Num, "ele", p.Ele, "on field", isActive, "party count", partyCount, "pre energ", c.Energy)
+
+	c.Energy += amt
+	if c.Energy > c.MaxEnergy {
+		c.Energy = c.MaxEnergy
+	}
+
+	c.S.Log.Debugw("\torb", "energy rec'd", amt, "next energy", c.Energy, "ER", er)
 }
 
 func (c *TemplateChar) Snapshot(name string, t combat.ActionType, e combat.EleType) combat.Snapshot {

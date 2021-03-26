@@ -1,7 +1,6 @@
 package diluc
 
 import (
-	"github.com/srliao/gisim/internal/character/common"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -10,7 +9,7 @@ func init() {
 }
 
 type diluc struct {
-	*common.TemplateChar
+	*combat.CharacterTemplate
 	eCounter int
 }
 
@@ -42,11 +41,11 @@ Checklist:
 
 func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error) {
 	d := diluc{}
-	t, err := common.New(s, p)
+	t, err := combat.NewTemplateChar(s, p)
 	if err != nil {
 		return nil, err
 	}
-	d.TemplateChar = t
+	d.CharacterTemplate = t
 	d.Energy = 60
 	d.MaxEnergy = 60
 	d.Profile.WeaponClass = combat.WeaponClassClaymore
