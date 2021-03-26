@@ -13,18 +13,18 @@ func init() {
 }
 
 type fischl struct {
-	*common.TemplateChar
+	*combat.CharacterTemplate
 	ozHitCounter int //hit counter, apply every 4 hit
 	ozResetTimer int //timer in seconds, 5 seconds reset
 }
 
 func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error) {
 	f := fischl{}
-	t, err := common.New(s, p)
+	t, err := combat.NewTemplateChar(s, p)
 	if err != nil {
 		return nil, err
 	}
-	f.TemplateChar = t
+	f.CharacterTemplate = t
 	f.Energy = 60
 	f.MaxEnergy = 60
 	f.Profile.WeaponClass = combat.WeaponClassBow
@@ -61,14 +61,13 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 			return false
 		}
 
+		//apparently a4 doesnt apply electro
 		d := f.Snapshot("Fischl A4", combat.ActionTypeSpecialProc, combat.Electro)
 		d.Mult = 0.8
-		//apparently a4 doesnt apply electro
-		s.AddAction(func(s *combat.Sim) bool {
+		s.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
-			s.Log.Infof("[%v]: Fischl (Oz - A4) dealt %.0f damage", s.Frame(), damage)
-			return true
-		}, fmt.Sprintf("%v-Fischl-C1", f.S.Frame()))
+			s.Log.Infof("\t Fischl (Oz - A4) dealt %.0f damage", s.Frame(), damage)
+		}, "Fischl A4", 1)
 
 		return false
 	}, "fischl a4", combat.PostReaction)
@@ -84,11 +83,10 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 			}
 			d := f.Snapshot("Fischl C1", combat.ActionTypeSpecialProc, combat.Physical)
 			d.Mult = 0.22
-			s.AddAction(func(s *combat.Sim) bool {
+			s.AddTask(func(s *combat.Sim) {
 				damage := s.ApplyDamage(d)
-				s.Log.Infof("[%v]: Fischl (Oz - C1) dealt %.0f damage", s.Frame(), damage)
-				return true
-			}, fmt.Sprintf("%v-Fischl-C1", f.S.Frame()))
+				s.Log.Infof("\t Fischl (Oz - C1) dealt %.0f damage", s.Frame(), damage)
+			}, "Fischl C1", 1)
 
 			return false
 		}, "fischl c1", combat.PostDamageHook)
@@ -128,11 +126,10 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 	b.ApplyAura = true
 
 	//apply initial damage
-	f.S.AddAction(func(s *combat.Sim) bool {
+	f.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Fischl (Oz - summon) dealt %.0f damage", s.Frame(), damage)
-		return true
-	}, fmt.Sprintf("%v-Fischl-Skill-Initial", f.S.Frame()))
+		s.Log.Infof("\t Fischl (Oz - summon) dealt %.0f damage", s.Frame(), damage)
+	}, "Fischl A4", 1)
 
 	//apply hit every 50 frames thereafter
 	//NOT ENTIRELY ACCURATE BUT OH WELL
@@ -158,19 +155,12 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 			f.ozHitCounter++
 		}
 		damage := s.ApplyDamage(b)
+		s.Log.Infof("[%v]: Fischl (Oz - tick) dealt %.0f damage", s.Frame(), damage)
+
 		//assume fischl has 60% chance of generating orb every attack;
 		if rand.Float64() < .6 {
-			orbDelay := 0
-			s.AddAction(func(s *combat.Sim) bool {
-				if orbDelay < 60+60 { //random guess, 60 frame to generate, 60 frame to collect
-					orbDelay++
-					return false
-				}
-				s.GenerateOrb(1, combat.Electro, false)
-				return true
-			}, fmt.Sprintf("%v-Fischl-Skill-Orb-[%v]", s.Frame(), count))
+			f.S.AddEnergyParticles("Fischl", 1, combat.Electro, 120)
 		}
-		s.Log.Infof("[%v]: Fischl (Oz - tick) dealt %.0f damage", s.Frame(), damage)
 		count++
 		return false
 	}, "Fischl-Oz-Skill")
@@ -292,7 +282,7 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 }
 
 func (f *fischl) Tick() {
-	f.TemplateChar.Tick()
+	f.CharacterTemplate.Tick()
 	f.ozResetTimer--
 	if f.ozResetTimer < 0 {
 		f.ozResetTimer = 0

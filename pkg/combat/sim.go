@@ -19,20 +19,15 @@ var (
 
 type ActionFunc func(s *Sim) bool
 
-type combatHookType string
+type snapshotHookType string
 
 const (
-	PreDamageHook   combatHookType = "PRE_DAMAGE"
-	PostDamageHook  combatHookType = "POST_DAMAGE"
-	PreAuraAppHook  combatHookType = "PRE_AURA_APP"
-	PostAuraAppHook combatHookType = "POST_AURA_APP"
-	// triggered when there will be a reaction
-	PreReaction  combatHookType = "PRE_REACTION"
-	PostReaction combatHookType = "POST_REACTION"
-	// triggered when a damage crits
-	OnCritDamage combatHookType = "CRIT_DAMAGE"
-	// presnap shot
-	PreSnapshot combatHookType = "PRE_SNAPSHOT"
+	PostSnapshot   snapshotHookType = "POST_SNAPSHOT"
+	PreDamageHook  snapshotHookType = "PRE_DAMAGE"
+	PreReaction    snapshotHookType = "PRE_REACTION"
+	PostDamageHook snapshotHookType = "POST_DAMAGE"
+	OnCritDamage   snapshotHookType = "CRIT_DAMAGE"
+	PostReaction   snapshotHookType = "POST_REACTION"
 )
 
 type eventHookType string
@@ -42,7 +37,7 @@ const (
 	PostBurstHook eventHookType = "POSt_BURST_HOOK"
 )
 
-type combatHookFunc func(s *Snapshot) bool
+type snapshotHookFunc func(s *Snapshot) bool
 type eventHookFunc func(s *Sim) bool
 
 //Sim keeps track of one simulation
@@ -62,10 +57,9 @@ type Sim struct {
 	swapCD     int
 	//per tick hooks
 	hooks map[string]ActionFunc
-	//combatHooks
-	combatHooks map[combatHookType]map[string]combatHookFunc
-	eventHooks  map[eventHookType]map[string]eventHookFunc
-	// effects map[string]ActionFunc
+	//snapshotHooks
+	snapshotHooks map[snapshotHookType]map[string]snapshotHookFunc
+	eventHooks    map[eventHookType]map[string]eventHookFunc
 
 	//action actions list
 	actions []ActionItem
@@ -80,11 +74,13 @@ func New(p Profile) (*Sim, error) {
 	u.Level = p.Enemy.Level
 	u.Resist = p.Enemy.Resist
 	u.DamageDetails = make(map[string]map[string]float64)
+	u.ResMod = make(map[EleType]map[string]float64)
+	u.Resist = make(map[EleType]float64)
 
 	s.Target = u
 
 	s.hooks = make(map[string]ActionFunc)
-	s.combatHooks = make(map[combatHookType]map[string]combatHookFunc)
+	s.snapshotHooks = make(map[snapshotHookType]map[string]snapshotHookFunc)
 	s.eventHooks = make(map[eventHookType]map[string]eventHookFunc)
 	s.Status = make(map[string]int)
 	s.chars = make(map[string]Character)
@@ -208,9 +204,21 @@ func New(p Profile) (*Sim, error) {
 
 	//add other hooks
 	//we need to add a predamage hook that reduces physical res
-	s.combatHooks[PreDamageHook]["superconduct"] = func(snap *Snapshot) bool {
-		if _, ok := s.Status["Superconduct"]; ok {
-			snap.ResMod[Physical] -= 0.4
+	s.hooks["superconduct"] = func(s *Sim) bool {
+		if _, exist := s.Target.Status["superconduct"]; exist {
+			//if super conduct debuff active, then make sure res is reduced by .4
+			if _, ok := s.Target.ResMod[Physical]; ok {
+				if _, active := s.Target.ResMod[Physical]["superconduct"]; !active {
+					s.Target.ResMod[Physical]["superconduct"] = -0.4
+				}
+			} else {
+				s.Target.ResMod[Physical] = make(map[string]float64)
+				s.Target.ResMod[Physical]["superconduct"] = -0.4
+			}
+		} else {
+			if _, ok := s.Target.ResMod[Physical]; ok {
+				delete(s.Target.ResMod[Physical], "superconduct")
+			}
 		}
 		return false
 	}
@@ -233,6 +241,7 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64) {
 		s.decrementStatusDuration()
 		s.executeCharacterTicks()
 		s.collectEnergyParticles()
+		s.runTasks()
 
 		//if in cooldown, do nothing
 		if skip > 0 {
@@ -295,7 +304,7 @@ func (s *Sim) addResonance(count map[EleType]int) {
 					s.Log.Debugf("\tapplying pyro resonance + 25%% atk")
 					ds.Stats[ATKP] += 0.25
 					return false
-				}, "Pyro Resonance", PreSnapshot)
+				}, "Pyro Resonance", PostSnapshot)
 			case Hydro:
 				//heal not implemented yet
 			case Cryo:
@@ -343,21 +352,21 @@ func (s *Sim) tick() {
 }
 
 //AddCombatHook adds a hook to sim. Hook will be called based on the type of hook
-func (s *Sim) AddCombatHook(f combatHookFunc, key string, hook combatHookType) {
-	if _, ok := s.combatHooks[hook]; !ok {
-		s.combatHooks[hook] = make(map[string]combatHookFunc)
+func (s *Sim) AddCombatHook(f snapshotHookFunc, key string, hook snapshotHookType) {
+	if _, ok := s.snapshotHooks[hook]; !ok {
+		s.snapshotHooks[hook] = make(map[string]snapshotHookFunc)
 	}
-	s.combatHooks[hook][key] = f
+	s.snapshotHooks[hook][key] = f
 }
 
 //CombatHooks return hooks of the requested type
-func (s *Sim) CombatHooks(key combatHookType) map[string]combatHookFunc {
-	return s.combatHooks[key]
+func (s *Sim) CombatHooks(key snapshotHookType) map[string]snapshotHookFunc {
+	return s.snapshotHooks[key]
 }
 
 //RemoveCombatHook forcefully remove an effect even if the call does not return true
-func (s *Sim) RemoveCombatHook(key string, hook combatHookType) {
-	delete(s.combatHooks[hook], key)
+func (s *Sim) RemoveCombatHook(key string, hook snapshotHookType) {
+	delete(s.snapshotHooks[hook], key)
 }
 
 //AddHook adds a hook to sim. Hook will be called based on the type of hook

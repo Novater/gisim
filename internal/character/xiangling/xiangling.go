@@ -323,11 +323,11 @@ func (x *xl) Burst(p map[string]interface{}) int {
 					s.Log.Debugf("\txiangling c6 adding pyro damage")
 					ds.Stats[combat.PyroP] += 0.15
 					return false
-				}, "xiangling c6", combat.PreSnapshot)
+				}, "xiangling c6", combat.PostSnapshot)
 				return false
 			}
 			if c6tick >= max {
-				s.RemoveCombatHook("xiangling c6", combat.PreSnapshot)
+				s.RemoveCombatHook("xiangling c6", combat.PostSnapshot)
 				return true
 			}
 			return false

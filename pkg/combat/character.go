@@ -150,14 +150,14 @@ func (c *CharacterTemplate) ReceiveParticle(p Particle, isActive bool, partyCoun
 	}
 	amt = amt * (1 + er) * float64(p.Num)
 
-	c.S.Log.Debugw("\torb", "name", c.Profile.Name, "count", p.Num, "ele", p.Ele, "on field", isActive, "party count", partyCount, "pre energ", c.Energy)
+	c.S.Log.Debugw("\t\t orb", "name", c.Profile.Name, "count", p.Num, "ele", p.Ele, "on field", isActive, "party count", partyCount, "pre energ", c.Energy)
 
 	c.Energy += amt
 	if c.Energy > c.MaxEnergy {
 		c.Energy = c.MaxEnergy
 	}
 
-	c.S.Log.Debugw("\torb", "energy rec'd", amt, "next energy", c.Energy, "ER", er)
+	c.S.Log.Debugw("\t\t orb", "energy rec'd", amt, "next energy", c.Energy, "ER", er)
 }
 
 func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType) Snapshot {
@@ -167,7 +167,7 @@ func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType) Snaps
 		ds.Stats[k] = v
 	}
 	for key, m := range c.Mods {
-		c.S.Log.Debugw("\t\tchar stat mod", "key", key, "mods", m)
+		c.S.Log.Debugw("\t\t char stat mod", "key", key, "mods", m)
 		for k, v := range m {
 			ds.Stats[k] += v
 		}
@@ -183,13 +183,8 @@ func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType) Snaps
 	ds.Stats[CR] += c.Profile.BaseCR
 	ds.Stats[CD] += c.Profile.BaseCD
 
-	ds.ResMod = make(map[EleType]float64)
-	ds.TargetRes = make(map[EleType]float64)
-	ds.ExtraStatMod = make(map[StatType]float64)
-
-	hooks := c.S.CombatHooks(PreSnapshot)
-	for key, f := range hooks {
-		c.S.Log.Debugf("\t\texecuting pre snapshot hook: %v", key)
+	for key, f := range c.S.snapshotHooks[PostSnapshot] {
+		c.S.Log.Debugf("\t\t executing pre snapshot hook: %v", key)
 		f(&ds)
 	}
 
@@ -229,14 +224,14 @@ func (c *CharacterTemplate) Tick() {
 	for k := range c.CD {
 		c.CD[k]--
 		if c.CD[k] == 0 {
-			c.S.Log.Debugf("\t[%v] cooldown %v finished; deleting", c.S.Frame(), k)
+			c.S.Log.Infof("[%v] cooldown %v finished; deleting", c.S.Frame(), k)
 			delete(c.CD, k)
 		}
 	}
 	//check normal reset
 	if c.NormalResetTimer == 0 {
 		if c.NRTChanged {
-			c.S.Log.Debugf("\t[%v] character normal reset", c.S.Frame())
+			c.S.Log.Infof("[%v] character normal reset", c.S.Frame())
 			c.NRTChanged = false
 		}
 		c.NormalCounter = 0

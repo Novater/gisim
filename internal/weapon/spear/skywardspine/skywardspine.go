@@ -57,11 +57,11 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		//add a new action that deals % dmg immediately
 		d := c.Snapshot("Skyward Spine Proc", combat.ActionTypeSpecialProc, combat.Physical)
 		d.Mult = dmg
-		s.AddAction(func(s *combat.Sim) bool {
+		s.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
-			s.Log.Infof("[%v]: Skyward Spine proc dealt %.0f damage", s.Frame(), damage)
-			return true
-		}, fmt.Sprintf("%v-Skyware-Spine-Proc-%v", s.Frame(), c.Name()))
+			s.Log.Infof("\t Skyward Spine proc dealt %.0f damage", damage)
+		}, fmt.Sprintf("Skyware-Spine-Proc-%v", c.Name()), 1)
+
 		//trigger cd
 		s.Status["Skyward Spine Proc"] = 2 * 60
 

@@ -22,7 +22,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			ds.DmgBonus += 0.2
 
 			return false
-		}, "noblesse oblige 2pc", combat.PreSnapshot)
+		}, "noblesse oblige 2pc", combat.PostSnapshot)
 	}
 	if count >= 4 {
 		s.AddEventHook(func(s *combat.Sim) bool {
@@ -46,7 +46,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 				s.Log.Debugf("\t\t\tNoblesse 4 pc adding %v atk; pre buff %v", 0.2, ds.Stats[combat.ATKP])
 				ds.Stats[combat.ATKP] += 0.2
 				return false
-			}, "noblesse oblige 4pc", combat.PreSnapshot)
+			}, "noblesse oblige 4pc", combat.PostSnapshot)
 
 			return false
 		}, "noblesse oblige 4pc", combat.PreBurstHook)

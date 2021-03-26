@@ -1,7 +1,6 @@
 package favoniuswarbow
 
 import (
-	"fmt"
 	"math/rand"
 
 	"github.com/srliao/gisim/pkg/combat"
@@ -44,15 +43,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		}
 		s.Log.Debugf("[%v] Favonius Warbox proc triggered", s.Frame())
 
-		orbDelay := 0
-		s.AddAction(func(s *combat.Sim) bool {
-			if orbDelay < 90+60 { //it takes 90 frames to generate orb, add another 60 frames to get it
-				orbDelay++
-				return false
-			}
-			s.GenerateOrb(3, combat.NonElemental, false)
-			return true
-		}, fmt.Sprintf("%v-FavoniusWarbow-Orb", s.Frame()))
+		s.AddEnergyParticles("Favonius Warbow", 3, combat.NonElemental, 150) //90 to generate, 60 to get it
 
 		s.Status["Favonius Warbow Proc"] = cd
 		return false

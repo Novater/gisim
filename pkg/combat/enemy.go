@@ -6,9 +6,7 @@ import "encoding/json"
 type Enemy struct {
 	Level  int64
 	Resist map[EleType]float64
-
-	//resist mods
-	ResMod map[string]float64
+	ResMod map[EleType]map[string]float64
 
 	//auras should be stored in an array
 	//there seems to be a priority system on what gets stored first; don't know how it works
@@ -98,7 +96,7 @@ func (e *Enemy) auraTick(s *Sim) {
 				s.Log.Panicw("tick json error", "err", err)
 			}
 			ds.ReactionType = ElectroCharged
-			damage := s.applyReactionDamage(ds)
+			damage := s.applyReactionDamage(ds, *s.Target)
 			//reduce both auras
 			e.Auras[0].Duration -= int64(0.5 * float64(e.Auras[0].Base))
 			e.Auras[1].Duration -= int64(0.4 * float64(e.Auras[1].Base))

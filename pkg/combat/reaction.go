@@ -51,7 +51,7 @@ const (
 )
 
 //split this out as a separate function so we can call it if we need to apply EC or Burning damage
-func (s *Sim) applyReactionDamage(ds Snapshot) float64 {
+func (s *Sim) applyReactionDamage(ds Snapshot, target Enemy) float64 {
 	var mult float64
 	var t EleType
 	switch ds.ReactionType {
@@ -79,7 +79,13 @@ func (s *Sim) applyReactionDamage(ds Snapshot) float64 {
 	//need some datamining here
 	cl := float64(ds.CharLvl)
 	lvlm := 0.0002325*cl*cl*cl + 0.05547*cl*cl - 0.2523*cl + 14.74
-	res := ds.TargetRes[t] + ds.ResMod[t]
+
+	var rm float64
+	for _, v := range target.ResMod[ds.Element] {
+		rm += v
+	}
+	//apply resist mod
+	res := target.Resist[ds.Element] + rm
 	resmod := 1 - res/2
 	if res >= 0 && res < 0.75 {
 		resmod = 1 - res
