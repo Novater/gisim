@@ -463,9 +463,9 @@ func (s *Sim) EventHooks(key eventHookType) map[string]eventHookFunc {
 }
 
 //RemoveHook forcefully remove an effect even if the call does not return true
-func (s *Sim) RemoveEventHook(key string, hook eventHookType) {
-	delete(s.eventHooks[hook], key)
-}
+// func (s *Sim) RemoveEventHook(key string, hook eventHookType) {
+// 	delete(s.eventHooks[hook], key)
+// }
 
 func (s *Sim) AddAction(f ActionFunc, key string) {
 	if _, ok := s.actions[key]; ok {
@@ -475,10 +475,10 @@ func (s *Sim) AddAction(f ActionFunc, key string) {
 	s.Log.Debugf("\t[%v] new action %v; action map: %v", s.Frame(), key, s.actions)
 }
 
-func (s *Sim) HasAction(key string) bool {
-	_, ok := s.actions[key]
-	return ok
-}
+// func (s *Sim) HasAction(key string) bool {
+// 	_, ok := s.actions[key]
+// 	return ok
+// }
 
 func (s *Sim) RemoveAction(key string) {
 	delete(s.actions, key)

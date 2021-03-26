@@ -10,6 +10,12 @@ type Aura interface {
 	Tick() bool //remove if true
 }
 
+type Element struct {
+	Type  EleType
+	Base  int
+	Units int
+}
+
 type Reaction struct {
 	Next Aura //the resultant aura, can be nil?
 }
