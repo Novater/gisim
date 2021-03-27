@@ -21,7 +21,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		atkmod = 0.72
 	}
 	//add on hit effect
-	s.AddCombatHook(func(snap *combat.Snapshot) bool {
+	s.AddSnapshotHook(func(snap *combat.Snapshot) bool {
 		//check if char is correct?
 		if snap.CharName != c.Name() {
 			return false
@@ -35,7 +35,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 	}, "prototype-crescent-proc", combat.PostDamageHook)
 
 	//add snapshot effect
-	s.AddCombatHook(func(ds *combat.Snapshot) bool {
+	s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		if c.Name() != ds.CharName {
 			return false
 		}

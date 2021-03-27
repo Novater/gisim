@@ -13,9 +13,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 		c.AddMod("Gladiator's Finale 2PC", m)
 	}
 	if count >= 4 {
-		//NOT YET IMPLEMENTED
-		//we now need a weapon type flag....
-		s.AddCombatHook(func(ds *combat.Snapshot) bool {
+		s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 			if ds.AbilType != combat.ActionTypeAttack {
 				return false
 			}
@@ -24,7 +22,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			}
 			ds.DmgBonus += 0.35
 			return false
-		}, "gladiator's finale 4pc", combat.PreDamageHook)
+		}, "gladiator's finale 4pc", combat.PostSnapshot)
 	}
 	//add flat stat to char
 }

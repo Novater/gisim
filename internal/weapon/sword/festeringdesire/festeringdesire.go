@@ -25,7 +25,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		crit = .12
 	}
 
-	s.AddCombatHook(func(ds *combat.Snapshot) bool {
+	s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		if ds.CharName != c.Name() {
 			return false
 		}

@@ -23,12 +23,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 			ds.WillReact = true
 			ds.ReactionType = r.Type
 			//handle pre reaction
-			for k, f := range s.snapshotHooks[PreReaction] {
-				if f(&ds) {
-					s.Log.Debugf("[%v] effect (pre reaction) %v expired", s.Frame(), k)
-					delete(s.snapshotHooks[PreReaction], k)
-				}
-			}
+			s.executeSnapshotHooks(PreReaction, &ds)
 
 			//either adjust damage snap, adjust stats, or add effect to deal damage after initial damage
 			switch r.Type {
@@ -53,7 +48,11 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 					ds.ReactMult = 2.0 //strong, triggered by hydro
 				}
 			case Superconduct:
-				s.Status["Superconduct"] = 12 * 60 //add a debuff for superconduct
+				s.Target.AddResMod("Superconduct", ResistMod{
+					Duration: 12 * 60,
+					Ele:      Physical,
+					Value:    -0.4,
+				})
 			case ElectroCharged:
 				target.Status["electrocharge icd"] = 60
 			}
@@ -61,13 +60,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 		target.Auras = r.Next
 	}
 
-	for k, f := range s.snapshotHooks[PreDamageHook] {
-		s.Log.Debugf("\trunning pre damage hook: %v", k)
-		if f(&ds) {
-			s.Log.Debugf("[%v] effect (pre damage) %v expired", s.Frame(), k)
-			delete(s.snapshotHooks[PreDamageHook], k)
-		}
-	}
+	s.executeSnapshotHooks(PreDamageHook, &ds)
 
 	//for each reaction damage to occur -> call any pre reaction hooks
 	//we can have multiple reaction so snapshot should be made a copy
@@ -80,33 +73,15 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	s.Target.DamageDetails[ds.CharName][ds.Abil] += dr.damage
 
 	if dr.isCrit {
-		for k, f := range s.snapshotHooks[OnCritDamage] {
-			s.Log.Debugf("\trunning on crit hook: %v", k)
-			if f(&ds) {
-				s.Log.Debugf("[%v] effect (on crit dmg) %v expired", s.Frame(), k)
-				delete(s.snapshotHooks[PostDamageHook], k)
-			}
-		}
+		s.executeSnapshotHooks(OnCritDamage, &ds)
 	}
 
-	for k, f := range s.snapshotHooks[PostDamageHook] {
-		s.Log.Debugf("\trunning post damage hook: %v", k)
-		if f(&ds) {
-			s.Log.Debugf("[%v] effect (pre damage) %v expired", s.Frame(), k)
-			delete(s.snapshotHooks[PostDamageHook], k)
-		}
-	}
+	s.executeSnapshotHooks(PostDamageHook, &ds)
 
 	//apply reaction damage now! not sure if this timing is right though; maybe we can add this to the next frame as a tick instead?
 	if ds.WillReact {
 		s.applyReactionDamage(ds, *s.Target)
-		for k, f := range s.snapshotHooks[PostReaction] {
-			s.Log.Debugf("\trunning post reaction hook: %v", k)
-			if f(&ds) {
-				s.Log.Debugf("[%v] effect (pre reaction) %v expired", s.Frame(), k)
-				delete(s.snapshotHooks[PostReaction], k)
-			}
-		}
+		s.executeSnapshotHooks(PostReaction, &ds)
 	}
 
 	return dr.damage
@@ -145,19 +120,14 @@ func calcDmg(ds Snapshot, target Enemy, log *zap.SugaredLogger) dmgResult {
 	if ds.Stats[CR] > 1 {
 		ds.Stats[CR] = 1
 	}
+	res := target.Resist()[ds.Element]
 
-	log.Debugw("\t\tcalc", "cr", ds.Stats[CR], "cd", ds.Stats[CD], "def adj", ds.DefMod, "res adj", target.ResMod[ds.Element], "char lvl", ds.CharLvl, "target lvl", target.Level, "target res", target.Resist[ds.Element])
+	log.Debugw("\t\tcalc", "cr", ds.Stats[CR], "cd", ds.Stats[CD], "def adj", ds.DefMod, "char lvl", ds.CharLvl, "target lvl", target.Level, "target res", res)
 
 	defmod := float64(ds.CharLvl+100) / (float64(ds.CharLvl+100) + float64(target.Level+100)*(1-ds.DefMod))
 	//apply def mod
 	damage = damage * defmod
-	//add up the resist mods
-	var rm float64
-	for _, v := range target.ResMod[ds.Element] {
-		rm += v
-	}
 	//apply resist mod
-	res := target.Resist[ds.Element] + rm
 
 	resmod := 1 - res/2
 	if res >= 0 && res < 0.75 {

@@ -17,28 +17,7 @@ var (
 	weaponMap = make(map[string]NewWeaponFunc)
 )
 
-type ActionFunc func(s *Sim) bool
-
-type snapshotHookType string
-
-const (
-	PostSnapshot   snapshotHookType = "POST_SNAPSHOT"
-	PreDamageHook  snapshotHookType = "PRE_DAMAGE"
-	PreReaction    snapshotHookType = "PRE_REACTION"
-	PostDamageHook snapshotHookType = "POST_DAMAGE"
-	OnCritDamage   snapshotHookType = "CRIT_DAMAGE"
-	PostReaction   snapshotHookType = "POST_REACTION"
-)
-
-type eventHookType string
-
-const (
-	PreBurstHook  eventHookType = "PRE_BURST_HOOK"
-	PostBurstHook eventHookType = "POSt_BURST_HOOK"
-)
-
-type snapshotHookFunc func(s *Snapshot) bool
-type eventHookFunc func(s *Sim) bool
+type EffectFunc func(s *Sim) bool
 
 //Sim keeps track of one simulation
 type Sim struct {
@@ -55,11 +34,11 @@ type Sim struct {
 	f          int
 	stam       float64
 	swapCD     int
-	//per tick hooks
-	hooks map[string]ActionFunc
-	//snapshotHooks
-	snapshotHooks map[snapshotHookType]map[string]snapshotHookFunc
-	eventHooks    map[eventHookType]map[string]eventHookFunc
+	//per tick effects
+	effects []EffectFunc
+	//event hooks
+	snapshotHooks map[snapshotHookType][]snapshotHookFunc
+	eventHooks    map[eventHookType][]eventHookFunc
 
 	//action actions list
 	actions []ActionItem
@@ -72,16 +51,14 @@ func New(p Profile) (*Sim, error) {
 	u := &Enemy{}
 	u.Status = make(map[string]int)
 	u.Level = p.Enemy.Level
-	u.Resist = p.Enemy.Resist
+	u.res = p.Enemy.Resist
 	u.DamageDetails = make(map[string]map[string]float64)
-	u.ResMod = make(map[EleType]map[string]float64)
-	u.Resist = make(map[EleType]float64)
+	u.mod = make(map[string]ResistMod)
 
 	s.Target = u
 
-	s.hooks = make(map[string]ActionFunc)
-	s.snapshotHooks = make(map[snapshotHookType]map[string]snapshotHookFunc)
-	s.eventHooks = make(map[eventHookType]map[string]eventHookFunc)
+	s.snapshotHooks = make(map[snapshotHookType][]snapshotHookFunc)
+	s.eventHooks = make(map[eventHookType][]eventHookFunc)
 	s.Status = make(map[string]int)
 	s.chars = make(map[string]Character)
 	// s.effects = make(map[string]ActionFunc)
@@ -203,26 +180,6 @@ func New(p Profile) (*Sim, error) {
 	s.addResonance(res)
 
 	//add other hooks
-	//we need to add a predamage hook that reduces physical res
-	s.hooks["superconduct"] = func(s *Sim) bool {
-		if _, exist := s.Target.Status["superconduct"]; exist {
-			//if super conduct debuff active, then make sure res is reduced by .4
-			if _, ok := s.Target.ResMod[Physical]; ok {
-				if _, active := s.Target.ResMod[Physical]["superconduct"]; !active {
-					s.Target.ResMod[Physical]["superconduct"] = -0.4
-				}
-			} else {
-				s.Target.ResMod[Physical] = make(map[string]float64)
-				s.Target.ResMod[Physical]["superconduct"] = -0.4
-			}
-		} else {
-			if _, ok := s.Target.ResMod[Physical]; ok {
-				delete(s.Target.ResMod[Physical], "superconduct")
-			}
-		}
-		return false
-	}
-
 	return s, nil
 }
 
@@ -241,7 +198,12 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64) {
 		s.decrementStatusDuration()
 		s.executeCharacterTicks()
 		s.collectEnergyParticles()
+		s.runEffects()
 		s.runTasks()
+
+		if s.swapCD > 0 {
+			s.swapCD--
+		}
 
 		//if in cooldown, do nothing
 		if skip > 0 {
@@ -285,22 +247,12 @@ func (s *Sim) AddCharMod(c string, key string, val map[StatType]float64) {
 	}
 }
 
-//GenerateOrb is called when an ability generates orb
-func (s *Sim) GenerateOrb(n int, ele EleType, isOrb bool) {
-	s.Log.Debugf("[%v]: particle/orbs picked up: %v of %v (isOrb: %v), active char: %v", s.Frame(), n, ele, isOrb, s.ActiveChar)
-	count := len(s.chars)
-	for name, c := range s.chars {
-		active := s.ActiveChar == name
-		c.ApplyOrb(n, ele, isOrb, active, count)
-	}
-}
-
 func (s *Sim) addResonance(count map[EleType]int) {
 	for k, v := range count {
 		if v > 2 {
 			switch k {
 			case Pyro:
-				s.AddCombatHook(func(ds *Snapshot) bool {
+				s.AddSnapshotHook(func(ds *Snapshot) bool {
 					s.Log.Debugf("\tapplying pyro resonance + 25%% atk")
 					ds.Stats[ATKP] += 0.25
 					return false
@@ -308,7 +260,7 @@ func (s *Sim) addResonance(count map[EleType]int) {
 			case Hydro:
 				//heal not implemented yet
 			case Cryo:
-				s.AddCombatHook(func(ds *Snapshot) bool {
+				s.AddSnapshotHook(func(ds *Snapshot) bool {
 					if len(s.Target.Auras) == 0 {
 						return false
 					}
@@ -334,74 +286,9 @@ func (s *Sim) addResonance(count map[EleType]int) {
 
 //tick
 func (s *Sim) tick() {
-	for k, f := range s.hooks {
-		if f(s) {
-			s.Log.Debugf("\t[%v] action %v expired", s.Frame(), k)
-			delete(s.hooks, k)
-		}
-	}
-	// for k, f := range s.effects {
-	// 	if f(s) {
-	// 		s.Log.Debugf("\t[%v] effect %v expired", s.Frame(), k)
-	// 		delete(s.effects, k)
-	// 	}
-	// }
 	if s.swapCD > 0 {
 		s.swapCD--
 	}
-}
-
-//AddCombatHook adds a hook to sim. Hook will be called based on the type of hook
-func (s *Sim) AddCombatHook(f snapshotHookFunc, key string, hook snapshotHookType) {
-	if _, ok := s.snapshotHooks[hook]; !ok {
-		s.snapshotHooks[hook] = make(map[string]snapshotHookFunc)
-	}
-	s.snapshotHooks[hook][key] = f
-}
-
-//CombatHooks return hooks of the requested type
-func (s *Sim) CombatHooks(key snapshotHookType) map[string]snapshotHookFunc {
-	return s.snapshotHooks[key]
-}
-
-//RemoveCombatHook forcefully remove an effect even if the call does not return true
-func (s *Sim) RemoveCombatHook(key string, hook snapshotHookType) {
-	delete(s.snapshotHooks[hook], key)
-}
-
-//AddHook adds a hook to sim. Hook will be called based on the type of hook
-func (s *Sim) AddEventHook(f eventHookFunc, key string, hook eventHookType) {
-	if _, ok := s.eventHooks[hook]; !ok {
-		s.eventHooks[hook] = make(map[string]eventHookFunc)
-	}
-	s.eventHooks[hook][key] = f
-}
-
-//Hooks return hooks of the requested type
-func (s *Sim) EventHooks(key eventHookType) map[string]eventHookFunc {
-	return s.eventHooks[key]
-}
-
-//RemoveHook forcefully remove an effect even if the call does not return true
-// func (s *Sim) RemoveEventHook(key string, hook eventHookType) {
-// 	delete(s.eventHooks[hook], key)
-// }
-
-func (s *Sim) AddAction(f ActionFunc, key string) {
-	if _, ok := s.hooks[key]; ok {
-		s.Log.Debugf("\t[%v] action %v exists; overriding existing", s.Frame(), key)
-	}
-	s.hooks[key] = f
-	s.Log.Debugf("\t[%v] new action %v; action map: %v", s.Frame(), key, s.hooks)
-}
-
-// func (s *Sim) HasAction(key string) bool {
-// 	_, ok := s.actions[key]
-// 	return ok
-// }
-
-func (s *Sim) RemoveAction(key string) {
-	delete(s.hooks, key)
 }
 
 func (s *Sim) Frame() string {

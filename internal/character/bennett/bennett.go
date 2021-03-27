@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/srliao/gisim/internal/character/common"
+	"github.com/srliao/gisim/internal/common"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -41,7 +41,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		pc += 0.2
 	}
 	atk := pc * float64(b.Profile.BaseAtk+b.Profile.WeaponBaseAtk)
-	b.S.AddCombatHook(func(ds *combat.Snapshot) bool {
+	b.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		if _, ok := b.S.Status["Bennett Burst"]; !ok {
 			return false
 		}
@@ -125,7 +125,7 @@ func (b *bennett) ChargeAttackStam() float64 {
 }
 
 func (b *bennett) Skill(p map[string]interface{}) int {
-	if _, ok := b.CD[common.SkillCD]; ok {
+	if _, ok := b.CD[combat.SkillCD]; ok {
 		b.S.Log.Debugf("\tBennett skill still on CD; skipping")
 		return 0
 	}
@@ -183,21 +183,21 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 	switch hold {
 	case 1:
 		cd := int(7.5 * 60 * (1 - reduction))
-		b.CD[common.SkillCD] = cd
+		b.CD[combat.SkillCD] = cd
 		return 153 //not right?
 	case 2:
 		cd := int(10 * 60 * (1 - reduction))
-		b.CD[common.SkillCD] = cd
+		b.CD[combat.SkillCD] = cd
 		return 370 //too high as well
 	}
 
 	cd := int(5 * 60 * (1 - reduction))
-	b.CD[common.SkillCD] = cd //should be 7.5 or 10
+	b.CD[combat.SkillCD] = cd //should be 7.5 or 10
 	return 52
 }
 
 func (b *bennett) Burst(p map[string]interface{}) int {
-	if _, ok := b.CD[common.BurstCD]; ok {
+	if _, ok := b.CD[combat.BurstCD]; ok {
 		b.S.Log.Debugf("\tBennett burst still on CD; skipping")
 		return 0
 	}

@@ -15,8 +15,8 @@ func set(c combat.Character, s *combat.Sim, count int) {
 		c.AddMod("Blizzard Strayer 2PC", m)
 	}
 	if count >= 4 {
-		s.AddCombatHook(func(snap *combat.Snapshot) bool {
-			if snap.CharName != c.Name() {
+		s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
+			if ds.CharName != c.Name() {
 				return false
 			}
 
@@ -26,12 +26,12 @@ func set(c combat.Character, s *combat.Sim, count int) {
 
 			if s.Target.Auras[0].Ele == combat.Cryo {
 				s.Log.Debugf("\tapplying blizzard strayer 2pc buff on cryo target")
-				snap.Stats[combat.CR] += .2
+				ds.Stats[combat.CR] += .2
 			}
 
 			if s.Target.Auras[0].Ele == combat.Frozen {
 				s.Log.Debugf("\tapplying blizzard strayer 4pc buff on cryo target")
-				snap.Stats[combat.CR] += .4
+				ds.Stats[combat.CR] += .4
 			}
 
 			return false

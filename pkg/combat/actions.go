@@ -72,19 +72,9 @@ func (s *Sim) executeAbilityQueue(a []ActionItem) (int, []ActionItem) {
 	case ActionTypeAimedShot:
 		f = c.Aimed(x.Params)
 	case ActionTypeBurst:
-		for k, f := range s.eventHooks[PreBurstHook] {
-			if f(s) {
-				s.Log.Debugf("[%v] hook (pre burst) %v expired", s.Frame(), k)
-				delete(s.eventHooks[PreBurstHook], k)
-			}
-		}
+		s.executeEventHook(PreBurstHook)
 		f = c.Burst(x.Params)
-		for k, f := range s.eventHooks[PostBurstHook] {
-			if f(s) {
-				s.Log.Debugf("[%v] hook (post burst) %v expired", s.Frame(), k)
-				delete(s.eventHooks[PostBurstHook], k)
-			}
-		}
+		s.executeEventHook(PostBurstHook)
 	case ActionTypeSkill:
 		f = c.Skill(x.Params)
 	}
@@ -101,7 +91,8 @@ type ActionItem struct {
 	ConditionTarget string                 `yaml:"ConditionTarget"` //which status or aura
 	ConditionBool   bool                   `yaml:"ConditionBool"`   //true or false
 	ConditionFloat  float64                `yaml:"ConditionFloat"`
-	SwapLock        int                    `yaml:"SwapLock"` //number of frames the sim is restricted from swapping after executing this ability
+	SwapLock        int                    `yaml:"SwapLock"`      //number of frames the sim is restricted from swapping after executing this ability
+	CancelAbility   ActionType             `yaml:"CancelAbility"` //ability to execute to cancel this action
 }
 
 type ActionType string

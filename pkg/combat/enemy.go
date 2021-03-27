@@ -4,9 +4,9 @@ import "encoding/json"
 
 //Enemy keeps track of the status of one enemy Enemy
 type Enemy struct {
-	Level  int64
-	Resist map[EleType]float64
-	ResMod map[EleType]map[string]float64
+	Level int64
+	res   map[EleType]float64
+	mod   map[string]ResistMod
 
 	//auras should be stored in an array
 	//there seems to be a priority system on what gets stored first; don't know how it works
@@ -29,6 +29,31 @@ type Enemy struct {
 	DamageDetails map[string]map[string]float64
 }
 
+type ResistMod struct {
+	Ele      EleType
+	Value    float64
+	Duration int
+}
+
+func (e *Enemy) Resist() map[EleType]float64 {
+	r := make(map[EleType]float64)
+	for k, v := range e.res {
+		r[k] = v
+	}
+	for _, v := range e.mod {
+		r[v.Ele] += v.Value
+	}
+	return r
+}
+
+func (e *Enemy) AddResMod(key string, val ResistMod) {
+	e.mod[key] = val
+}
+
+func (e *Enemy) RemoveResMod(key string) {
+	delete(e.mod, key)
+}
+
 func (e *Enemy) tick(s *Sim) {
 	//tick down buffs and debuffs
 	for k, v := range e.Status {
@@ -36,6 +61,15 @@ func (e *Enemy) tick(s *Sim) {
 			delete(e.Status, k)
 		} else {
 			e.Status[k]--
+		}
+	}
+	//tick down resist mods
+	for k, v := range e.mod {
+		if v.Duration == 0 {
+			delete(e.mod, k)
+		} else {
+			v.Duration--
+			e.mod[k] = v
 		}
 	}
 	e.auraTick(s)

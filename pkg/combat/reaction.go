@@ -80,12 +80,7 @@ func (s *Sim) applyReactionDamage(ds Snapshot, target Enemy) float64 {
 	cl := float64(ds.CharLvl)
 	lvlm := 0.0002325*cl*cl*cl + 0.05547*cl*cl - 0.2523*cl + 14.74
 
-	var rm float64
-	for _, v := range target.ResMod[ds.Element] {
-		rm += v
-	}
-	//apply resist mod
-	res := target.Resist[ds.Element] + rm
+	res := target.Resist()[ds.Element]
 	resmod := 1 - res/2
 	if res >= 0 && res < 0.75 {
 		resmod = 1 - res

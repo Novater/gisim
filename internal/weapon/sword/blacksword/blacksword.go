@@ -19,7 +19,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		dmg = .4
 	}
 	//add on hit effect to sim?
-	s.AddCombatHook(func(ds *combat.Snapshot) bool {
+	s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		if ds.AbilType == combat.ActionTypeAttack || ds.AbilType == combat.ActionTypeChargedAttack {
 			s.Log.Debugf("\t\tBlack sword adding %v dmg", dmg)
 			ds.DmgBonus += dmg

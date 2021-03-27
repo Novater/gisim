@@ -29,7 +29,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		cd = 6 * 60
 	}
 	//add on crit effect
-	s.AddCombatHook(func(snap *combat.Snapshot) bool {
+	s.AddSnapshotHook(func(snap *combat.Snapshot) bool {
 		//check if char is correct?
 		if snap.CharName != c.Name() {
 			return false
