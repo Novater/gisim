@@ -64,6 +64,7 @@ const (
 	PhyP     StatType = "Phys%"
 	DendroP  StatType = "Dendro%"
 	AtkSpd   StatType = "ATKSPD%"
+	DmgP     StatType = "Dmg%"
 )
 
 func EleToDmgP(e EleType) StatType {

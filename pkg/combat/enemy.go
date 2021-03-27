@@ -1,6 +1,10 @@
 package combat
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"go.uber.org/zap"
+)
 
 //Enemy keeps track of the status of one enemy Enemy
 type Enemy struct {
@@ -35,12 +39,14 @@ type ResistMod struct {
 	Duration int
 }
 
-func (e *Enemy) Resist() map[EleType]float64 {
+func (e *Enemy) Resist(log *zap.SugaredLogger) map[EleType]float64 {
+	// log.Debugw("\t\t res calc", "res", e.res, "mods", e.mod)
 	r := make(map[EleType]float64)
 	for k, v := range e.res {
 		r[k] = v
 	}
-	for _, v := range e.mod {
+	for k, v := range e.mod {
+		log.Debugf("\t\t Resist %v modified by %v; from %v", v.Ele, v.Value, k)
 		r[v.Ele] += v.Value
 	}
 	return r
@@ -66,6 +72,7 @@ func (e *Enemy) tick(s *Sim) {
 	//tick down resist mods
 	for k, v := range e.mod {
 		if v.Duration == 0 {
+			s.Log.Debugf("[%v] resist mod %v expired", s.Frame(), k)
 			delete(e.mod, k)
 		} else {
 			v.Duration--

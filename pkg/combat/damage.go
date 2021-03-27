@@ -97,7 +97,7 @@ func calcDmg(ds Snapshot, target Enemy, log *zap.SugaredLogger) dmgResult {
 	result := dmgResult{}
 
 	st := EleToDmgP(ds.Element)
-	ds.DmgBonus += ds.Stats[st]
+	ds.DmgBonus += ds.Stats[st] + ds.Stats[DmgP]
 
 	log.Debugw("\t\tcalc", "base atk", ds.BaseAtk, "flat +", ds.Stats[ATK], "% +", ds.Stats[ATKP], "ele", st, "ele %", ds.Stats[st], "bonus dmg", ds.DmgBonus, "mul", ds.Mult)
 	//calculate using attack or def
@@ -120,7 +120,7 @@ func calcDmg(ds Snapshot, target Enemy, log *zap.SugaredLogger) dmgResult {
 	if ds.Stats[CR] > 1 {
 		ds.Stats[CR] = 1
 	}
-	res := target.Resist()[ds.Element]
+	res := target.Resist(log)[ds.Element]
 
 	log.Debugw("\t\tcalc", "cr", ds.Stats[CR], "cd", ds.Stats[CD], "def adj", ds.DefMod, "char lvl", ds.CharLvl, "target lvl", target.Level, "target res", res)
 

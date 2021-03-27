@@ -24,6 +24,12 @@ func (s *Sim) abilityConditionsOk(a ActionItem) bool {
 		if t > a.ConditionFloat {
 			return false
 		}
+	case "tags":
+		t := s.chars[a.CharacterName].Tag(a.ConditionTarget)
+		s.Log.Debugw("\t checking for tags", "want", a.ConditionInt, "got", t, "action", a)
+		if t != a.ConditionInt {
+			return false
+		}
 	}
 	return true
 }
@@ -89,6 +95,7 @@ type ActionItem struct {
 	ConditionTarget string                 `yaml:"ConditionTarget"` //which status or aura
 	ConditionBool   bool                   `yaml:"ConditionBool"`   //true or false
 	ConditionFloat  float64                `yaml:"ConditionFloat"`
+	ConditionInt    int                    `yaml:"ConditionInt"`
 	SwapLock        int                    `yaml:"SwapLock"`      //number of frames the sim is restricted from swapping after executing this ability
 	CancelAbility   ActionType             `yaml:"CancelAbility"` //ability to execute to cancel this action
 }

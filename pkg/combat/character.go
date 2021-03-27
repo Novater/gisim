@@ -20,6 +20,7 @@ type Character interface {
 	ActionCooldown(a ActionType) int
 	ActionReady(a ActionType) bool
 	ChargeAttackStam() float64
+	Tag(key string) int
 	//other actions
 	ApplyOrb(count int, ele EleType, isOrb bool, isActive bool, partyCount int)
 	ReceiveParticle(p Particle, isActive bool, partyCount int)
@@ -69,6 +70,7 @@ type CharacterTemplate struct {
 	CD    map[string]int
 	Stats map[StatType]float64
 	Mods  map[string]map[StatType]float64
+	Tags  map[string]int
 	//Profile info
 	Profile   CharacterProfile
 	Energy    float64
@@ -98,6 +100,7 @@ func NewTemplateChar(s *Sim, p CharacterProfile) (*CharacterTemplate, error) {
 	c.CD = make(map[string]int)
 	c.Stats = make(map[StatType]float64)
 	c.Mods = make(map[string]map[StatType]float64)
+	c.Tags = make(map[string]int)
 	c.Profile = p
 
 	for _, a := range p.Artifacts {
@@ -116,6 +119,10 @@ func NewTemplateChar(s *Sim, p CharacterProfile) (*CharacterTemplate, error) {
 	}
 
 	return &c, nil
+}
+
+func (c *CharacterTemplate) Tag(key string) int {
+	return c.Tags[key]
 }
 
 func (c *CharacterTemplate) Name() string {
