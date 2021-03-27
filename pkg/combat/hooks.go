@@ -60,9 +60,8 @@ func (s *Sim) executeSnapshotHooks(t snapshotHookType, ds *Snapshot) {
 
 func (s *Sim) runEffects() {
 	var next []EffectFunc
-	for k, f := range s.effects {
+	for _, f := range s.effects {
 		if !f(s) {
-			s.Log.Debugf("\t[%v] action %v expired", s.Frame(), k)
 			next = append(next, f)
 		}
 	}

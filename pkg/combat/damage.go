@@ -18,7 +18,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	//they will only trigger a sep damage calc
 	if ds.ApplyAura {
 		r := s.checkReact(ds)
-		s.Log.Debugw("reaction result", "r", r, "source", ds.Element)
+		s.Log.Debugw("\t reaction result", "r", r, "source", ds.Element)
 		if r.DidReact {
 			ds.WillReact = true
 			ds.ReactionType = r.Type

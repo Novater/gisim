@@ -3,7 +3,6 @@ package xiangling
 import (
 	"fmt"
 
-	"github.com/srliao/gisim/internal/character/common"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -12,34 +11,40 @@ func init() {
 }
 
 type xl struct {
-	*common.TemplateChar
+	*combat.CharacterTemplate
+	delayedFunc map[string]func() bool
 }
 
 func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error) {
 	x := xl{}
-	t, err := common.New(s, p)
+	t, err := combat.NewTemplateChar(s, p)
 	if err != nil {
 		return nil, err
 	}
-	x.TemplateChar = t
+	x.CharacterTemplate = t
 	x.Energy = 60
 	x.MaxEnergy = 60
 	x.Profile.WeaponClass = combat.WeaponClassSpear
 
-	if x.Profile.Constellation >= 1 {
-		s.Log.Debugf("\tactivating Xiangling C1")
-
-		s.AddCombatHook(func(snap *combat.Snapshot) bool {
-			//check if c1 debuff is on, if so, reduce resist by -0.15
-			if _, ok := s.Target.Status["xiangling-c1"]; ok {
-				s.Log.Debugf("\t[%v]: applying Xiangling C1 pyro debuff", s.Frame())
-				snap.ResMod[combat.Pyro] -= 0.15
-			}
-			return false
-		}, "xiangling-c1", combat.PreDamageHook)
-	}
-
 	return &x, nil
+}
+
+func (x *xl) c1() {
+	x.S.Target.AddResMod("xiangling-c1", combat.ResistMod{
+		Ele:      combat.Pyro,
+		Value:    -0.15,
+		Duration: 6 * 60,
+	})
+}
+
+func (x *xl) c6() {
+	x.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
+		if _, ok := x.S.Status["Xiangling C6"]; !ok {
+			return false
+		}
+		ds.Stats[combat.PyroP] += 0.15
+		return false
+	}, "Xiangling C6", combat.PostSnapshot)
 }
 
 func (x *xl) Attack(p map[string]interface{}) int {
@@ -81,35 +86,22 @@ func (x *xl) Attack(p map[string]interface{}) int {
 	for i, hit := range hits {
 		d.Mult = hit[x.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 		t := i + 1
-		//add a 5 frame delay
-		delay := 0
-		x.S.AddAction(func(s *combat.Sim) bool {
-			if delay < 5 {
-				delay++
-				return false
-			}
-			//no delay for now? realistically the hits should have delay but not sure if it actually makes a diff
-			//since it doesnt apply any elements, only trigger weapon procs
-			c := d.Clone()
-			damage := s.ApplyDamage(c)
-			s.Log.Infof("[%v]: Xiangling normal %v (hit %v) dealt %.0f damage", s.Frame(), n, t, damage)
-			return true
-		}, fmt.Sprintf("%v-Xiangling-Normal-%v-%v", x.S.Frame(), n, i))
+		x.S.AddTask(func(s *combat.Sim) {
+			damage := s.ApplyDamage(d)
+			s.Log.Infof("\t Xiangling normal %v (hit %v) dealt %.0f damage", n, t, damage)
+		}, fmt.Sprintf("Xiangling-Normal-%v-%v", n, t), 5)
 	}
 	//if n = 5, add explosion for c2
 	if x.Profile.Constellation >= 2 && n == 5 {
-		tick := 0
-		x.S.AddAction(func(s *combat.Sim) bool {
-			tick++
-			if tick < 2*60 {
-				return false
-			}
-			c := d.Clone()
-			c.Element = combat.Pyro
+		c := d.Clone()
+		c.Element = combat.Pyro
+		c.ApplyAura = true
+		c.AuraBase = combat.WeakAuraBase
+		c.AuraUnits = 1
+		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(c)
-			s.Log.Infof("[%v]: Xiangling C2 explosion dealt %.0f damage", s.Frame(), damage)
-			return true
-		}, fmt.Sprintf("%v-Xiangling-C2-Explosion", x.S.Frame()))
+			s.Log.Infof("\t Xiangling C2 explosion dealt %.0f damage", damage)
+		}, "Xiangling-C2-Explosion", 120)
 	}
 	//add a 75 frame attackcounter reset
 	x.NormalResetTimer = 70
@@ -126,13 +118,13 @@ func (x *xl) ChargeAttack(p map[string]interface{}) int {
 	d := x.Snapshot("Charge Attack", combat.ActionTypeChargedAttack, combat.Physical)
 	d.Mult = nc[x.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 
-	x.S.AddAction(func(s *combat.Sim) bool {
-		//no delay for now? realistically the hits should have delay but not sure if it actually makes a diff
-		//since it doesnt apply any elements, only trigger weapon procs
+	//no delay for now? realistically the hits should have delay but not sure if it actually makes a diff
+	//since it doesnt apply any elements, only trigger weapon procs
+	x.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Xiangling charge attack dealt %.0f damage", s.Frame(), damage)
-		return true
-	}, fmt.Sprintf("%v-Xiangling-Charge-Attack", x.S.Frame()))
+		s.Log.Infof("\t Xiangling charge attack dealt %.0f damage", damage)
+	}, "Xiangling-Charge-Attack", 1)
+
 	x.NormalResetTimer = 0
 	//return animation cd
 	return 85
@@ -144,7 +136,7 @@ func (x *xl) ChargeAttackStam() float64 {
 
 func (x *xl) Skill(p map[string]interface{}) int {
 	//check if on cd first
-	if _, ok := x.CD[common.SkillCD]; ok {
+	if _, ok := x.CD[combat.SkillCD]; ok {
 		x.S.Log.Debugf("\tXiangling skill still on CD; skipping")
 		return 0
 	}
@@ -161,52 +153,18 @@ func (x *xl) Skill(p map[string]interface{}) int {
 	d.ApplyAura = true //apparently every hit applies
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1
+	delay := 120
 
-	//we get orb after a delay each tick, tick 4 times
-	tick := 0
-	next := 120
-	count := 0
-	g := func(s *combat.Sim) bool {
-		//cast 1630
-		//first app 1750, next app after 90 frames @ 1840, total 4 casts
-		//120 frames delay initially
-		tick++
-		if tick < next {
-			return false
-		}
-		if tick == next {
-			//make a copy of the snapshot
-			c := d.Clone()
-
-			next += 95
-			count++
-			damage := s.ApplyDamage(c)
-			s.Log.Infof("[%v]: Xiangling (Gouba - tick) dealt %.0f damage", s.Frame(), damage)
-			//apply c1 after damage
-			if x.Profile.Constellation >= 1 {
-				s.Target.Status["xiangling-c1"] = 6 * 60
-			}
-			//generate orbs
-			//add delayed orb for travel time
-			orbDelay := 0
-			s.AddAction(func(s *combat.Sim) bool {
-				if orbDelay < 90+60 { //it takes 90 frames to generate orb, add another 60 frames to get it
-					orbDelay++
-					return false
-				}
-				s.GenerateOrb(1, combat.Pyro, false)
-				return true
-			}, fmt.Sprintf("%v-Xiangling-Skill-Orb", s.Frame()))
-		}
-		if count == 4 {
-			s.Log.Infof("[%v]: Xiangling (Gouba) expired", s.Frame())
-			return true
-		}
-		return false
+	for i := 0; i < 4; i++ {
+		x.S.AddTask(func(s *combat.Sim) {
+			damage := s.ApplyDamage(d)
+			s.Log.Infof("\t Xiangling (Gouba - tick) dealt %.0f damage", damage)
+		}, "Xiangling Guoba", delay+i*95)
+		x.S.AddEnergyParticles("Xiangling", 1, combat.Pyro, delay+i*95+90+60)
 	}
-	x.S.AddAction(g, fmt.Sprintf("%v-Xiangling-Skill", x.S.Frame()))
+
 	//add cooldown to sim
-	x.CD[common.SkillCD] = 12 * 60
+	x.CD[combat.SkillCD] = 12 * 60
 	x.NormalResetTimer = 0
 	//return animation cd
 	return 26
@@ -214,7 +172,7 @@ func (x *xl) Skill(p map[string]interface{}) int {
 
 func (x *xl) Burst(p map[string]interface{}) int {
 	//check if on cd first
-	if _, ok := x.CD[common.BurstCD]; ok {
+	if _, ok := x.CD[combat.BurstCD]; ok {
 		x.S.Log.Debugf("\tXiangling skill still on CD; skipping")
 		return 0
 	}
@@ -230,9 +188,9 @@ func (x *xl) Burst(p map[string]interface{}) int {
 			lvl = 14
 		}
 	}
-	//first hit
+	//initial 3 hits are delayed and snapshotted at execution instead of at cast... no idea why...
 	h1d := 0
-	x.S.AddAction(func(s *combat.Sim) bool {
+	x.delayedFunc["hit1"] = func() bool {
 		h1d++
 		if h1d < 20 {
 			return false
@@ -242,12 +200,15 @@ func (x *xl) Burst(p map[string]interface{}) int {
 		d.AuraBase = combat.WeakAuraBase
 		d.AuraUnits = 1
 		d.ApplyAura = true
-		damage := s.ApplyDamage(d)
-		x.S.Log.Infof("[%v]: Xiangling Pyronado initial hit 1 dealt %.0f damage", s.Frame(), damage)
+		x.S.AddTask(func(s *combat.Sim) {
+			damage := s.ApplyDamage(d)
+			s.Log.Infof("\t Xiangling Pyronado initial hit 1 dealt %.0f damagee", damage)
+		}, "Xiangling-Burst-Hit-1", 0)
 		return true
-	}, fmt.Sprintf("%v-Xiangling-Burst-Hit-1", x.S.Frame()))
+	}
+
 	h2d := 0
-	x.S.AddAction(func(s *combat.Sim) bool {
+	x.delayedFunc["hit2"] = func() bool {
 		h2d++
 		if h2d < 50 {
 			return false
@@ -257,12 +218,15 @@ func (x *xl) Burst(p map[string]interface{}) int {
 		d.AuraBase = combat.WeakAuraBase
 		d.AuraUnits = 1
 		d.ApplyAura = true
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Xiangling Pyronado initial hit 2 dealt %.0f damage", s.Frame(), damage)
+		x.S.AddTask(func(s *combat.Sim) {
+			damage := s.ApplyDamage(d)
+			s.Log.Infof("\t Xiangling Pyronado initial hit 2 dealt %.0f damagee", damage)
+		}, "Xiangling-Burst-Hit-2", 0)
 		return true
-	}, fmt.Sprintf("%v-Xiangling-Burst-Hit-2", x.S.Frame()))
+	}
+
 	h3d := 0
-	x.S.AddAction(func(s *combat.Sim) bool {
+	x.delayedFunc["hit2"] = func() bool {
 		h3d++
 		if h3d < 75 {
 			return false
@@ -272,75 +236,67 @@ func (x *xl) Burst(p map[string]interface{}) int {
 		d.AuraBase = combat.WeakAuraBase
 		d.AuraUnits = 1
 		d.ApplyAura = true
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Xiangling Pyronado initial hit 3 dealt %.0f damage", s.Frame(), damage)
+		x.S.AddTask(func(s *combat.Sim) {
+			damage := s.ApplyDamage(d)
+			s.Log.Infof("\t Xiangling Pyronado initial hit 3 dealt %.0f damagee", damage)
+		}, "Xiangling-Burst-Hit-3", 0)
 		return true
-	}, fmt.Sprintf("%v-Xiangling-Burst-Hit-3", x.S.Frame()))
-	//ok for now we assume it's 80 frames per cycle, that gives us roughly 10s uptime
-	tick := 0
-	next := 70
+	}
+
+	//spin to win; snapshot on cast
+	d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)
+	d.Mult = pyronadoSpin[lvl]
+	d.ApplyAura = true
+	d.AuraBase = combat.WeakAuraBase
+	d.AuraUnits = 1
+
+	//ok for now we assume it's 80 (or 70??) frames per cycle, that gives us roughly 10s uptime
 	//max is either 10s or 14s
 	max := 10 * 60
 	if x.Profile.Constellation >= 4 {
 		max = 14 * 60
 	}
 	count := 0
-	//pyronado snaps at cast time
-	pd := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)
-	pd.Mult = pyronadoSpin[lvl]
-	pd.ApplyAura = true
-	pd.AuraBase = combat.WeakAuraBase
-	pd.AuraUnits = 1
-	x.S.AddAction(func(s *combat.Sim) bool {
-		tick++
-		if tick < next {
-			return false
-		}
-		//exit if expired
-		if tick >= max {
-			return true
-		}
-		if tick == next {
-			count++
-			next += 70
-			damage := s.ApplyDamage(pd)
-			s.Log.Infof("[%v]: Xiangling (Pyronado - tick #%v) dealt %.0f damage", s.Frame(), count, damage)
-		}
-		return false
-	}, fmt.Sprintf("%v-Xiangling-Burst-Spin", x.S.Frame()))
+
+	for delay := 70; delay <= max; delay += 70 {
+		count++
+		x.S.AddTask(func(s *combat.Sim) {
+			damage := s.ApplyDamage(d)
+			s.Log.Infof("\t Xiangling (Pyronado - tick #%v) dealt %.0f damage", count, damage)
+		}, "Xiangling Pyronado", delay)
+	}
+
 	//add an effect starting at frame 70 to end of duration to increase pyro dmg by 15% if c6
 	if x.Profile.Constellation >= 6 {
 		//wait 70 frames, add effect
 		//count to max, remove effect
 		c6tick := 0
-		x.S.AddAction(func(s *combat.Sim) bool {
+		x.delayedFunc["c6"] = func() bool {
 			c6tick++
 			if c6tick < 70 {
 				return false
 			}
-			if c6tick == 70 {
-				s.AddCombatHook(func(ds *combat.Snapshot) bool {
-					s.Log.Debugf("\txiangling c6 adding pyro damage")
-					ds.Stats[combat.PyroP] += 0.15
-					return false
-				}, "xiangling c6", combat.PostSnapshot)
-				return false
-			}
-			if c6tick >= max {
-				s.RemoveCombatHook("xiangling c6", combat.PostSnapshot)
-				return true
-			}
-			return false
-		}, fmt.Sprintf("%v-Xiangling-Burst-C6", x.S.Frame()))
+			x.S.Status["Xiangling C6"] = max
+			return true
+		}
 
 	}
 
 	//add cooldown to sim
-	x.CD[common.BurstCD] = 20 * 60
+	x.CD[combat.BurstCD] = 20 * 60
 	//use up energy
 	x.Energy = 0
 
 	x.NormalResetTimer = 0
 	//return animation cd
 	return 140
+}
+
+func (x *xl) Tick() {
+	x.CharacterTemplate.Tick()
+	for k, f := range x.delayedFunc {
+		if f() {
+			delete(x.delayedFunc, k)
+		}
+	}
 }

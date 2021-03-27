@@ -3,7 +3,6 @@ package xingqiu
 import (
 	"fmt"
 
-	"github.com/srliao/gisim/internal/character/common"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -12,16 +11,18 @@ func init() {
 }
 
 type xingqiu struct {
-	*common.TemplateChar
+	*combat.CharacterTemplate
+	numSwords    int
+	burstCounter int
 }
 
 func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error) {
 	x := xingqiu{}
-	t, err := common.New(s, p)
+	t, err := combat.NewTemplateChar(s, p)
 	if err != nil {
 		return nil, err
 	}
-	x.TemplateChar = t
+	x.CharacterTemplate = t
 	x.Energy = 80
 	x.MaxEnergy = 80
 	x.Profile.WeaponClass = combat.WeaponClassSword
@@ -30,26 +31,20 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	a4[combat.HydroP] = 0.2
 	x.AddMod("Xingqiu A4", a4)
 
-	//c2
-	if x.Profile.Constellation >= 2 {
-		s.Log.Debugf("\tactivating Xingqiu C2")
-
-		s.AddCombatHook(func(snap *combat.Snapshot) bool {
-			//check if c1 debuff is on, if so, reduce resist by -0.15
-			if _, ok := s.Target.Status["xingqiu-c2"]; ok {
-				s.Log.Debugf("\t[%v]: applying Xingqiu C2 hydro debuff", s.Frame())
-				snap.ResMod[combat.Hydro] -= 0.15
-			}
-			return false
-		}, "xingqiu-c2", combat.PreDamageHook)
-	}
-
 	/** c6
 	Activating 2 of Guhua Sword: Raincutter's sword rain attacks greatly increases the DMG of the third.
 	Xingqiu regenerates 3 Energy when sword rain attacks hit opponents.
 	**/
 
 	return &x, nil
+}
+
+func (x *xingqiu) c2() {
+	x.S.Target.AddResMod("xingqiu-c2", combat.ResistMod{
+		Ele:      combat.Hydro,
+		Value:    -0.15,
+		Duration: 4 * 60,
+	})
 }
 
 func (x *xingqiu) Attack(p map[string]interface{}) int {
@@ -84,24 +79,16 @@ func (x *xingqiu) Attack(p map[string]interface{}) int {
 	x.NormalCounter++
 	//apply attack speed
 	frames = int(float64(frames) / (1 + x.Stats[combat.AtkSpd]))
+
 	for i, hit := range hits {
 		d := x.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
 		d.Mult = hit[x.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 		//add a 20 frame delay; should be 18 and 42 for combo 3 and 5 actual
-		delay := 0
 		t := i + 1
-		x.S.AddAction(func(s *combat.Sim) bool {
-			if delay < 20 {
-				delay++
-				return false
-			}
-			//no delay for now? realistically the hits should have delay but not sure if it actually makes a diff
-			//since it doesnt apply any elements, only trigger weapon procs
-			c := d.Clone()
-			damage := s.ApplyDamage(c)
-			s.Log.Infof("[%v]: Xingqiu normal %v (hit %v) dealt %.0f damage", s.Frame(), n, t, damage)
-			return true
-		}, fmt.Sprintf("%v-Xingqiu-Normal-%v-%v", x.S.Frame(), n, i))
+		x.S.AddTask(func(s *combat.Sim) {
+			damage := s.ApplyDamage(d)
+			s.Log.Infof("\t Xingqiu normal %v (hit %v) dealt %.0f damage", n, t, damage)
+		}, fmt.Sprintf("Xingqiu-Normal-%v-%v", n, i), 20)
 	}
 
 	//add a 75 frame attackcounter reset
@@ -117,7 +104,7 @@ func (x *xingqiu) Attack(p map[string]interface{}) int {
 
 func (x *xingqiu) Skill(p map[string]interface{}) int {
 	//applies wet to self 30 frame after cast
-	if _, ok := x.CD[common.SkillCD]; ok {
+	if _, ok := x.CD[combat.SkillCD]; ok {
 		x.S.Log.Debugf("\tXingqiu skill still on CD; skipping")
 		return 0
 	}
@@ -142,47 +129,104 @@ func (x *xingqiu) Skill(p map[string]interface{}) int {
 	d2 := d.Clone()
 	d2.Mult = rainscreen[1][lvl]
 
-	tick := 0
-	x.S.AddAction(func(s *combat.Sim) bool {
-		tick++
-		if tick < 19 { //first hit 19 frames
-			return false
-		}
+	x.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Xingqiu skill hit 1 dealt %.0f damage", s.Frame(), damage)
-		return true
-	}, fmt.Sprintf("%v-Xingqiu-Skill-1", x.S.Frame()))
+		s.Log.Infof("\t Xingqiu skill hit 1 dealt %.0f damage", damage)
+	}, "Xingqiu-Skill-1", 19) //first hit 19 frames
 
-	x.S.AddAction(func(s *combat.Sim) bool {
-		tick++
-		if tick < 39 { //second 39
-			return false
-		}
+	x.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d2)
-		s.Log.Infof("[%v]: Xingqiu skill hit 2 dealt %.0f damage", s.Frame(), damage)
-		return true
-	}, fmt.Sprintf("%v-Xingqiu-Skill-2", x.S.Frame()))
+		s.Log.Infof("\t Xingqiu skill hit 2 dealt %.0f damage", damage)
+	}, "Xingqiu-Skill-1", 39) //second hit 39 frames
 
-	orbDelay := 0
-	x.S.AddAction(func(s *combat.Sim) bool {
-		if orbDelay < 100 { //generated on the 37th, 100 frames to get orbs if standing right up against
-			orbDelay++
-			return false
-		}
-		s.GenerateOrb(5, combat.Hydro, false)
-		return true
-	}, fmt.Sprintf("%v-Xingqiu-Skill-Orb", x.S.Frame()))
+	x.S.AddEnergyParticles("Xingqiu", 5, combat.Hydro, 100)
 
 	//should last 15s, cd 21s
-	x.CD[common.SkillCD] = 21 * 60
+	x.CD[combat.SkillCD] = 21 * 60
 	return 77
+}
+
+func (x *xingqiu) burstHook() {
+	x.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
+		//check if buff is up
+		if _, ok := x.S.Status["Xingqiu-Burst"]; !ok {
+			return false
+		}
+		//check if off ICD
+		if _, ok := x.CD["Xingqiu-Burst-ICD"]; ok {
+			return false
+		}
+		//check if normal attack
+		if ds.AbilType != combat.ActionTypeAttack && ds.AbilType != combat.ActionTypeChargedAttack {
+			return false
+		}
+
+		lvl := x.Profile.TalentLevel[combat.ActionTypeBurst] - 1
+		if x.Profile.Constellation >= 3 {
+			lvl += 3
+			if lvl > 14 {
+				lvl = 14
+			}
+		}
+
+		//trigger swords, only first sword applies hydro
+		for i := 0; i < x.numSwords; i++ {
+
+			d := x.Snapshot("Guhua Sword: Raincutter", combat.ActionTypeBurst, combat.Hydro)
+			d.Mult = burst[lvl]
+
+			//apply aura every 3rd hit -> hit 0, 3, 6, etc...
+			//only first sword summoned can apply aura
+			if x.burstCounter%3 == 0 && i == 0 {
+				d.ApplyAura = true
+				d.AuraBase = combat.WeakAuraBase
+				d.AuraUnits = 1
+			}
+			t := i + 1
+
+			x.S.AddTask(func(s *combat.Sim) {
+				damage := s.ApplyDamage(d)
+				s.Log.Infof("\t Xingqiu burst proc hit %v dealt %.0f damage", t, damage)
+				if x.Profile.Constellation >= 2 {
+					x.c2()
+				}
+				if x.Profile.Constellation == 6 && t-1 == 0 {
+					s.Log.Debugf("\tXingqiu C6 regenerating energy previous % next %v", x.Energy, x.Energy+3)
+					x.Energy += 3
+					if x.Energy > x.MaxEnergy {
+						x.Energy = x.MaxEnergy
+					}
+				}
+			}, fmt.Sprintf("Xingqiu-Burst-Proc-Hit-%v", i+1), 20+i) //second hit 39 frames
+		}
+
+		//figure out next wave # of swords
+		switch x.numSwords {
+		case 2:
+			x.numSwords = 3
+		case 3:
+			if x.Profile.Constellation == 6 {
+				x.numSwords = 5
+			} else {
+				x.numSwords = 2
+			}
+		case 5:
+			x.numSwords = 2
+		}
+
+		//estimated 1 second ICD
+		x.CD["Xingqiu-Burst-ICD"] = 60
+		x.burstCounter++
+
+		return false
+	}, "Xingqiu-Burst", combat.PostDamageHook)
 }
 
 func (x *xingqiu) Burst(p map[string]interface{}) int {
 	//apply hydro every 3rd hit
 	//triggered on normal attack
 	//not sure what ICD is
-	if _, ok := x.CD[common.BurstCD]; ok {
+	if _, ok := x.CD[combat.BurstCD]; ok {
 		x.S.Log.Debugf("\tXingqiu skill still on CD; skipping")
 		return 0
 	}
@@ -209,100 +253,10 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 	dur = dur * 60
 	x.S.Status["Xingqiu-Burst"] = dur
 
-	burstCounter := 0
-	swords := 2
-	x.S.AddCombatHook(func(ds *combat.Snapshot) bool {
-		//check if buff is up
-		if _, ok := x.S.Status["Xingqiu-Burst"]; !ok {
-			return true //remove
-		}
-		//check if off ICD
-		if _, ok := x.CD["Xingqiu-Burst-ICD"]; ok {
-			return false
-		}
-		//check if normal attack
-		if ds.AbilType != combat.ActionTypeAttack && ds.AbilType != combat.ActionTypeChargedAttack {
-			return false
-		}
+	x.burstCounter = 0
+	x.numSwords = 2
 
-		lvl := x.Profile.TalentLevel[combat.ActionTypeBurst] - 1
-		if x.Profile.Constellation >= 3 {
-			lvl += 3
-			if lvl > 14 {
-				lvl = 14
-			}
-		}
-
-		//trigger swords, only first sword applies hydro
-		for i := 0; i < swords; i++ {
-
-			d := x.Snapshot("Guhua Sword: Raincutter", combat.ActionTypeBurst, combat.Hydro)
-			d.Mult = burst[lvl]
-
-			//apply aura every 3rd hit -> hit 0, 3, 6, etc...
-			//only first sword summoned can apply aura
-			if burstCounter%3 == 0 && i == 0 {
-				d.ApplyAura = true
-				d.AuraBase = combat.WeakAuraBase
-				d.AuraUnits = 1
-			}
-			t := i + 1
-
-			delay := 0
-			x.S.AddAction(func(s *combat.Sim) bool {
-				if delay < 20+(i) { //20 frames after trigger to do dmg, + i for each sword; TODO
-					delay++
-					return false
-				}
-				damage := s.ApplyDamage(d)
-				s.Log.Infof("[%v]: Xingqiu burst proc hit %v dealt %.0f damage", s.Frame(), t, damage)
-				//add hydro debuff for 4s
-				if x.Profile.Constellation >= 2 {
-					s.Target.Status["xingqiu-c2"] = 4 * 60
-				}
-				//on first hit, if C6, recover 3 energy
-				if x.Profile.Constellation == 6 && t-1 == 0 {
-					s.Log.Debugf("\tXingqiu C6 regenerating energy previous % next %v", x.Energy, x.Energy+3)
-					x.Energy += 3
-					if x.Energy > x.MaxEnergy {
-						x.Energy = x.MaxEnergy
-					}
-				}
-				return true
-			}, fmt.Sprintf("%v-Xingqiu-Burst-Proc-Hit-%v", x.S.Frame(), i+1))
-		}
-
-		//figure out next wave # of swords
-		switch swords {
-		case 2:
-			swords = 3
-		case 3:
-			if x.Profile.Constellation == 6 {
-				swords = 5
-			} else {
-				swords = 2
-			}
-		case 5:
-			swords = 2
-		}
-
-		//estimated 1 second ICD
-		x.CD["Xingqiu-Burst-ICD"] = 60
-		burstCounter++
-
-		return false
-	}, "Xingqiu-Burst", combat.PostDamageHook)
-
-	//remove the hook if off CD
-	x.S.AddAction(func(s *combat.Sim) bool {
-		_, ok := s.Status["Xingqiu-Burst"]
-		if !ok {
-			s.RemoveCombatHook("Xingqiu-Burst", combat.PostDamageHook)
-		}
-		return !ok
-	}, fmt.Sprintf("%v-Xingqiu-Burst", x.S.Frame()))
-
-	x.CD[common.BurstCD] = 20 * 60
+	x.CD[combat.BurstCD] = 20 * 60
 	x.Energy = 0
 	return 39
 }

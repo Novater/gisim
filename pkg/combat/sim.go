@@ -196,8 +196,8 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64) {
 		s.tick()
 
 		s.decrementStatusDuration()
-		s.executeCharacterTicks()
 		s.collectEnergyParticles()
+		s.executeCharacterTicks()
 		s.runEffects()
 		s.runTasks()
 

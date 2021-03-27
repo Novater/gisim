@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/srliao/gisim/internal/common"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -146,6 +145,8 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 	var hits [][]float64
 	delay := []int{26}
 	switch hold {
+	case 0:
+		hits = skill
 	case 1:
 		delay = []int{89, 115}
 		hits = skill1
@@ -201,6 +202,11 @@ func (b *bennett) Burst(p map[string]interface{}) int {
 		b.S.Log.Debugf("\tBennett burst still on CD; skipping")
 		return 0
 	}
+	//check if sufficient energy
+	if b.Energy < b.MaxEnergy {
+		b.S.Log.Debugf("\t Bennett burst - insufficent energy, current: %v", b.Energy)
+		return 0
+	}
 
 	lvl := b.Profile.TalentLevel[combat.ActionTypeBurst] - 1
 	if b.Profile.Constellation >= 5 {
@@ -229,6 +235,6 @@ func (b *bennett) Burst(p map[string]interface{}) int {
 	}, "Bennett-Burst", 43)
 
 	b.Energy = 0
-	b.CD[common.BurstCD] = 15 * 60
+	b.CD[combat.BurstCD] = 15 * 60
 	return 51 //todo fix field cast time
 }

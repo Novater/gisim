@@ -1,10 +1,8 @@
 package fischl
 
 import (
-	"fmt"
 	"math/rand"
 
-	"github.com/srliao/gisim/internal/character/common"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -14,8 +12,17 @@ func init() {
 
 type fischl struct {
 	*combat.CharacterTemplate
-	ozHitCounter int //hit counter, apply every 4 hit
-	ozResetTimer int //timer in seconds, 5 seconds reset
+	ozAuraICDHitCounter int //hit counter, apply every 4 hit
+	ozAuraICDResetTimer int //timer in seconds, 5 seconds reset
+	//track if oz is active
+	ozActive      bool
+	ozActiveTimer int
+	//field use for calculating oz damage
+	ozActiveSource string
+	//will only shoot if active and CD == 0
+	ozShootCD    int
+	ozShootDelay int
+	ozSnapshot   combat.Snapshot
 }
 
 func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error) {
@@ -29,8 +36,19 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	f.MaxEnergy = 60
 	f.Profile.WeaponClass = combat.WeaponClassBow
 
+	f.ozShootDelay = 50
+
 	//register A4
-	s.AddCombatHook(func(ds *combat.Snapshot) bool {
+	f.a4()
+
+	if p.Constellation >= 1 {
+		f.c1()
+	}
+	return &f, nil
+}
+
+func (f *fischl) a4() {
+	f.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		//don't trigger A4 if Fischl dealt dmg thereby triggering reaction
 		if ds.CharName == "Fischl" {
 			return false
@@ -55,56 +73,98 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 			return false
 		}
 		//check if Oz is on the field
-		_, skillOz := s.Status["Fischl-Oz-Skill"]
-		_, burstOz := s.Status["Fischl-Oz-Burst"]
-		if !skillOz && !burstOz {
+		if !f.ozActive {
 			return false
 		}
-
 		//apparently a4 doesnt apply electro
 		d := f.Snapshot("Fischl A4", combat.ActionTypeSpecialProc, combat.Electro)
 		d.Mult = 0.8
-		s.AddTask(func(s *combat.Sim) {
+		f.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("\t Fischl (Oz - A4) dealt %.0f damage", s.Frame(), damage)
 		}, "Fischl A4", 1)
 
 		return false
 	}, "fischl a4", combat.PostReaction)
+}
 
-	if p.Constellation >= 1 {
-		//if oz is not on field, trigger effect
-		s.AddCombatHook(func(ds *combat.Snapshot) bool {
-			if ds.CharName != "Fischl" {
-				return false
-			}
-			if ds.AbilType != combat.ActionTypeAttack {
-				return false
-			}
-			d := f.Snapshot("Fischl C1", combat.ActionTypeSpecialProc, combat.Physical)
-			d.Mult = 0.22
-			s.AddTask(func(s *combat.Sim) {
-				damage := s.ApplyDamage(d)
-				s.Log.Infof("\t Fischl (Oz - C1) dealt %.0f damage", s.Frame(), damage)
-			}, "Fischl C1", 1)
-
+func (f *fischl) c1() {
+	//if oz is not on field, trigger effect
+	f.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
+		if f.ozActive {
 			return false
-		}, "fischl c1", combat.PostDamageHook)
-	}
+		}
+		if ds.CharName != "Fischl" {
+			return false
+		}
+		if ds.AbilType != combat.ActionTypeAttack {
+			return false
+		}
+		d := f.Snapshot("Fischl C1", combat.ActionTypeSpecialProc, combat.Physical)
+		d.Mult = 0.22
+		f.S.AddTask(func(s *combat.Sim) {
+			damage := s.ApplyDamage(d)
+			s.Log.Infof("\t Fischl (Oz - C1) dealt %.0f damage", s.Frame(), damage)
+		}, "Fischl C1", 1)
 
-	return &f, nil
+		return false
+	}, "fischl c1", combat.PostDamageHook)
+}
+
+func (f *fischl) ozShoot() {
+	//don't shoot if oz not around
+	if !f.ozActive {
+		return
+	}
+	//check oz active timer
+	f.ozActiveTimer--
+	if f.ozActiveTimer == 0 {
+		f.ozActiveTimer = 0
+		f.ozActive = false
+		return
+	}
+	//don't shoot if oz shoot timer is on cd
+	if f.ozShootCD > 0 {
+		f.ozShootCD--
+		return
+	}
+	d := f.ozSnapshot.Clone()
+	if f.ozAuraICDHitCounter%4 == 0 {
+		//apply aura, add to timer
+		d.ApplyAura = true
+		d.AuraBase = combat.WeakAuraBase
+		d.AuraUnits = 1
+		f.ozAuraICDResetTimer = 5 * 60 // every 5 second force reset
+		f.ozAuraICDHitCounter++
+	}
+	//so oz is active and ready to shoot, we add damage
+	f.S.AddTask(func(s *combat.Sim) {
+		damage := s.ApplyDamage(d)
+		s.Log.Infof("\t Fischl (Oz - %v) dealt %.0f damage", s.Frame(), f.ozActiveSource, damage)
+	}, "Fischl A4", 0)
+	f.ozShootCD += f.ozShootDelay
+	//assume fischl has 60% chance of generating orb every attack;
+	if rand.Float64() < .6 {
+		f.S.AddEnergyParticles("Fischl", 1, combat.Electro, 120)
+	}
 }
 
 //42
 func (f *fischl) Skill(p map[string]interface{}) int {
-	if _, ok := f.CD[common.SkillCD]; ok {
+	if _, ok := f.CD[combat.SkillCD]; ok {
 		f.S.Log.Debugf("\tFischl skill still on CD; skipping")
 		return 0
 	}
 
-	//cancel existing bird right away if any
-	f.S.RemoveAction("Fischl-Oz-Burst")
-	delete(f.S.Status, "Fischl-Oz-Burst")
+	//reset oz
+	f.ozActive = true
+	f.ozActiveTimer = 10 * 60 //10 second summon
+	f.ozActiveSource = "Skill"
+	f.ozShootCD = 40    //40 frames before first shot
+	f.ozShootDelay = 50 //50 frames per shot
+	//reset hit counter as well not sure if this is true though
+	f.ozAuraICDHitCounter = 0
+	f.ozAuraICDResetTimer = 0
 
 	d := f.Snapshot("Oz", combat.ActionTypeSkill, combat.Electro)
 	lvl := f.Profile.TalentLevel[combat.ActionTypeSkill] - 1
@@ -120,55 +180,19 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 	}
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1
+	//set on field oz to be this one
+	f.ozSnapshot = d
 	//clone b without info re aura
 	b := d.Clone()
 	b.Mult = birdAtk[lvl]
 	b.ApplyAura = true
-
 	//apply initial damage
 	f.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Fischl (Oz - summon) dealt %.0f damage", s.Frame(), damage)
-	}, "Fischl A4", 1)
+		s.Log.Infof("\t Fischl (Oz - Skill Initial) dealt %.0f damage", s.Frame(), damage)
+	}, "Fischl Skill", 1)
 
-	//apply hit every 50 frames thereafter
-	//NOT ENTIRELY ACCURATE BUT OH WELL
-	tick := 0
-	next := 40 + 50
-	count := 0
-
-	f.S.AddAction(func(s *combat.Sim) bool {
-		tick++
-		if tick < next {
-			return false
-		}
-		if count >= 11 {
-			return true
-		}
-		next += 50
-		//Oz has two ICD, an internal hit counter and a reset timer
-		//apply aura every 4th hit
-		if f.ozHitCounter%4 == 0 {
-			//apply aura, add to timer
-			b.ApplyAura = true
-			f.ozResetTimer = 5 * 60 // every 5 second force reset
-			f.ozHitCounter++
-		}
-		damage := s.ApplyDamage(b)
-		s.Log.Infof("[%v]: Fischl (Oz - tick) dealt %.0f damage", s.Frame(), damage)
-
-		//assume fischl has 60% chance of generating orb every attack;
-		if rand.Float64() < .6 {
-			f.S.AddEnergyParticles("Fischl", 1, combat.Electro, 120)
-		}
-		count++
-		return false
-	}, "Fischl-Oz-Skill")
-
-	//register Oz with sim
-	f.S.Status["Fischl-Oz-Skill"] = 10 * 60
-
-	f.CD["skill-cd"] = 25 * 60
+	f.CD[combat.SkillCD] = 25 * 60
 	//return animation cd
 	return 40
 }
@@ -178,14 +202,27 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 //last @ 620
 
 func (f *fischl) Burst(p map[string]interface{}) int {
-	if _, ok := f.CD[common.BurstCD]; ok {
-		f.S.Log.Debugf("\tFischl burst still on CD; skipping")
+	if _, ok := f.CD[combat.BurstCD]; ok {
+		f.S.Log.Debugf("\t Fischl burst still on CD; skipping")
 		return 0
 	}
-	//cancel existing bird right away if any
-	f.S.RemoveAction("Fischl-Oz-Skill")
-	delete(f.S.Status, "Fischl-Oz-Skill")
+	//check if sufficient energy
+	if f.Energy < f.MaxEnergy {
+		f.S.Log.Debugf("\t Fischl burst - insufficent energy, current: %v", f.Energy)
+		return 0
+	}
 
+	//reset oz
+	f.ozActive = true
+	f.ozActiveTimer = 10 * 60 //10 second summon
+	f.ozActiveSource = "Burst"
+	f.ozShootCD = 40    //40 frames before first shot
+	f.ozShootDelay = 50 //50 frames per shot
+	//reset hit counter as well not sure if this is true though
+	f.ozAuraICDHitCounter = 0
+	f.ozAuraICDResetTimer = 0
+
+	//initial damage
 	d := f.Snapshot("Midnight Phantasmagoria", combat.ActionTypeBurst, combat.Electro)
 	lvl := f.Profile.TalentLevel[combat.ActionTypeBurst] - 1
 	if f.Profile.Constellation >= 5 {
@@ -199,11 +236,10 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 	d.AuraUnits = 1
 	d.ApplyAura = true
 	//apply initial damage
-	f.S.AddAction(func(s *combat.Sim) bool {
+	f.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Fischl (burst) dealt %.0f damage", s.Frame(), damage)
-		return true
-	}, fmt.Sprintf("%v-Fischl-Burst-Initial", f.S.Frame()))
+		s.Log.Infof("\t Fischl (Burst Initial) dealt %.0f damage", s.Frame(), damage)
+	}, "Fischl Burst", 1)
 
 	//check for C4 damage
 	if f.Profile.Constellation >= 4 {
@@ -211,21 +247,13 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 		d1.Mult = 2.22
 		d1.AuraBase = combat.WeakAuraBase
 		d1.AuraUnits = 1
-		f.S.AddAction(func(s *combat.Sim) bool {
-			damage := s.ApplyDamage(d1)
-			s.Log.Infof("[%v]: Fischl (burst C4) dealt %.0f damage", s.Frame(), damage)
-			return true
-		}, fmt.Sprintf("%v-Fischl-Burst-C4", f.S.Frame()))
+		f.S.AddTask(func(s *combat.Sim) {
+			damage := s.ApplyDamage(d)
+			s.Log.Infof("\t Fischl (Burst C4) dealt %.0f damage", s.Frame(), damage)
+		}, "Fischl Burst C4", 1)
 	}
 
-	//add new bird after a delay
-
-	//apply hit every 50 frames thereafter
-	//NOT ENTIRELY ACCURATE BUT OH WELL
-	tick := 0
-	next := 40 + 50 //bird starts casting after 50, the initial is the oz animation time; we keep at 40 for now even though we're returning 20
-	count := 0
-
+	//snapshot for Oz
 	b := f.Snapshot("Midnight Phantasmagoria (Oz)", combat.ActionTypeBurst, combat.Electro)
 	blvl := f.Profile.TalentLevel[combat.ActionTypeSkill] - 1
 	if f.Profile.Constellation >= 3 {
@@ -235,57 +263,21 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 		}
 	}
 	b.Mult = birdAtk[blvl]
-	b.ApplyAura = false
 	b.AuraBase = combat.WeakAuraBase
 	b.AuraUnits = 1
+	f.ozSnapshot = b
 
-	f.S.AddAction(func(s *combat.Sim) bool {
-		tick++
-		if tick < next {
-			return false
-		}
-		if count >= 11 {
-			return true
-		}
-		next += 50
-		//Oz has two ICD, an internal hit counter and a reset timer
-		//apply aura every 4th hit
-		if f.ozHitCounter%4 == 0 {
-			//apply aura, add to timer
-			b.ApplyAura = true
-			f.ozResetTimer = 5 * 60 // every 5 second force reset
-			f.ozHitCounter++
-		}
-		damage := s.ApplyDamage(b)
-		//assume fischl has 60% chance of generating orb every attack;
-		if rand.Float64() < .6 {
-			orbDelay := 0
-			s.AddAction(func(s *combat.Sim) bool {
-				if orbDelay < 60+60 { //random guess, 60 frame to generate, 60 frame to collect
-					orbDelay++
-					return false
-				}
-				s.GenerateOrb(1, combat.Electro, false)
-				return true
-			}, fmt.Sprintf("%v-Fischl-Burst(Oz)-Orb-[%v]", s.Frame(), count))
-		}
-		s.Log.Infof("[%v]: Fischl (Burst - Oz tick) dealt %.0f damage", s.Frame(), damage)
-		count++
-		return false
-	}, "Fischl-Oz-Burst")
-
-	//register Oz with sim
-	f.S.Status["Fischl-Oz-Burst"] = 10 * 60
 	f.Energy = 0
-	f.CD[common.BurstCD] = 15 * 60
+	f.CD[combat.BurstCD] = 15 * 60
 	return 21 //this is if you cancel immediately
 }
 
 func (f *fischl) Tick() {
 	f.CharacterTemplate.Tick()
-	f.ozResetTimer--
-	if f.ozResetTimer < 0 {
-		f.ozResetTimer = 0
-		f.ozHitCounter = 0
+	f.ozAuraICDResetTimer--
+	if f.ozAuraICDResetTimer < 0 {
+		f.ozAuraICDResetTimer = 0
+		f.ozAuraICDHitCounter = 0
 	}
+	f.ozShoot()
 }

@@ -183,8 +183,7 @@ func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType) Snaps
 	ds.Stats[CR] += c.Profile.BaseCR
 	ds.Stats[CD] += c.Profile.BaseCD
 
-	for key, f := range c.S.snapshotHooks[PostSnapshot] {
-		c.S.Log.Debugf("\t\t executing pre snapshot hook: %v", key)
+	for _, f := range c.S.snapshotHooks[PostSnapshot] {
 		f(&ds)
 	}
 

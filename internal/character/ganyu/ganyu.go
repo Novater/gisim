@@ -1,9 +1,6 @@
 package ganyu
 
 import (
-	"fmt"
-
-	"github.com/srliao/gisim/internal/character/common"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -12,113 +9,83 @@ func init() {
 }
 
 type ganyu struct {
-	*common.TemplateChar
+	*combat.CharacterTemplate
 }
 
 func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error) {
 	g := ganyu{}
-	t, err := common.New(s, p)
+	t, err := combat.NewTemplateChar(s, p)
 	if err != nil {
 		return nil, err
 	}
-	g.TemplateChar = t
+	g.CharacterTemplate = t
 	g.Energy = 60
 	g.MaxEnergy = 60
 	g.Profile.WeaponClass = combat.WeaponClassBow
 
-	//add A4
-	// s.AddHook(func(snap *combat.Snapshot) bool {
-	// 	//check if c1 debuff is on, if so, reduce resist by -0.15
-	// 	if _, ok := s.Target.Status["ganyu-c1"]; ok {
-	// 		s.Log.Debugf("\t[%v]: applying Ganyu C1 cryo debuff", s.Frame())
-	// 		snap.ResMod[combat.Cryo] -= 0.15
-	// 	}
-	// 	return false
-	// }, "ganyu-c1", combat.PreSnapshot)
-
 	if g.Profile.Constellation >= 1 {
-		s.Log.Debugf("\tactivating Ganyu C1")
-
-		s.AddCombatHook(func(snap *combat.Snapshot) bool {
-			//check if c1 debuff is on, if so, reduce resist by -0.15
-			if _, ok := s.Target.Status["ganyu-c1"]; ok {
-				s.Log.Debugf("\t[%v]: applying Ganyu C1 cryo debuff", s.Frame())
-				snap.ResMod[combat.Cryo] -= 0.15
-			}
-			return false
-		}, "ganyu-c1", combat.PreDamageHook)
-
-		s.AddCombatHook(func(snap *combat.Snapshot) bool {
-			if snap.CharName == "Ganyu" && snap.Abil == "Frost Flake Arrow" {
-				//if c1, increase character energy by 2, unaffected by ER; assume assuming arrow always hits here
-				g.Energy += 2
-				if g.Energy > g.MaxEnergy {
-					g.Energy = g.MaxEnergy
-				}
-				s.Log.Debugf("\t[%v]: Ganyu C1 refunding 2 energy; current energy %v", s.Frame(), g.Energy)
-				//also add c1 debuff to target
-				s.Target.Status["ganyu-c1"] = 5 * 60
-			}
-			return false
-		}, "ganyu-c1", combat.PostDamageHook)
+		g.c1()
 	}
 
 	return &g, nil
 }
 
-func (g *ganyu) Aimed(p map[string]interface{}) int {
-	i := 0
-	g.S.AddAction(func(s *combat.Sim) bool {
-		if i < 20+137 { //assume 20 frame travel time
-			i++
-			return false
-		}
-		//abil
-		d := g.Snapshot("Frost Flake Arrow", combat.ActionTypeAimedShot, combat.Cryo)
-		d.HitWeakPoint = true
-		d.Mult = ffa[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
-		d.AuraBase = combat.WeakAuraBase
-		d.AuraUnits = 1
-		d.ApplyAura = true
-		//if not ICD, apply aura
-		if _, ok := g.CD["ICD-charge"]; !ok {
-			d.ApplyAura = true
-		}
-		//check if A4 talent is
-		if _, ok := g.CD["A2"]; ok {
-			d.Stats[combat.CR] += 0.2
-		}
-		g.CD["A2"] = 5 * 60
-		//apply damage
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Ganyu frost arrow dealt %.0f damage", s.Frame(), damage)
-		return true
-	}, fmt.Sprintf("%v-Ganyu-CA-FFA", g.S.Frame()))
+func (g *ganyu) c1() {
+	s := g.S
+	s.Log.Debugf("\tactivating Ganyu C1")
 
-	b := 0
-	g.S.AddAction(func(s *combat.Sim) bool {
-		if b < 20+20+137 { //bloom takes roughly 20 frames
-			b++
-			return false
+	s.AddSnapshotHook(func(snap *combat.Snapshot) bool {
+		if snap.CharName == "Ganyu" && snap.Abil == "Frost Flake Arrow" {
+			//if c1, increase character energy by 2, unaffected by ER; assume assuming arrow always hits here
+			g.Energy += 2
+			if g.Energy > g.MaxEnergy {
+				g.Energy = g.MaxEnergy
+			}
+			s.Log.Debugf("\t[%v]: Ganyu C1 refunding 2 energy; current energy %v", s.Frame(), g.Energy)
+			//also add c1 debuff to target
+			s.Target.AddResMod("ganyu-c1", combat.ResistMod{
+				Ele:      combat.Cryo,
+				Value:    -0.15,
+				Duration: 5 * 60,
+			})
 		}
-		//abil
-		d := g.Snapshot("Frost Flake Bloom", combat.ActionTypeAimedShot, combat.Cryo)
-		d.Mult = ffb[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
-		d.ApplyAura = true
-		d.AuraBase = combat.WeakAuraBase
-		d.AuraUnits = 1
-		//if not ICD, apply aura
-		if _, ok := g.CD["ICD-charge"]; !ok {
-			d.ApplyAura = true
-		}
-		if _, ok := g.CD["A2"]; ok {
-			d.Stats[combat.CR] += 0.2
-		}
-		//apply damage
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Ganyu frost flake bloom dealt %.0f damage", s.Frame(), damage)
-		return true
-	}, fmt.Sprintf("%v-Ganyu-CA-FFB", g.S.Frame()))
+		return false
+	}, "ganyu-c1", combat.PostDamageHook)
+}
+
+func (g *ganyu) Aimed(p map[string]interface{}) int {
+	f := g.Snapshot("Frost Flake Arrow", combat.ActionTypeAimedShot, combat.Cryo)
+	f.HitWeakPoint = true
+	f.Mult = ffa[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
+	f.AuraBase = combat.WeakAuraBase
+	f.AuraUnits = 1
+	f.ApplyAura = true
+	if _, ok := g.CD["A2"]; ok {
+		f.Stats[combat.CR] += 0.2
+	}
+
+	g.S.AddTask(func(s *combat.Sim) {
+		damage := s.ApplyDamage(f)
+		s.Log.Infof("\t Ganyu frost arrow dealt %.0f damage", damage)
+		//apply A2 on hit
+		g.CD["A2"] = 5 * 60
+	}, "Ganyu-Aimed-FFA", 20+137)
+
+	b := g.Snapshot("Frost Flake Bloom", combat.ActionTypeAimedShot, combat.Cryo)
+	b.Mult = ffb[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
+	b.ApplyAura = true
+	b.AuraBase = combat.WeakAuraBase
+	b.AuraUnits = 1
+	if _, ok := g.CD["A2"]; ok {
+		f.Stats[combat.CR] += 0.2
+	}
+
+	g.S.AddTask(func(s *combat.Sim) {
+		damage := s.ApplyDamage(f)
+		s.Log.Infof("\t Ganyu frost flake bloom dealt %.0f damage", damage)
+		//apply A2 on hit
+		g.CD["A2"] = 5 * 60
+	}, "Ganyu-Aimed-FFB", 20+20+137)
 
 	return 137
 }
@@ -158,30 +125,14 @@ func (g *ganyu) Skill(p map[string]interface{}) int {
 	d.AuraUnits = 1
 
 	//we get the orbs right away
-	//add delayed orb for travel time
-	orbDelay := 0
-	g.S.AddAction(func(s *combat.Sim) bool {
-		if orbDelay < 90 { //1.5 second to receive the org
-			orbDelay++
-			return false
-		}
-		s.GenerateOrb(2, combat.Cryo, false)
-		return true
-	}, fmt.Sprintf("%v-Ganyu-Skill-Orb", g.S.Frame()))
+	g.S.AddEnergyParticles("Ganyu", 2, combat.Cryo, 90) //90s travel time
 
-	tick := 0
-	flower := func(s *combat.Sim) bool {
-		if tick < 6*60 {
-			tick++
-			return false
-		}
-		//do damage
+	//flower damage is after 6 seconds
+	g.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Ganyu ice lotus (tick) dealt %.0f damage", s.Frame(), damage)
-		tick++
-		return true
-	}
-	g.S.AddAction(flower, fmt.Sprintf("%v-Ganyu-Skill", g.S.Frame()))
+		s.Log.Infof("\t Ganyu ice lotus dealt %.0f damage", damage)
+	}, "Ganyu Flower", 6*60)
+
 	//add cooldown to sim
 	g.CD[charge] = 10 * 60
 
@@ -213,29 +164,15 @@ func (g *ganyu) Burst(p map[string]interface{}) int {
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1
 
-	//apply weapon stats here
-	//burst should be instant
-	//should add a hook to the unit, triggering damage every 1 sec
-	//also add a field effect
-	tick := 0
-	storm := func(s *combat.Sim) bool {
-		if tick > 900 {
-			return true
-		}
-		//check if multiples of 60s; also add an initial delay of 120 frames
-		if tick%60 != 0 || tick < 120 {
-			tick++
-			return false
-		}
-		//do damage
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("[%v]: Ganyu burst (tick) dealt %.0f damage", s.Frame(), damage)
-		tick++
-		return false
+	for delay := 120; delay <= 900; delay += 60 {
+		g.S.AddTask(func(s *combat.Sim) {
+			damage := s.ApplyDamage(d)
+			s.Log.Infof("\t Ganyu burst (tick) dealt %.0f damage", s.Frame(), damage)
+		}, "Ganyu Burst", delay)
 	}
-	g.S.AddAction(storm, fmt.Sprintf("%v-Ganyu-Burst", g.S.Frame()))
+
 	//add cooldown to sim
-	g.CD["burst-cd"] = 15 * 60
+	g.CD[combat.BurstCD] = 15 * 60
 	//use up energy
 	g.Energy = 0
 
@@ -285,4 +222,8 @@ func (g *ganyu) ActionReady(a combat.ActionType) bool {
 		return false
 	}
 	return true
+}
+
+func (g *ganyu) Tick() {
+	g.CharacterTemplate.Tick()
 }
