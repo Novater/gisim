@@ -25,6 +25,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	x.Energy = 60
 	x.MaxEnergy = 60
 	x.Profile.WeaponClass = combat.WeaponClassSpear
+	x.delayedFunc = make(map[string]func() bool)
 
 	return &x, nil
 }

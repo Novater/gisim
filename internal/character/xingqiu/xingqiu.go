@@ -30,6 +30,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	a4 := make(map[combat.StatType]float64)
 	a4[combat.HydroP] = 0.2
 	x.AddMod("Xingqiu A4", a4)
+	x.burstHook()
 
 	/** c6
 	Activating 2 of Guhua Sword: Raincutter's sword rain attacks greatly increases the DMG of the third.
@@ -137,7 +138,7 @@ func (x *xingqiu) Skill(p map[string]interface{}) int {
 	x.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d2)
 		s.Log.Infof("\t Xingqiu skill hit 2 dealt %.0f damage", damage)
-	}, "Xingqiu-Skill-1", 39) //second hit 39 frames
+	}, "Xingqiu-Skill-2", 39) //second hit 39 frames
 
 	x.S.AddEnergyParticles("Xingqiu", 5, combat.Hydro, 100)
 

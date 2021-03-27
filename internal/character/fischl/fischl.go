@@ -81,7 +81,7 @@ func (f *fischl) a4() {
 		d.Mult = 0.8
 		f.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Fischl (Oz - A4) dealt %.0f damage", s.Frame(), damage)
+			s.Log.Infof("\t Fischl (Oz - A4) dealt %.0f damage", damage)
 		}, "Fischl A4", 1)
 
 		return false
@@ -141,7 +141,7 @@ func (f *fischl) ozShoot() {
 	f.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("\t Fischl (Oz - %v) dealt %.0f damage", s.Frame(), f.ozActiveSource, damage)
-	}, "Fischl A4", 0)
+	}, "Fischl Oz (Damage)", 1)
 	f.ozShootCD += f.ozShootDelay
 	//assume fischl has 60% chance of generating orb every attack;
 	if rand.Float64() < .6 {
@@ -190,7 +190,7 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 	f.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("\t Fischl (Oz - Skill Initial) dealt %.0f damage", s.Frame(), damage)
-	}, "Fischl Skill", 1)
+	}, "Fischl Skill Initial", 1)
 
 	f.CD[combat.SkillCD] = 25 * 60
 	//return animation cd
@@ -239,7 +239,7 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 	f.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("\t Fischl (Burst Initial) dealt %.0f damage", s.Frame(), damage)
-	}, "Fischl Burst", 1)
+	}, "Fischl Burst Initial", 1)
 
 	//check for C4 damage
 	if f.Profile.Constellation >= 4 {

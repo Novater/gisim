@@ -36,6 +36,7 @@ func (s *Sim) isAbilityReady(a ActionItem) bool {
 	//ask the char if the ability is off cooldown
 	ready := s.chars[a.CharacterName].ActionReady(a.Action)
 	if ready {
+		// s.Log.Infof("[%v]\t\t action %v is ready", s.Frame(), a)
 		//check stam cost
 		if a.Action == ActionTypeChargedAttack {
 			cost := s.chars[a.CharacterName].ChargeAttackStam()
@@ -47,39 +48,36 @@ func (s *Sim) isAbilityReady(a ActionItem) bool {
 	return ready
 }
 
-func (s *Sim) executeAbilityQueue(a []ActionItem) (int, []ActionItem) {
-	if len(a) == 0 {
-		return 0, nil
-	}
-	//execute first item
+func (s *Sim) executeAbilityQueue(a ActionItem) int {
+
 	c := s.chars[s.ActiveChar]
-	x := a[0]
-	s.Log.Infof("[%v] %v executing %v", s.Frame(), s.ActiveChar, x.Action)
+
+	s.Log.Infof("[%v] %v executing %v", s.Frame(), s.ActiveChar, a.Action)
 	f := 0
-	switch x.Action {
-	case ActionTypeSwap:
-		s.swapCD = 150
-		f = 20
-		s.ActiveChar = x.CharacterName
+	switch a.Action {
 	case ActionTypeDash:
 		f = 30
 	case ActionTypeJump:
 		f = 30
 	case ActionTypeAttack:
-		f = c.Attack(x.Params)
+		f = c.Attack(a.Params)
 	case ActionTypeChargedAttack:
-		f = c.ChargeAttack(x.Params)
+		f = c.ChargeAttack(a.Params)
 	case ActionTypeAimedShot:
-		f = c.Aimed(x.Params)
+		f = c.Aimed(a.Params)
 	case ActionTypeBurst:
 		s.executeEventHook(PreBurstHook)
-		f = c.Burst(x.Params)
+		f = c.Burst(a.Params)
 		s.executeEventHook(PostBurstHook)
 	case ActionTypeSkill:
-		f = c.Skill(x.Params)
+		f = c.Skill(a.Params)
 	}
 
-	return f, a[1:]
+	if a.SwapLock > 0 {
+		s.swapCD += a.SwapLock
+	}
+
+	return f
 }
 
 //ActionItem ...

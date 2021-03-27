@@ -27,7 +27,7 @@ type Sim struct {
 	Status map[string]int
 
 	particles []Particle
-	tasks     []Task
+	tasks     map[string]Task
 
 	ActiveChar string
 	chars      map[string]Character
@@ -37,8 +37,8 @@ type Sim struct {
 	//per tick effects
 	effects []EffectFunc
 	//event hooks
-	snapshotHooks map[snapshotHookType][]snapshotHookFunc
-	eventHooks    map[eventHookType][]eventHookFunc
+	snapshotHooks map[snapshotHookType]map[string]snapshotHookFunc
+	eventHooks    map[eventHookType]map[string]eventHookFunc
 
 	//action actions list
 	actions []ActionItem
@@ -57,8 +57,9 @@ func New(p Profile) (*Sim, error) {
 
 	s.Target = u
 
-	s.snapshotHooks = make(map[snapshotHookType][]snapshotHookFunc)
-	s.eventHooks = make(map[eventHookType][]eventHookFunc)
+	s.snapshotHooks = make(map[snapshotHookType]map[string]snapshotHookFunc)
+	s.eventHooks = make(map[eventHookType]map[string]eventHookFunc)
+	s.tasks = make(map[string]Task)
 	s.Status = make(map[string]int)
 	s.chars = make(map[string]Character)
 	// s.effects = make(map[string]ActionFunc)
@@ -187,7 +188,6 @@ func New(p Profile) (*Sim, error) {
 func (s *Sim) Run(length int) (float64, map[string]map[string]float64) {
 	var skip int
 	rand.Seed(time.Now().UnixNano())
-	var queue []ActionItem
 	//60fps, 60s/min, 2min
 	for s.f = 0; s.f < 60*length; s.f++ {
 		//tick target and each character
@@ -212,20 +212,23 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64) {
 		}
 
 		next, err := s.findNextAction()
-		if err == nil {
-			//check if swap required
-			if s.ActiveChar != next.CharacterName {
-				queue = append(queue, ActionItem{
-					CharacterName: next.CharacterName,
-					Action:        ActionTypeSwap,
-				})
-			}
-			//execute action
-			queue = append(queue, next)
+		if err != nil {
+			s.Log.Infof("[%v] no action found (%v)", s.Frame(), next)
+			//skip this round
+			continue
 		}
-		f, q := s.executeAbilityQueue(queue)
-		queue = q
-		skip += f
+
+		if s.ActiveChar != next.CharacterName {
+			//swap
+			s.Log.Infof("[%v] swapping from %v to %v", s.Frame(), s.ActiveChar, next.CharacterName)
+			s.swapCD = 150
+			skip = 20
+			s.ActiveChar = next.CharacterName
+			continue
+		}
+
+		//other wise excute
+		skip = s.executeAbilityQueue(next)
 	}
 
 	return s.Target.Damage, s.Target.DamageDetails

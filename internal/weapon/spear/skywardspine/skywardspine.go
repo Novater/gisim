@@ -35,19 +35,20 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 	}
 	c.AddMod("Skyward-Spine-Stats", m)
 	//add on hit effect to sim?
-	s.AddSnapshotHook(func(snap *combat.Snapshot) bool {
+	s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		//check if char is correct?
-		if snap.CharName != c.Name() {
+		if ds.CharName != c.Name() {
 			return false
 		}
 		//check if this is normal or charged
-		if snap.AbilType != combat.ActionTypeAttack && snap.AbilType != combat.ActionTypeChargedAttack {
+		if ds.AbilType != combat.ActionTypeAttack && ds.AbilType != combat.ActionTypeChargedAttack {
 			return false
 		}
 		//check if cd is up
 		if _, ok := s.Status["Skyward Spine Proc"]; ok {
 			return false
 		}
+
 		//check 50/50 proc chance
 		r := rand.Intn(2)
 		if r == 0 {
@@ -60,7 +61,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		s.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("\t Skyward Spine proc dealt %.0f damage", damage)
-		}, fmt.Sprintf("Skyware-Spine-Proc-%v", c.Name()), 1)
+		}, fmt.Sprintf("Skyward Spine Proc %v", c.Name()), 1)
 
 		//trigger cd
 		s.Status["Skyward Spine Proc"] = 2 * 60

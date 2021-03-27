@@ -23,13 +23,19 @@ type eventHookFunc func(s *Sim) bool
 
 //AddCombatHook adds a hook to sim. Hook will be called based on the type of hook
 func (s *Sim) AddSnapshotHook(f snapshotHookFunc, key string, hook snapshotHookType) {
-	s.snapshotHooks[hook] = append(s.snapshotHooks[hook], f)
+	if _, ok := s.snapshotHooks[hook]; !ok {
+		s.snapshotHooks[hook] = make(map[string]snapshotHookFunc)
+	}
+	s.snapshotHooks[hook][key] = f
 	s.Log.Debugf("\t[%v] new snapshot hook added %v", s.Frame(), key)
 }
 
 //AddHook adds a hook to sim. Hook will be called based on the type of hook
 func (s *Sim) AddEventHook(f eventHookFunc, key string, hook eventHookType) {
-	s.eventHooks[hook] = append(s.eventHooks[hook], f)
+	if _, ok := s.eventHooks[hook]; !ok {
+		s.eventHooks[hook] = make(map[string]eventHookFunc)
+	}
+	s.eventHooks[hook][key] = f
 	s.Log.Debugf("\t[%v] new event hook added %v", s.Frame(), key)
 }
 
@@ -39,23 +45,21 @@ func (s *Sim) AddEffect(f EffectFunc, key string) {
 }
 
 func (s *Sim) executeEventHook(t eventHookType) {
-	var next []eventHookFunc
-	for _, f := range s.eventHooks[t] {
-		if !f(s) {
-			next = append(next, f)
+	for k, f := range s.eventHooks[t] {
+		if f(s) {
+			s.Log.Debugf("[%v] event hook %v returned true, deleting", s.Frame(), k)
+			delete(s.eventHooks[t], k)
 		}
 	}
-	s.eventHooks[t] = next
 }
 
 func (s *Sim) executeSnapshotHooks(t snapshotHookType, ds *Snapshot) {
-	var next []snapshotHookFunc
-	for _, f := range s.snapshotHooks[t] {
-		if !f(ds) {
-			next = append(next, f)
+	for k, f := range s.snapshotHooks[t] {
+		if f(ds) {
+			s.Log.Debugf("[%v] event hook %v returned true, deleting", s.Frame(), k)
+			delete(s.snapshotHooks[t], k)
 		}
 	}
-	s.snapshotHooks[t] = next
 }
 
 func (s *Sim) runEffects() {
