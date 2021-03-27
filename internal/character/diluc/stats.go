@@ -124,7 +124,7 @@ var (
 			3.8934,
 		},
 	}
-	burst1 = []float64{
+	burstInitial = []float64{
 		2.04,
 		2.193,
 		2.346,

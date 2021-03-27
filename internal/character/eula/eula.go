@@ -230,7 +230,7 @@ func (e *eula) Burst(p map[string]interface{}) int {
 	}
 
 	//add initial damage
-	d := e.Snapshot("Glacial Illumination", combat.ActionTypeSkill, combat.Cryo)
+	d := e.Snapshot("Glacial Illumination", combat.ActionTypeBurst, combat.Cryo)
 	d.ApplyAura = true
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1
@@ -242,7 +242,7 @@ func (e *eula) Burst(p map[string]interface{}) int {
 	}, "Eula-Burst-Initial", 100) //guess frames
 
 	//add blow up after 8 seconds
-	d2 := e.Snapshot("Glacial Illumination (Lightfall)", combat.ActionTypeSkill, combat.Cryo)
+	d2 := e.Snapshot("Glacial Illumination (Lightfall)", combat.ActionTypeBurst, combat.Cryo)
 	d2.ApplyAura = true
 	d2.AuraBase = combat.WeakAuraBase
 	d2.AuraUnits = 1
