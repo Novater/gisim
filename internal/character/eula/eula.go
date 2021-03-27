@@ -28,6 +28,8 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	e.MaxEnergy = 60
 	e.Profile.WeaponClass = combat.WeaponClassSword
 
+	e.a4()
+
 	e.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		if _, ok := e.S.Status["Eula Burst"]; !ok {
 			return false
@@ -48,6 +50,27 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	}, "Eula Burst", combat.PostDamageHook)
 
 	return &e, nil
+}
+
+func (e *eula) a4() {
+	e.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
+		if ds.CharName != e.Profile.Name {
+			return false
+		}
+		if ds.AbilType != combat.ActionTypeAttack {
+			return false
+		}
+		//check icd
+		if _, ok := e.CD["A4-ICD"]; ok {
+			return false
+		}
+		e.S.Log.Debugw("\t Eula A4 triggered", "skill previous cd", e.CD[combat.SkillCD])
+		e.CD["A4-ICD"] = 6
+
+		e.CD[combat.SkillCD] -= 18
+
+		return false
+	}, "eula-a4", combat.OnCritDamage)
 }
 
 func (e *eula) Attack(p map[string]interface{}) int {
@@ -196,8 +219,28 @@ func (e *eula) holdE() {
 			s.Log.Infof("\t Eula skill (ice whirl %v) dealt %.0f damage", t, damage)
 		}, "Eula-Skill-Hold-Icewhirl", 108)
 	}
+
+	//A2
+	if v == 2 {
+		lvl := e.Profile.TalentLevel[combat.ActionTypeBurst] - 1
+		if e.Profile.Constellation >= 5 {
+			lvl += 3
+			if lvl > 14 {
+				lvl = 14
+			}
+		}
+		d := e.Snapshot("Icetide (Lightfall)", combat.ActionTypeBurst, combat.Cryo)
+		d.ApplyAura = true
+		d.AuraBase = combat.WeakAuraBase
+		d.AuraUnits = 1
+		d.Mult = burstExplodeBase[lvl] * 0.5
+		e.S.AddTask(func(s *combat.Sim) {
+			damage := s.ApplyDamage(d)
+			s.Log.Infof("\t Eula A2 on 2 Grimheart stacks dealt %.0f damage", damage)
+		}, "Eula-Skill-Hold-A2-Lightfall", 108)
+	}
 	//RANDOM GUESS
-	e.S.AddEnergyParticles("Eula", 2, combat.Cryo, 100)
+	e.S.AddEnergyParticles("Eula", 3, combat.Cryo, 100)
 
 	//add debuff per hit
 	e.S.Target.AddResMod("Icewhirl Cryo", combat.ResistMod{

@@ -229,7 +229,7 @@ func (c *CharacterTemplate) Tick() {
 	//this function gets called for every character every tick
 	for k := range c.CD {
 		c.CD[k]--
-		if c.CD[k] == 0 {
+		if c.CD[k] <= 0 {
 			c.S.Log.Infof("[%v] cooldown %v finished; deleting", c.S.Frame(), k)
 			delete(c.CD, k)
 		}

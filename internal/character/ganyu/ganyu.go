@@ -81,7 +81,7 @@ func (g *ganyu) Aimed(p map[string]interface{}) int {
 	}
 
 	g.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(f)
+		damage := s.ApplyDamage(b)
 		s.Log.Infof("\t Ganyu frost flake bloom dealt %.0f damage", damage)
 		//apply A2 on hit
 		g.CD["A2"] = 5 * 60
