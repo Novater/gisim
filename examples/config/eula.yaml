@@ -177,16 +177,16 @@ Enemy:
     physical: 0.1
 InitialActive: "Eula"
 Rotation:
-  - CharacterName: "Fischl"
-    Action: "burst"
-    ConditionType: "status"
-    ConditionTarget: "Fischl-Oz"
-    ConditionBool: false
-  - CharacterName: "Fischl"
-    Action: "skill"
-    ConditionType: "status"
-    ConditionTarget: "Fischl-Oz"
-    ConditionBool: false
+  # - CharacterName: "Fischl"
+  #   Action: "burst"
+  #   ConditionType: "status"
+  #   ConditionTarget: "Fischl-Oz"
+  #   ConditionBool: false
+  # - CharacterName: "Fischl"
+  #   Action: "skill"
+  #   ConditionType: "status"
+  #   ConditionTarget: "Fischl-Oz"
+  #   ConditionBool: false
   - CharacterName: "Eula"
     Action: "burst"
   - CharacterName: "Eula"

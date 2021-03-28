@@ -22,7 +22,7 @@ type TaskFunc func(s *Sim)
 func (s *Sim) runTasks() {
 	for k, a := range s.tasks {
 		if a.Delay == 0 {
-			s.Log.Debugf("[%v] executing task %v, originated from frame %v", s.Frame(), k, a.originFrame)
+			s.Log.Debugf("\t [%v] executing task %v, originated from frame %v", s.Frame(), k, a.originFrame)
 			a.F(s)
 			delete(s.tasks, k)
 		} else {
@@ -40,7 +40,7 @@ func (s *Sim) AddTask(f TaskFunc, name string, delay int) {
 		F:           f,
 		originFrame: s.f,
 	}
-	s.Log.Debugf("[%v] task added: %v", s.Frame(), key)
+	s.Log.Debugf("\t task added: %v", key)
 }
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

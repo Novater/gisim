@@ -141,7 +141,7 @@ func (e *Enemy) auraTick(s *Sim) {
 			//reduce both auras
 			e.Auras[0].Duration -= int64(0.5 * float64(e.Auras[0].Base))
 			e.Auras[1].Duration -= int64(0.4 * float64(e.Auras[1].Base))
-			s.Log.Debugf("[%v] EC reaction tick triggered", s.Frame())
+			s.Log.Debugf("\t [%v] EC reaction tick triggered", s.Frame())
 			s.Log.Debugw("\telectrocharged", "damage", damage, "auras", e.Auras)
 			e.Status["electrocharge icd"] = 60
 		}

@@ -60,7 +60,7 @@ const (
 )
 
 func (s *Sim) executeCharacterTicks() {
-	for _, c := range s.chars {
+	for _, c := range s.Chars {
 		c.Tick()
 	}
 }

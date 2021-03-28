@@ -31,8 +31,8 @@ func (s *Sim) collectEnergyParticles() {
 }
 
 func (s *Sim) distributeParticles(p Particle) {
-	l := len(s.chars)
-	for n, c := range s.chars {
+	l := len(s.Chars)
+	for n, c := range s.Chars {
 		a := s.ActiveChar == n
 		c.ReceiveParticle(p, a, l)
 	}

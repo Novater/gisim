@@ -23,17 +23,18 @@ type EffectFunc func(s *Sim) bool
 type Sim struct {
 	Target *Enemy
 	Log    *zap.SugaredLogger
-	//track whatever status, ticked down by 1 each tick
-	Status map[string]int
+	//exposed fields
+	Status     map[string]int
+	ActiveChar string
+	Stam       float64
+	Chars      map[string]Character
+	SwapCD     int
+	//overwritable functions
+	FindNextAction func(s *Sim) (ActionItem, error)
 
 	particles []Particle
 	tasks     map[string]Task
-
-	ActiveChar string
-	chars      map[string]Character
-	f          int
-	stam       float64
-	swapCD     int
+	f         int
 	//per tick effects
 	effects []EffectFunc
 	//event hooks
@@ -47,6 +48,7 @@ type Sim struct {
 //New creates new sim from given profile
 func New(p Profile) (*Sim, error) {
 	s := &Sim{}
+	s.FindNextAction = FindNextAction
 
 	u := &Enemy{}
 	u.Status = make(map[string]int)
@@ -61,10 +63,10 @@ func New(p Profile) (*Sim, error) {
 	s.eventHooks = make(map[eventHookType]map[string]eventHookFunc)
 	s.tasks = make(map[string]Task)
 	s.Status = make(map[string]int)
-	s.chars = make(map[string]Character)
+	s.Chars = make(map[string]Character)
 	// s.effects = make(map[string]ActionFunc)
 
-	s.stam = 240
+	s.Stam = 240
 
 	config := zap.NewDevelopmentConfig()
 	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
@@ -128,7 +130,7 @@ func New(p Profile) (*Sim, error) {
 			return nil, fmt.Errorf("char %v missing talent level for %v", v.Name, ActionTypeBurst)
 		}
 
-		s.chars[v.Name] = c
+		s.Chars[v.Name] = c
 
 		if v.Name == p.InitialActive {
 			s.ActiveChar = p.InitialActive
@@ -171,7 +173,7 @@ func New(p Profile) (*Sim, error) {
 	}
 	for _, v := range p.Rotation {
 		//make sure char exists
-		if _, ok := s.chars[v.CharacterName]; !ok {
+		if _, ok := s.Chars[v.CharacterName]; !ok {
 			return nil, fmt.Errorf("invalid character %v in rotation list", v.CharacterName)
 		}
 	}
@@ -194,7 +196,6 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64
 		//tick target and each character
 		//target doesn't do anything, just takes punishment, so it won't affect cd
 		s.Target.tick(s)
-		s.tick()
 
 		s.decrementStatusDuration()
 		s.collectEnergyParticles()
@@ -202,8 +203,8 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64
 		s.runEffects()
 		s.runTasks()
 
-		if s.swapCD > 0 {
-			s.swapCD--
+		if s.SwapCD > 0 {
+			s.SwapCD--
 		}
 
 		//damage for this frame
@@ -215,7 +216,8 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64
 			continue
 		}
 
-		next, err := s.findNextAction()
+		next, err := s.FindNextAction(s)
+		s.Log.Infof("[%v] off skip, next action: %v swap cd %v", s.Frame(), next, s.SwapCD)
 		if err != nil {
 			s.Log.Infof("[%v] no action found (%v)", s.Frame(), next)
 			//skip this round
@@ -224,8 +226,8 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64
 
 		if s.ActiveChar != next.CharacterName {
 			//swap
-			s.Log.Infof("[%v] swapping from %v to %v", s.Frame(), s.ActiveChar, next.CharacterName)
-			s.swapCD = 150
+			s.Log.Infof("[%v] swapping from %v to %v; cd: %v action %v", s.Frame(), s.ActiveChar, next.CharacterName, s.SwapCD, next)
+			s.SwapCD = 150
 			skip = 20
 			s.ActiveChar = next.CharacterName
 			continue
@@ -233,6 +235,7 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64
 
 		//other wise excute
 		skip = s.executeAbilityQueue(next)
+		s.Log.Infof("[%v] action executed; skip %v swap cd %v", s.Frame(), skip, s.SwapCD)
 	}
 
 	return s.Target.Damage, s.Target.DamageDetails, graph
@@ -249,8 +252,8 @@ func (s *Sim) decrementStatusDuration() {
 }
 
 func (s *Sim) AddCharMod(c string, key string, val map[StatType]float64) {
-	if _, ok := s.chars[c]; ok {
-		s.chars[c].AddMod(key, val)
+	if _, ok := s.Chars[c]; ok {
+		s.Chars[c].AddMod(key, val)
 	}
 }
 
@@ -288,13 +291,6 @@ func (s *Sim) addResonance(count map[EleType]int) {
 			case Anemo:
 			}
 		}
-	}
-}
-
-//tick
-func (s *Sim) tick() {
-	if s.swapCD > 0 {
-		s.swapCD--
 	}
 }
 

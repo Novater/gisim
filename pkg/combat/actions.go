@@ -2,7 +2,7 @@ package combat
 
 import "errors"
 
-func (s *Sim) findNextAction() (ActionItem, error) {
+func FindNextAction(s *Sim) (ActionItem, error) {
 	for _, a := range s.actions {
 		if s.isAbilityReady(a) && s.abilityConditionsOk(a) {
 			return a, nil
@@ -20,12 +20,12 @@ func (s *Sim) abilityConditionsOk(a ActionItem) bool {
 		}
 	case "energy lt":
 		//check if target energy < threshold
-		t := s.chars[a.ConditionTarget].CurrentEnergy()
+		t := s.Chars[a.ConditionTarget].CurrentEnergy()
 		if t > a.ConditionFloat {
 			return false
 		}
 	case "tags":
-		t := s.chars[a.CharacterName].Tag(a.ConditionTarget)
+		t := s.Chars[a.CharacterName].Tag(a.ConditionTarget)
 		s.Log.Debugw("\t checking for tags", "want", a.ConditionInt, "got", t, "action", a)
 		if t != a.ConditionInt {
 			return false
@@ -36,17 +36,17 @@ func (s *Sim) abilityConditionsOk(a ActionItem) bool {
 
 func (s *Sim) isAbilityReady(a ActionItem) bool {
 	//check if character is active
-	if a.CharacterName != s.ActiveChar && s.swapCD > 0 {
+	if a.CharacterName != s.ActiveChar && s.SwapCD > 0 {
 		return false
 	}
 	//ask the char if the ability is off cooldown
-	ready := s.chars[a.CharacterName].ActionReady(a.Action)
+	ready := s.Chars[a.CharacterName].ActionReady(a.Action)
 	if ready {
 		// s.Log.Infof("[%v]\t\t action %v is ready", s.Frame(), a)
 		//check stam cost
 		if a.Action == ActionTypeChargedAttack {
-			cost := s.chars[a.CharacterName].ChargeAttackStam()
-			if cost > s.stam {
+			cost := s.Chars[a.CharacterName].ChargeAttackStam()
+			if cost > s.Stam {
 				return false
 			}
 		}
@@ -56,7 +56,7 @@ func (s *Sim) isAbilityReady(a ActionItem) bool {
 
 func (s *Sim) executeAbilityQueue(a ActionItem) int {
 
-	c := s.chars[s.ActiveChar]
+	c := s.Chars[s.ActiveChar]
 
 	s.Log.Infof("[%v] %v executing %v", s.Frame(), s.ActiveChar, a.Action)
 	f := 0
@@ -80,7 +80,8 @@ func (s *Sim) executeAbilityQueue(a ActionItem) int {
 	}
 
 	if a.SwapLock > 0 {
-		s.swapCD += a.SwapLock
+		s.SwapCD += a.SwapLock
+		s.Log.Debugw("\t locking swap", "swaplock", a.SwapLock, "new cd", s.SwapCD)
 	}
 
 	return f

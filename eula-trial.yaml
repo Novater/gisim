@@ -12,9 +12,9 @@ Characters:
     AscensionBonus:
       CD: 0.384
     TalentLevel:
-      attack: 6
+      attack: 8
       skill: 6
-      burst: 6
+      burst: 9
     WeaponName: "Skyward Pride"
     WeaponRefinement: 1
     WeaponBaseAtk: 674
@@ -415,27 +415,27 @@ Enemy:
     geo: 0.1
     anemo: 0.1
     physical: 0.1
-InitialActive: "Eula"
+InitialActive: "Fischl"
 Rotation:
-  - CharacterName: "Xingqiu"
-    Action: "burst"
-  - CharacterName: "Xingqiu"
-    Action: "skill"
-    SwapLock: 100
-  - CharacterName: "Fischl"
-    Action: "burst"
-    ConditionType: "status"
-    ConditionTarget: "Fischl-Oz"
-    ConditionBool: false
-  - CharacterName: "Fischl"
-    Action: "skill"
-    ConditionType: "status"
-    ConditionTarget: "Fischl-Oz"
-    ConditionBool: false
-  - CharacterName: "Xiangling"
-    Action: "burst"
-  - CharacterName: "Xiangling"
-    Action: "skill"
+  # - CharacterName: "Xingqiu"
+  #   Action: "burst"
+  # - CharacterName: "Xingqiu"
+  #   Action: "skill"
+    # SwapLock: 100
+  # - CharacterName: "Fischl"
+  #   Action: "burst"
+  #   ConditionType: "status"
+  #   ConditionTarget: "Fischl-Oz"
+  #   ConditionBool: false
+  # - CharacterName: "Fischl"
+  #   Action: "skill"
+  #   ConditionType: "status"
+  #   ConditionTarget: "Fischl-Oz"
+  #   ConditionBool: false
+  # - CharacterName: "Xiangling"
+  #   Action: "burst"
+  # - CharacterName: "Xiangling"
+  #   Action: "skill"
   - CharacterName: "Eula"
     Action: "burst"
     SwapLock: 480
@@ -450,5 +450,5 @@ Rotation:
     Action: "skill"
   - CharacterName: "Eula"
     Action: "attack"
-  - CharacterName: "Xingqiu"
-    Action: "attack"
+  # - CharacterName: "Xingqiu"
+  #   Action: "attack"

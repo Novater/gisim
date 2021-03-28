@@ -11,8 +11,8 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 
 	target := s.Target
 
-	s.Log.Debugf("[%v] %v - %v triggered dmg", s.Frame(), ds.CharName, ds.Abil)
-	s.Log.Debugw("\ttarget", "auras", target.Auras)
+	s.Log.Debugf("\t [%v] %v - %v triggered dmg", s.Frame(), ds.CharName, ds.Abil)
+	s.Log.Debugw("\t target", "auras", target.Auras)
 
 	//in general, transformative reaction does not change the snapshot
 	//they will only trigger a sep damage calc
