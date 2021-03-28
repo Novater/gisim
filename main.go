@@ -10,7 +10,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/pkg/profile"
 	"github.com/srliao/gisim/pkg/combat"
+
+	_ "net/http/pprof"
 
 	//characters
 	_ "github.com/srliao/gisim/internal/character/bennett"
@@ -45,13 +48,15 @@ func main() {
 	var cfg combat.Profile
 	var err error
 
-	debugPtr := flag.String("d", "debug", "output level: debug, info, warn")
-	secondsPtr := flag.Int("s", 300, "how many seconds to run the sim for")
+	debugPtr := flag.String("d", "error", "output level: debug, info, warn")
+	secondsPtr := flag.Int("s", 60000, "how many seconds to run the sim for")
 	pPtr := flag.String("p", "config.yaml", "which profile to use")
-	f := flag.String("o", "out.log", "detailed log file")
+	f := flag.String("o", "", "detailed log file")
 	showCaller := flag.Bool("c", false, "show caller in debug low")
 	w := flag.String("w", "", "test weights for specified character")
 	flag.Parse()
+
+	defer profile.Start(profile.ProfilePath("./")).Stop()
 
 	// p := "./xl-base.yaml" //xl.yaml expecting 4659 dps
 
@@ -166,6 +171,7 @@ func main() {
 	fmt.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", *pPtr, dmg, *secondsPtr, dmg/float64(*secondsPtr), elapsed)
 
 	graphToCSV(graph)
+
 }
 
 func graphToCSV(in []float64) {

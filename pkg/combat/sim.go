@@ -33,7 +33,7 @@ type Sim struct {
 	FindNextAction func(s *Sim) (ActionItem, error)
 
 	Rand      *rand.Rand
-	particles []Particle
+	particles map[Particle]int
 	tasks     map[string]Task
 	f         int
 	//per tick effects
@@ -67,6 +67,7 @@ func New(p Profile) (*Sim, error) {
 	s.tasks = make(map[string]Task)
 	s.Status = make(map[string]int)
 	s.Chars = make(map[string]Character)
+	s.particles = make(map[Particle]int)
 	// s.effects = make(map[string]ActionFunc)
 
 	s.Stam = 240

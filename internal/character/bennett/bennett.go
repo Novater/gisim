@@ -2,6 +2,8 @@ package bennett
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/srliao/gisim/pkg/combat"
 )
@@ -72,40 +74,48 @@ func (b *bennett) Attack(p map[string]interface{}) int {
 	frames := 21 //first hit
 	delay := 10  //frames between execution and damage
 	n := 1
+	var sb strings.Builder
+	sb.WriteString("Bennet-Normal-")
 	switch b.NormalCounter {
 	case 1:
 		hits = n2
 		frames = 48 - 21
 		delay = 10
 		n = 2
+		sb.WriteRune('2')
 	case 2:
 		hits = n3
 		frames = 74 - 48
 		delay = 15
 		n = 3
+		sb.WriteRune('3')
 	case 3:
 		hits = n4
 		frames = 114 - 74
 		delay = 20
 		n = 4
+		sb.WriteRune('4')
 	case 4:
 		hits = n5
 		frames = 180 - 114
 		delay = 66
 		n = 5
 		reset = true
+		sb.WriteRune('5')
 	default:
 		hits = n1
+		sb.WriteRune('1')
 	}
 	b.NormalCounter++
 	//apply attack speed
 	frames = int(float64(frames) / (1 + b.Stats[combat.AtkSpd]))
 	d.Mult = hits[b.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 
+	sb.Write([]byte(strconv.Itoa(n)))
 	b.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
 		s.Log.Infof("\t Bennett normal %v dealt %.0f damage", n, damage)
-	}, fmt.Sprintf("Bennett-Normal-%v", n), delay)
+	}, sb.String(), delay)
 
 	//add a 75 frame attackcounter reset
 	b.NormalResetTimer = 70

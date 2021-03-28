@@ -1,2 +1,7 @@
 *.log
 graph.csv
+*.csv
+*.png
+*.pdf
+gisim
+*.pprof
