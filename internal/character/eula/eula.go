@@ -78,20 +78,20 @@ func (e *eula) Attack(p map[string]interface{}) int {
 	//3 and 4 need to be registered as multi action
 
 	reset := false
-	frames := 32 //first hit = 13 at 25fps
+	frames := 28 //first hit = 13 at 25fps
 	delay := 10  //frames between execution and damage
 	switch e.NormalCounter {
 	case 1:
-		frames = 29 //47 - 35
+		frames = 25 //47 - 35
 		delay = 10
 	case 2:
-		frames = 53 //69
+		frames = 65 //69
 		delay = 15
 	case 3:
-		frames = 24 //79
+		frames = 33 //79
 		delay = 20
 	case 4:
-		frames = 94 //118
+		frames = 88 //118
 		delay = 66
 		reset = true
 	}
@@ -138,10 +138,10 @@ func (e *eula) Skill(p map[string]interface{}) int {
 	switch hold {
 	default:
 		e.pressE()
-		return 35
+		return 34
 	case 1:
 		e.holdE()
-		return 108
+		return 70
 	}
 
 }
@@ -229,7 +229,7 @@ func (e *eula) holdE() {
 				lvl = 14
 			}
 		}
-		d := e.Snapshot("Icetide (Lightfall)", combat.ActionTypeBurst, combat.Cryo)
+		d := e.Snapshot("Icetide (Lightfall)", combat.ActionTypeSkill, combat.Cryo)
 		d.ApplyAura = true
 		d.AuraBase = combat.WeakAuraBase
 		d.AuraUnits = 1
@@ -304,7 +304,7 @@ func (e *eula) Burst(p map[string]interface{}) int {
 
 	e.CD[combat.BurstCD] = 20 * 60
 	e.Energy = 0
-	return 120
+	return 112
 }
 
 func (e *eula) Tick() {

@@ -165,6 +165,8 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 	//reset hit counter as well not sure if this is true though
 	f.ozAuraICDHitCounter = 0
 	f.ozAuraICDResetTimer = 0
+	//put a tag on the sim
+	f.S.Status["Fischl-Oz"] = 10 * 60
 
 	d := f.Snapshot("Oz", combat.ActionTypeSkill, combat.Electro)
 	lvl := f.Profile.TalentLevel[combat.ActionTypeSkill] - 1
@@ -221,6 +223,8 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 	//reset hit counter as well not sure if this is true though
 	f.ozAuraICDHitCounter = 0
 	f.ozAuraICDResetTimer = 0
+	//put a tag on the sim
+	f.S.Status["Fischl-Oz"] = 10 * 60
 
 	//initial damage
 	d := f.Snapshot("Midnight Phantasmagoria", combat.ActionTypeBurst, combat.Electro)

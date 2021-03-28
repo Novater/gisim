@@ -185,7 +185,8 @@ func New(p Profile) (*Sim, error) {
 }
 
 //Run the sim; length in seconds
-func (s *Sim) Run(length int) (float64, map[string]map[string]float64) {
+func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64) {
+	graph := make([]float64, length*60)
 	var skip int
 	rand.Seed(time.Now().UnixNano())
 	//60fps, 60s/min, 2min
@@ -204,6 +205,9 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64) {
 		if s.swapCD > 0 {
 			s.swapCD--
 		}
+
+		//damage for this frame
+		graph[s.f] = s.Target.Damage
 
 		//if in cooldown, do nothing
 		if skip > 0 {
@@ -231,7 +235,7 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64) {
 		skip = s.executeAbilityQueue(next)
 	}
 
-	return s.Target.Damage, s.Target.DamageDetails
+	return s.Target.Damage, s.Target.DamageDetails, graph
 }
 
 func (s *Sim) decrementStatusDuration() {

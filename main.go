@@ -1,11 +1,13 @@
 package main
 
 import (
+	"encoding/csv"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/srliao/gisim/pkg/combat"
@@ -29,6 +31,7 @@ import (
 
 	//sets
 	_ "github.com/srliao/gisim/internal/artifact/blizzard"
+	_ "github.com/srliao/gisim/internal/artifact/bloodstained"
 	_ "github.com/srliao/gisim/internal/artifact/crimson"
 	_ "github.com/srliao/gisim/internal/artifact/gladiator"
 	_ "github.com/srliao/gisim/internal/artifact/noblesse"
@@ -118,7 +121,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		d1, _ := s2.Run(dur)
+		d1, _, _ := s2.Run(dur)
 
 		for _, v := range stat {
 
@@ -133,7 +136,7 @@ func main() {
 			val := make(map[combat.StatType]float64)
 			val[v.Type] = v.Value * 4
 			s.AddCharMod(name, "test", val)
-			d, _ := s.Run(dur)
+			d, _, _ := s.Run(dur)
 
 			elapsed := time.Since(start)
 
@@ -152,7 +155,7 @@ func main() {
 	}
 
 	start := time.Now()
-	dmg, details := s.Run(*secondsPtr)
+	dmg, details, graph := s.Run(*secondsPtr)
 	elapsed := time.Since(start)
 	for char, t := range details {
 		fmt.Printf("%v contributed the following dps:\n", char)
@@ -161,5 +164,46 @@ func main() {
 		}
 	}
 	fmt.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", *pPtr, dmg, *secondsPtr, dmg/float64(*secondsPtr), elapsed)
+
+	graphToCSV(graph)
+}
+
+func graphToCSV(in []float64) {
+	os.Remove("graph.csv")
+	file, err := os.Create("result.csv")
+	if err != nil {
+		log.Panic(err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+	t := 10
+	l := len(in) / (60 * t)
+
+	out := make([][]string, 0, l)
+
+	stop := false
+	next := 0
+	var prev float64
+	var i int64
+	for !stop {
+		val := in[next] - prev
+		prev = in[next]
+		out = append(out, []string{strconv.FormatInt(i, 10), strconv.FormatFloat(val/float64(t), 'f', 2, 64)})
+		i++
+		if next == len(in)-1 {
+			stop = true
+		} else {
+			next += 600
+			if next >= len(in) {
+				next = len(in) - 1
+			}
+		}
+	}
+
+	for _, v := range out {
+		writer.Write(v)
+	}
 
 }
