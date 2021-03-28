@@ -1,7 +1,6 @@
 package bennett
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -151,18 +150,24 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 			lvl = 14
 		}
 	}
+	var sb strings.Builder
+	sb.WriteString("Bennett-Skill-Hold-")
 	var hits [][]float64
 	delay := []int{26}
 	switch hold {
 	case 0:
 		hits = skill
+		sb.WriteRune('0')
 	case 1:
 		delay = []int{89, 115}
 		hits = skill1
+		sb.WriteRune('1')
 	case 2:
 		delay = []int{136, 154, 198}
 		hits = skill2
+		sb.WriteRune('2')
 	}
+	sb.WriteString("-Hit-")
 
 	for i, s := range hits {
 		d := b.Snapshot("Passion Overload", combat.ActionTypeSkill, combat.Pyro)
@@ -171,10 +176,11 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 		d.AuraUnits = 2
 		d.Mult = s[lvl]
 		t := i + 1
+		sb.WriteString(strconv.Itoa(t))
 		b.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("\t Bennett skill dealt %.0f damage", damage)
-		}, fmt.Sprintf("Bennett-Skill-Hold-%v-Hit-%v", hold, t), delay[i])
+		}, sb.String(), delay[i])
 	}
 
 	count := 3

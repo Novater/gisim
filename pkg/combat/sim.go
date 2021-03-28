@@ -3,6 +3,7 @@ package combat
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"sync"
 	"time"
 
@@ -299,7 +300,7 @@ func (s *Sim) addResonance(count map[EleType]int) {
 }
 
 func (s *Sim) Frame() string {
-	return fmt.Sprintf("%.2fs|%v", float64(s.f)/60, s.f)
+	return strconv.Itoa(int(1000*float64(s.f)/60)) + "ms|" + strconv.Itoa(s.f)
 }
 
 type NewCharacterFunc func(s *Sim, p CharacterProfile) (Character, error)
