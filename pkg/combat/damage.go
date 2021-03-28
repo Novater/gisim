@@ -68,7 +68,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 
 	//determine type of reaction
 
-	dr := calcDmg(ds, *s.Target, s.Log)
+	dr := calcDmg(ds, *s.Target, s.Rand, s.Log)
 	s.Target.Damage += dr.damage
 	s.Target.DamageDetails[ds.CharName][ds.Abil] += dr.damage
 
@@ -92,7 +92,7 @@ type dmgResult struct {
 	isCrit bool
 }
 
-func calcDmg(ds Snapshot, target Enemy, log *zap.SugaredLogger) dmgResult {
+func calcDmg(ds Snapshot, target Enemy, rand *rand.Rand, log *zap.SugaredLogger) dmgResult {
 
 	result := dmgResult{}
 

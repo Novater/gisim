@@ -1,8 +1,6 @@
 package fischl
 
 import (
-	"math/rand"
-
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -144,7 +142,7 @@ func (f *fischl) ozShoot() {
 	}, "Fischl Oz (Damage)", 1)
 	f.ozShootCD += f.ozShootDelay
 	//assume fischl has 60% chance of generating orb every attack;
-	if rand.Float64() < .6 {
+	if f.S.Rand.Float64() < .6 {
 		f.S.AddEnergyParticles("Fischl", 1, combat.Electro, 120)
 	}
 }

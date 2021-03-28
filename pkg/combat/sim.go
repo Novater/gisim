@@ -32,6 +32,7 @@ type Sim struct {
 	//overwritable functions
 	FindNextAction func(s *Sim) (ActionItem, error)
 
+	Rand      *rand.Rand
 	particles []Particle
 	tasks     map[string]Task
 	f         int
@@ -49,6 +50,8 @@ type Sim struct {
 func New(p Profile) (*Sim, error) {
 	s := &Sim{}
 	s.FindNextAction = FindNextAction
+
+	s.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	u := &Enemy{}
 	u.Status = make(map[string]int)

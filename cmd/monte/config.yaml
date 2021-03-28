@@ -1,0 +1,85 @@
+Label: "Test"
+Characters:
+  - Name: Eula
+    Level: 90
+    Element: "cryo"
+    BaseHP: 13226
+    BaseAtk: 342
+    BaseDef: 751
+    BaseCR: 0.05
+    BaseCD: 0.50
+    Constellation: 0
+    AscensionBonus:
+      CD: 0.384
+    TalentLevel:
+      attack: 8
+      skill: 6
+      burst: 9
+    WeaponName: "Skyward Pride"
+    WeaponRefinement: 1
+    WeaponBaseAtk: 674
+    WeaponSecondaryStat:
+      ER: 0.368
+    Artifacts:
+      Flower:
+        Level: 20
+        Type: "Flower"
+        Set: "Gladiator's Finale"
+        MainStat:
+          Type: "HP"
+          Value: 4780
+      Feather:
+        Level: 20
+        Type: "Feather"
+        Set: "Gladiator's Finale"
+        MainStat:
+          Type: "ATK"
+          Value: 311
+      Sands:
+        Level: 20
+        Type: "Sands"
+        Set: "Bloodstained Chivalry"
+        MainStat:
+          Type: "ATK%"
+          Value: 0.466
+      Goblet:
+        Level: 20
+        Type: "Goblet"
+        Set: "Bloodstained Chivalry"
+        MainStat:
+          Type: "Phys%"
+          Value: 0.466
+      Circlet:
+        Level: 20
+        Type: "Circlet"
+        Set: "Bloodstained Chivalry"
+        MainStat:
+          Type: "CR"
+          Value: 0.311
+Enemy:
+  Level: 88
+  Resist:
+    pyro: 0.1
+    dendro: 0.1
+    hydro: 0.1
+    cryo: 0.1
+    electro: 0.1
+    geo: 0.1
+    anemo: 0.1
+    physical: 0.1
+InitialActive: "Eula"
+Rotation:
+  - CharacterName: "Eula"
+    Action: "burst"
+    SwapLock: 480
+  - CharacterName: "Eula"
+    Action: "skill"
+    Params:
+      Hold: 1
+    ConditionType: "tags"
+    ConditionTarget: "Grimheart"
+    ConditionInt: 2
+  - CharacterName: "Eula"
+    Action: "skill"
+  - CharacterName: "Eula"
+    Action: "attack"

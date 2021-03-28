@@ -1,8 +1,6 @@
 package favonius
 
 import (
-	"math/rand"
-
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -37,7 +35,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 			return false
 		}
 
-		if rand.Float64() > p {
+		if s.Rand.Float64() > p {
 			return false
 		}
 		s.Log.Debugf("\t [%v] Favonius Sword proc triggered", s.Frame())

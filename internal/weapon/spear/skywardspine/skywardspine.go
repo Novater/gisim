@@ -2,7 +2,6 @@ package skywardspine
 
 import (
 	"fmt"
-	"math/rand"
 
 	"github.com/srliao/gisim/pkg/combat"
 )
@@ -50,7 +49,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		}
 
 		//check 50/50 proc chance
-		r := rand.Intn(2)
+		r := s.Rand.Intn(2)
 		if r == 0 {
 			return false
 		}

@@ -2,7 +2,6 @@ package bennett
 
 import (
 	"fmt"
-	"math/rand"
 
 	"github.com/srliao/gisim/pkg/combat"
 )
@@ -169,7 +168,7 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 	}
 
 	count := 3
-	if rand.Float64() < .5 {
+	if b.S.Rand.Float64() < .5 {
 		count = 2
 	}
 	b.S.AddEnergyParticles("Bennett", count, combat.Pyro, delay[0]+100)
