@@ -18,27 +18,22 @@ func (t Task) String() string {
 type TaskFunc func(s *Sim)
 
 func (s *Sim) runTasks() {
-	for k, a := range s.tasks {
-		if a.Delay == 0 {
-			s.Log.Debugf("\t [%v] executing task %v, originated from frame %v", s.Frame(), k, a.originFrame)
-			a.F(s)
-			delete(s.tasks, k)
-		} else {
-			a.Delay--
-			s.tasks[k] = a
-		}
+
+	for _, t := range s.tasks[s.f] {
+		t.F(s)
 	}
+
+	delete(s.tasks, s.f)
 }
 
 func (s *Sim) AddTask(f TaskFunc, name string, delay int) {
-	key := s.RandStringBytesMaskImprSrcSB(10, name)
-	s.tasks[key] = Task{
+	s.tasks[s.f+delay] = append(s.tasks[s.f+delay], Task{
 		Name:        name,
 		Delay:       delay,
 		F:           f,
 		originFrame: s.f,
-	}
-	s.Log.Debugf("\t task added: %v", key)
+	})
+	s.Log.Debugf("\t task added: %v", name)
 }
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

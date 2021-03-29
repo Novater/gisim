@@ -22,7 +22,7 @@ type Character interface {
 	ChargeAttackStam() float64
 	Tag(key string) int
 	//other actions
-	ApplyOrb(count int, ele EleType, isOrb bool, isActive bool, partyCount int)
+
 	ReceiveParticle(p Particle, isActive bool, partyCount int)
 	Snapshot(name string, t ActionType, e EleType) Snapshot
 	ResetActionCooldown(a ActionType)
@@ -66,7 +66,9 @@ func (s *Sim) executeCharacterTicks() {
 }
 
 type CharacterTemplate struct {
-	S     *Sim
+	S *Sim
+	//this should describe the frame in which the abil becomes available
+	//if frame > current then it's available. no need to decrement this way
 	CD    map[string]int
 	Stats map[StatType]float64
 	Mods  map[string]map[StatType]float64
@@ -259,44 +261,6 @@ func (c *CharacterTemplate) RemoveMod(key string) {
 func (c *CharacterTemplate) HasMod(key string) bool {
 	_, ok := c.Mods[key]
 	return ok
-}
-
-func (c *CharacterTemplate) ApplyOrb(count int, ele EleType, isOrb bool, isActive bool, partyCount int) {
-	var amt, er, r float64
-	r = 1.0
-	if !isActive {
-		r = 1.0 - 0.1*float64(partyCount)
-	}
-	//recharge amount - particles: same = 3, non-ele = 2, diff = 1
-	//recharge amount - orbs: same = 9, non-ele = 6, diff = 3 (3x particles)
-	switch {
-	case ele == c.Profile.Element:
-		amt = 3
-	case ele == NonElemental:
-		amt = 2
-	default:
-		amt = 1
-	}
-	if isOrb {
-		amt = amt * 3
-	}
-	amt = amt * r //apply off field reduction
-	//apply energy regen stat
-	er = c.Stats[ER]
-	for _, m := range c.Mods {
-		er += m[ER]
-	}
-	amt = amt * (1 + er) * float64(count)
-
-	c.S.Log.Debugw("\torb", "name", c.Profile.Name, "count", count, "ele", ele, "isOrb", isOrb, "on field", isActive, "party count", partyCount, "pre energ", c.Energy)
-
-	c.Energy += amt
-	if c.Energy > c.MaxEnergy {
-		c.Energy = c.MaxEnergy
-	}
-
-	c.S.Log.Debugw("\torb", "energy rec'd", amt, "next energy", c.Energy, "ER", er)
-
 }
 
 func (c *CharacterTemplate) ActionCooldown(a ActionType) int {

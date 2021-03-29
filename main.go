@@ -49,7 +49,7 @@ func main() {
 	var err error
 
 	debugPtr := flag.String("d", "error", "output level: debug, info, warn")
-	secondsPtr := flag.Int("s", 600000, "how many seconds to run the sim for")
+	secondsPtr := flag.Int("s", 100000, "how many seconds to run the sim for")
 	pPtr := flag.String("p", "config.yaml", "which profile to use")
 	f := flag.String("o", "", "detailed log file")
 	showCaller := flag.Bool("c", false, "show caller in debug low")
