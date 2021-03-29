@@ -17,7 +17,6 @@ type Character interface {
 	RemoveMod(key string)
 	//info methods
 	HasMod(key string) bool
-	ActionCooldown(a ActionType) int
 	ActionReady(a ActionType) bool
 	ChargeAttackStam() float64
 	Tag(key string) int
@@ -229,13 +228,13 @@ func (c *CharacterTemplate) Burst(p map[string]interface{}) int {
 
 func (c *CharacterTemplate) Tick() {
 	//this function gets called for every character every tick
-	for k := range c.CD {
-		c.CD[k]--
-		if c.CD[k] <= 0 {
-			c.S.Log.Infof("[%v] cooldown %v finished; deleting", c.S.Frame(), k)
-			delete(c.CD, k)
-		}
-	}
+	// for k := range c.CD {
+	// 	c.CD[k]--
+	// 	if c.CD[k] <= 0 {
+	// 		c.S.Log.Infof("[%v] cooldown %v finished; deleting", c.S.Frame(), k)
+	// 		delete(c.CD, k)
+	// 	}
+	// }
 	//check normal reset
 	if c.NormalResetTimer == 0 {
 		if c.NRTChanged {
@@ -263,29 +262,16 @@ func (c *CharacterTemplate) HasMod(key string) bool {
 	return ok
 }
 
-func (c *CharacterTemplate) ActionCooldown(a ActionType) int {
-	switch a {
-	case ActionTypeBurst:
-		return c.CD["burst-cd"]
-	case ActionTypeSkill:
-		return c.CD["skill-cd"]
-	}
-	return 0
-}
-
 func (c *CharacterTemplate) ActionReady(a ActionType) bool {
 	switch a {
 	case ActionTypeBurst:
 		if c.Energy != c.MaxEnergy {
 			return false
 		}
-		if _, ok := c.CD["burst-cd"]; ok {
-			return false
-		}
+		return c.CD[BurstCD] <= c.S.F
+
 	case ActionTypeSkill:
-		if _, ok := c.CD["skill-cd"]; ok {
-			return false
-		}
+		return c.CD[SkillCD] <= c.S.F
 	}
 	return true
 }

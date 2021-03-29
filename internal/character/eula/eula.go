@@ -31,7 +31,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	e.a4()
 
 	e.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-		if _, ok := e.S.Status["Eula Burst"]; !ok {
+		if !e.S.StatusActive("Eula Burst") {
 			return false
 		}
 		if ds.CharName != e.Profile.Name {
@@ -40,12 +40,12 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		if ds.AbilType != combat.ActionTypeBurst && ds.AbilType != combat.ActionTypeAttack && ds.AbilType != combat.ActionTypeSkill {
 			return false
 		}
-		if _, ok := e.S.Status["Eula Burst ICD"]; ok {
+		if e.S.StatusActive("Eula Burst ICD") {
 			return false
 		}
 		//add to counter
 		e.burstCounter++
-		e.S.Status["Eula Burst ICD"] = 6
+		e.S.Status["Eula Burst ICD"] = e.S.F + 6
 		return false
 	}, "Eula Burst", combat.PostDamageHook)
 
@@ -61,11 +61,13 @@ func (e *eula) a4() {
 			return false
 		}
 		//check icd
-		if _, ok := e.CD["A4-ICD"]; ok {
+		cd := e.CD["A4-ICD"]
+		if cd >= e.S.F {
 			return false
 		}
+
 		e.S.Log.Debugw("\t Eula A4 triggered", "skill previous cd", e.CD[combat.SkillCD])
-		e.CD["A4-ICD"] = 6
+		e.CD["A4-ICD"] = e.S.F + 6
 
 		e.CD[combat.SkillCD] -= 18
 
@@ -124,7 +126,8 @@ func (e *eula) Attack(p map[string]interface{}) int {
 }
 
 func (e *eula) Skill(p map[string]interface{}) int {
-	if _, ok := e.CD[combat.SkillCD]; ok {
+	cd := e.CD[combat.SkillCD]
+	if cd >= e.S.F {
 		e.S.Log.Debugf("\t Eula skill still on CD; skipping")
 		return 0
 	}
@@ -179,7 +182,7 @@ func (e *eula) pressE() {
 	e.S.Log.Debugf("\t Eula Grimheart stacks %v", v)
 	e.grimheartReset = 18 * 60
 
-	e.CD[combat.SkillCD] = 4 * 60
+	e.CD[combat.SkillCD] = e.S.F + 4*60
 }
 
 func (e *eula) holdE() {
@@ -255,13 +258,13 @@ func (e *eula) holdE() {
 	})
 
 	e.Tags["Grimheart"] = 0
-	e.CD[combat.SkillCD] = 10*60 + 62
+	e.CD[combat.SkillCD] = e.S.F + 10*60 + 62
 }
 
 //ult 365 to 415, 60fps = 120
 //looks like ult charges for 8 seconds
 func (e *eula) Burst(p map[string]interface{}) int {
-	e.S.Status["Eula Burst"] = 8 * 60
+	e.S.Status["Eula Burst"] = e.S.F + 8*60
 	e.burstCounter = 0
 
 	lvl := e.Profile.TalentLevel[combat.ActionTypeBurst] - 1
@@ -298,11 +301,11 @@ func (e *eula) Burst(p map[string]interface{}) int {
 		d2.Mult = burstExplodeBase[lvl] + burstExplodeStack[lvl]*float64(stacks)
 		damage := s.ApplyDamage(d2)
 		s.Log.Infof("\t Eula burst (lightfall) dealt %.0f damage, %v stacks", damage, stacks)
-		e.S.Status["Eula Burst"] = 0
+		e.S.Status["Eula Burst"] = e.S.F
 		e.burstCounter = 0
 	}, "Eula-Burst-Lightfall", 8*60+100) //after 8 seconds
 
-	e.CD[combat.BurstCD] = 20 * 60
+	e.CD[combat.BurstCD] = e.S.F + 20*60
 	e.Energy = 0
 	return 112
 }

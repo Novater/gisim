@@ -31,7 +31,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if ds.CharName != c.Name() {
 			return false
 		}
-		if _, ok := s.Status["Favonius Sword Proc"]; ok {
+		if s.StatusActive("Favonius Sword Proc") {
 			return false
 		}
 
@@ -42,7 +42,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 
 		s.AddEnergyParticles("Favonius Sword", 3, combat.NonElemental, 150) //90 to generate, 60 to get it
 
-		s.Status["Favonius Sword Proc"] = cd
+		s.Status["Favonius Sword Proc"] = s.F + cd
 		return false
 	}, "favonius-sword-proc", combat.OnCritDamage)
 

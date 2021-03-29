@@ -19,19 +19,19 @@ type TaskFunc func(s *Sim)
 
 func (s *Sim) runTasks() {
 
-	for _, t := range s.tasks[s.f] {
+	for _, t := range s.tasks[s.F] {
 		t.F(s)
 	}
 
-	delete(s.tasks, s.f)
+	delete(s.tasks, s.F)
 }
 
 func (s *Sim) AddTask(f TaskFunc, name string, delay int) {
-	s.tasks[s.f+delay] = append(s.tasks[s.f+delay], Task{
+	s.tasks[s.F+delay] = append(s.tasks[s.F+delay], Task{
 		Name:        name,
 		Delay:       delay,
 		F:           f,
-		originFrame: s.f,
+		originFrame: s.F,
 	})
 	s.Log.Debugf("\t task added: %v", name)
 }

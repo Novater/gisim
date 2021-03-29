@@ -44,7 +44,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 			return false
 		}
 		//check if cd is up
-		if _, ok := s.Status["Skyward Spine Proc"]; ok {
+		if !s.StatusActive("Skyward Spine Proc") {
 			return false
 		}
 
@@ -63,7 +63,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		}, fmt.Sprintf("Skyward Spine Proc %v", c.Name()), 1)
 
 		//trigger cd
-		s.Status["Skyward Spine Proc"] = 2 * 60
+		s.Status["Skyward Spine Proc"] = s.F + 2*60
 
 		return false
 	}, "skyward-spine-proc", combat.PostDamageHook)

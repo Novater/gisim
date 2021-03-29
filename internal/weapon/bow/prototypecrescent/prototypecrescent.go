@@ -30,7 +30,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if !snap.HitWeakPoint {
 			return false
 		}
-		s.Status["Prototype Crescent"] = 600
+		s.Status["Prototype Crescent"] = s.F + 600
 		return false
 	}, "prototype-crescent-proc", combat.PostDamageHook)
 
@@ -39,7 +39,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if c.Name() != ds.CharName {
 			return false
 		}
-		if _, ok := s.Status["Prototype Crescent"]; !ok {
+		if !s.StatusActive("Prototype Crescent") {
 			return false
 		}
 		ds.Stats[combat.ATKP] += atkmod

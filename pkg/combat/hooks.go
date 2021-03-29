@@ -63,7 +63,7 @@ func (s *Sim) executeSnapshotHooks(t snapshotHookType, ds *Snapshot) {
 }
 
 func (s *Sim) runEffects() {
-	var next []EffectFunc
+	next := make([]EffectFunc, 0, len(s.effects))
 	for _, f := range s.effects {
 		if !f(s) {
 			next = append(next, f)

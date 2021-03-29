@@ -35,7 +35,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if snap.AbilType != combat.ActionTypeSkill {
 			return false
 		}
-		if _, ok := s.Status["Sacrificial Sword Proc"]; ok {
+		if s.StatusActive("Sacrificial Sword Proc") {
 			return false
 		}
 		if s.Rand.Float64() > prob {
@@ -45,7 +45,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 
 		c.ResetActionCooldown(combat.ActionTypeSkill)
 
-		s.Status["Sacrificial Sword Proc"] = cd
+		s.Status["Sacrificial Sword Proc"] = s.F + cd
 		return false
 	}, "sacrificial-sword-proc", combat.PostDamageHook)
 }

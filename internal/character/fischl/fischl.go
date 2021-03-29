@@ -149,7 +149,8 @@ func (f *fischl) ozShoot() {
 
 //42
 func (f *fischl) Skill(p map[string]interface{}) int {
-	if _, ok := f.CD[combat.SkillCD]; ok {
+	cd := f.CD[combat.SkillCD]
+	if cd > f.S.F {
 		f.S.Log.Debugf("\tFischl skill still on CD; skipping")
 		return 0
 	}
@@ -164,7 +165,7 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 	f.ozAuraICDHitCounter = 0
 	f.ozAuraICDResetTimer = 0
 	//put a tag on the sim
-	f.S.Status["Fischl-Oz"] = 10 * 60
+	f.S.Status["Fischl-Oz"] = f.S.F + 10*60
 
 	d := f.Snapshot("Oz", combat.ActionTypeSkill, combat.Electro)
 	lvl := f.Profile.TalentLevel[combat.ActionTypeSkill] - 1
@@ -192,7 +193,7 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 		s.Log.Infof("\t Fischl (Oz - Skill Initial) dealt %.0f damage", s.Frame(), damage)
 	}, "Fischl Skill Initial", 1)
 
-	f.CD[combat.SkillCD] = 25 * 60
+	f.CD[combat.SkillCD] = f.S.F + 25*60
 	//return animation cd
 	return 40
 }
@@ -202,7 +203,8 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 //last @ 620
 
 func (f *fischl) Burst(p map[string]interface{}) int {
-	if _, ok := f.CD[combat.BurstCD]; ok {
+	cd := f.CD[combat.BurstCD]
+	if cd > f.S.F {
 		f.S.Log.Debugf("\t Fischl burst still on CD; skipping")
 		return 0
 	}
@@ -222,7 +224,7 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 	f.ozAuraICDHitCounter = 0
 	f.ozAuraICDResetTimer = 0
 	//put a tag on the sim
-	f.S.Status["Fischl-Oz"] = 10 * 60
+	f.S.Status["Fischl-Oz"] = f.S.F + 10*60
 
 	//initial damage
 	d := f.Snapshot("Midnight Phantasmagoria", combat.ActionTypeBurst, combat.Electro)
@@ -270,7 +272,7 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 	f.ozSnapshot = b
 
 	f.Energy = 0
-	f.CD[combat.BurstCD] = 15 * 60
+	f.CD[combat.BurstCD] = f.S.F + 15*60
 	return 21 //this is if you cancel immediately
 }
 

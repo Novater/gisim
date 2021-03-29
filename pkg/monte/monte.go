@@ -121,7 +121,7 @@ func (s *Simulator) SimDmgDist(n, b, w int64) SimResult {
 		}
 	}()
 
-	fmt.Print("\tProgress: 0.")
+	fmt.Print("\tProgress: 0")
 
 	for count > 0 {
 		//process results received

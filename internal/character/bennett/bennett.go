@@ -132,7 +132,8 @@ func (b *bennett) ChargeAttackStam() float64 {
 }
 
 func (b *bennett) Skill(p map[string]interface{}) int {
-	if _, ok := b.CD[combat.SkillCD]; ok {
+	cd := b.CD[combat.SkillCD]
+	if cd > b.S.F {
 		b.S.Log.Debugf("\tBennett skill still on CD; skipping")
 		return 0
 	}
@@ -207,13 +208,14 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 		return 370 //too high as well
 	}
 
-	cd := int(5 * 60 * (1 - reduction))
-	b.CD[combat.SkillCD] = cd //should be 7.5 or 10
+	cd = int(5 * 60 * (1 - reduction))
+	b.CD[combat.SkillCD] = b.S.F + cd //should be 7.5 or 10
 	return 52
 }
 
 func (b *bennett) Burst(p map[string]interface{}) int {
-	if _, ok := b.CD[combat.BurstCD]; ok {
+	cd := b.CD[combat.BurstCD]
+	if cd > b.S.F {
 		b.S.Log.Debugf("\tBennett burst still on CD; skipping")
 		return 0
 	}
@@ -250,6 +252,6 @@ func (b *bennett) Burst(p map[string]interface{}) int {
 	}, "Bennett-Burst", 43)
 
 	b.Energy = 0
-	b.CD[combat.BurstCD] = 15 * 60
+	b.CD[combat.BurstCD] = b.S.F + 15*60
 	return 51 //todo fix field cast time
 }

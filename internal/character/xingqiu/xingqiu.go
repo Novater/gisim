@@ -105,7 +105,7 @@ func (x *xingqiu) Attack(p map[string]interface{}) int {
 
 func (x *xingqiu) Skill(p map[string]interface{}) int {
 	//applies wet to self 30 frame after cast
-	if _, ok := x.CD[combat.SkillCD]; ok {
+	if x.CD[combat.SkillCD] > x.S.F {
 		x.S.Log.Debugf("\tXingqiu skill still on CD; skipping")
 		return 0
 	}
@@ -119,7 +119,7 @@ func (x *xingqiu) Skill(p map[string]interface{}) int {
 	}
 	if x.Profile.Constellation >= 4 {
 		//check if ult is up, if so increase multiplier
-		if _, ok := x.S.Status["Xingqiu-Burst"]; ok {
+		if x.S.StatusActive("Xingqiu-Burst") {
 			d.OtherMult = 1.5
 		}
 	}
@@ -143,18 +143,18 @@ func (x *xingqiu) Skill(p map[string]interface{}) int {
 	x.S.AddEnergyParticles("Xingqiu", 5, combat.Hydro, 100)
 
 	//should last 15s, cd 21s
-	x.CD[combat.SkillCD] = 21 * 60
+	x.CD[combat.SkillCD] = x.S.F + 21*60
 	return 77
 }
 
 func (x *xingqiu) burstHook() {
 	x.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		//check if buff is up
-		if _, ok := x.S.Status["Xingqiu-Burst"]; !ok {
+		if !x.S.StatusActive("Xingqiu-Burst") {
 			return false
 		}
 		//check if off ICD
-		if _, ok := x.CD["Xingqiu-Burst-ICD"]; ok {
+		if x.CD["Xingqiu-Burst-ICD"] > x.S.F {
 			return false
 		}
 		//check if normal attack
@@ -216,7 +216,7 @@ func (x *xingqiu) burstHook() {
 		}
 
 		//estimated 1 second ICD
-		x.CD["Xingqiu-Burst-ICD"] = 60
+		x.CD["Xingqiu-Burst-ICD"] = x.S.F + 60
 		x.burstCounter++
 
 		return false
@@ -227,7 +227,7 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 	//apply hydro every 3rd hit
 	//triggered on normal attack
 	//not sure what ICD is
-	if _, ok := x.CD[combat.BurstCD]; ok {
+	if x.CD[combat.BurstCD] > x.S.F {
 		x.S.Log.Debugf("\tXingqiu skill still on CD; skipping")
 		return 0
 	}
@@ -252,12 +252,12 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 		dur += 3
 	}
 	dur = dur * 60
-	x.S.Status["Xingqiu-Burst"] = dur
+	x.S.Status["Xingqiu-Burst"] = x.S.F + dur
 
 	x.burstCounter = 0
 	x.numSwords = 2
 
-	x.CD[combat.BurstCD] = 20 * 60
+	x.CD[combat.BurstCD] = x.S.F + 20*60
 	x.Energy = 0
 	return 39
 }

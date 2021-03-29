@@ -13,8 +13,6 @@ import (
 	"github.com/pkg/profile"
 	"github.com/srliao/gisim/pkg/combat"
 
-	_ "net/http/pprof"
-
 	//characters
 	_ "github.com/srliao/gisim/internal/character/bennett"
 	_ "github.com/srliao/gisim/internal/character/eula"
@@ -49,7 +47,7 @@ func main() {
 	var err error
 
 	debugPtr := flag.String("d", "error", "output level: debug, info, warn")
-	secondsPtr := flag.Int("s", 100000, "how many seconds to run the sim for")
+	secondsPtr := flag.Int("s", 2000, "how many seconds to run the sim for")
 	pPtr := flag.String("p", "config.yaml", "which profile to use")
 	f := flag.String("o", "", "detailed log file")
 	showCaller := flag.Bool("c", false, "show caller in debug low")

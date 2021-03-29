@@ -43,7 +43,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 			return false
 		}
 		//20s timer
-		s.Status["Skyward Pride Proc"] = 20 * 60
+		s.Status["Skyward Pride Proc"] = s.F + 20*60
 		counter = 0
 
 		return false
@@ -60,7 +60,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 			return false
 		}
 		//check if buff is active
-		if _, ok := s.Status["Skyward Pride Proc"]; !ok {
+		if !s.StatusActive("Skyward Pride Proc") {
 			return false
 		}
 		//check if already done 8 hits

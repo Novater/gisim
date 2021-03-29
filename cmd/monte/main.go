@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/components"
@@ -38,9 +39,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	start := time.Now()
 	sim, err := monte.New(cfg, *index)
-
 	r := sim.SimDmgDist(*t, *bin, *worker)
+	elapsed := time.Since(start)
+	fmt.Printf("Provie %v done in %s\n", *prf, elapsed)
 
 	page := components.NewPage()
 	page.PageTitle = "simulation results"

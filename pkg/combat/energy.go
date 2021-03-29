@@ -8,7 +8,7 @@ type Particle struct {
 }
 
 func (s *Sim) AddEnergyParticles(source string, num int, ele EleType, delay int) {
-	s.particles[s.f+delay] = append(s.particles[s.f+delay], Particle{
+	s.particles[s.F+delay] = append(s.particles[s.F+delay], Particle{
 		Source: source,
 		Num:    num,
 		Ele:    ele,
@@ -18,17 +18,18 @@ func (s *Sim) AddEnergyParticles(source string, num int, ele EleType, delay int)
 
 func (s *Sim) collectEnergyParticles() {
 
-	for _, p := range s.particles[s.f] {
+	for _, p := range s.particles[s.F] {
 		s.distributeParticles(p)
 	}
 
-	delete(s.particles, s.f)
+	delete(s.particles, s.F)
 }
 
 func (s *Sim) distributeParticles(p Particle) {
+
 	l := len(s.Chars)
 	for n, c := range s.Chars {
-		a := s.ActiveChar == n
+		a := s.ActiveIndex == n
 		c.ReceiveParticle(p, a, l)
 	}
 }

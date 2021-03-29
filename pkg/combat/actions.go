@@ -14,18 +14,15 @@ func FindNextAction(s *Sim) (ActionItem, error) {
 func (s *Sim) abilityConditionsOk(a ActionItem) bool {
 	switch a.ConditionType {
 	case "status":
-		_, ok := s.Status[a.ConditionTarget]
-		if ok != a.ConditionBool {
-			return false
-		}
+		return s.StatusActive(a.ConditionTarget) == a.ConditionBool
 	case "energy lt":
 		//check if target energy < threshold
-		t := s.Chars[a.ConditionTarget].CurrentEnergy()
+		t := s.Chars[a.index].CurrentEnergy()
 		if t > a.ConditionFloat {
 			return false
 		}
 	case "tags":
-		t := s.Chars[a.CharacterName].Tag(a.ConditionTarget)
+		t := s.Chars[a.index].Tag(a.ConditionTarget)
 		s.Log.Debugw("\t checking for tags", "want", a.ConditionInt, "got", t, "action", a)
 		if t != a.ConditionInt {
 			return false
@@ -40,12 +37,12 @@ func (s *Sim) isAbilityReady(a ActionItem) bool {
 		return false
 	}
 	//ask the char if the ability is off cooldown
-	ready := s.Chars[a.CharacterName].ActionReady(a.Action)
+	ready := s.Chars[a.index].ActionReady(a.Action)
 	if ready {
 		// s.Log.Infof("[%v]\t\t action %v is ready", s.Frame(), a)
 		//check stam cost
 		if a.Action == ActionTypeChargedAttack {
-			cost := s.Chars[a.CharacterName].ChargeAttackStam()
+			cost := s.Chars[a.index].ChargeAttackStam()
 			if cost > s.Stam {
 				return false
 			}
@@ -56,7 +53,7 @@ func (s *Sim) isAbilityReady(a ActionItem) bool {
 
 func (s *Sim) executeAbilityQueue(a ActionItem) int {
 
-	c := s.Chars[s.ActiveChar]
+	c := s.Chars[s.ActiveIndex]
 
 	s.Log.Infof("[%v] %v executing %v", s.Frame(), s.ActiveChar, a.Action)
 	f := 0
@@ -99,6 +96,7 @@ type ActionItem struct {
 	ConditionInt    int                    `yaml:"ConditionInt"`
 	SwapLock        int                    `yaml:"SwapLock"`      //number of frames the sim is restricted from swapping after executing this ability
 	CancelAbility   ActionType             `yaml:"CancelAbility"` //ability to execute to cancel this action
+	index           int
 }
 
 type ActionType string

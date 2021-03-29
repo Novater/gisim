@@ -25,18 +25,20 @@ type Sim struct {
 	Target *Enemy
 	Log    *zap.SugaredLogger
 	//exposed fields
-	Status     map[string]int
-	ActiveChar string
-	Stam       float64
-	Chars      map[string]Character
-	SwapCD     int
+	Status      map[string]int
+	ActiveChar  string
+	ActiveIndex int
+	Stam        float64
+	Chars       []Character
+	SwapCD      int
 	//overwritable functions
 	FindNextAction func(s *Sim) (ActionItem, error)
 
 	Rand      *rand.Rand
 	particles map[int][]Particle
 	tasks     map[int][]Task
-	f         int
+	F         int
+	charPos   map[string]int
 	//per tick effects
 	effects []EffectFunc
 	//event hooks
@@ -67,8 +69,9 @@ func New(p Profile) (*Sim, error) {
 	s.eventHooks = make(map[eventHookType]map[string]eventHookFunc)
 	s.tasks = make(map[int][]Task)
 	s.Status = make(map[string]int)
-	s.Chars = make(map[string]Character)
+	s.Chars = make([]Character, 0, 4)
 	s.particles = make(map[int][]Particle)
+	s.charPos = make(map[string]int)
 	// s.effects = make(map[string]ActionFunc)
 
 	s.Stam = 240
@@ -103,8 +106,9 @@ func New(p Profile) (*Sim, error) {
 
 	dup := make(map[string]bool)
 	res := make(map[EleType]int)
+
 	//create the characters
-	for _, v := range p.Characters {
+	for i, v := range p.Characters {
 
 		f, ok := charMap[v.Name]
 		if !ok {
@@ -135,10 +139,12 @@ func New(p Profile) (*Sim, error) {
 			return nil, fmt.Errorf("char %v missing talent level for %v", v.Name, ActionTypeBurst)
 		}
 
-		s.Chars[v.Name] = c
+		s.Chars = append(s.Chars, c)
+		s.charPos[v.Name] = i
 
 		if v.Name == p.InitialActive {
 			s.ActiveChar = p.InitialActive
+			s.ActiveIndex = i
 		}
 
 		if _, ok := dup[v.Name]; ok {
@@ -176,11 +182,13 @@ func New(p Profile) (*Sim, error) {
 	if s.ActiveChar == "" {
 		return nil, fmt.Errorf("invalid active initial character %v", p.InitialActive)
 	}
-	for _, v := range p.Rotation {
+	for i, v := range p.Rotation {
 		//make sure char exists
-		if _, ok := s.Chars[v.CharacterName]; !ok {
+		pos, ok := s.charPos[v.CharacterName]
+		if !ok {
 			return nil, fmt.Errorf("invalid character %v in rotation list", v.CharacterName)
 		}
+		p.Rotation[i].index = pos
 	}
 
 	s.actions = p.Rotation
@@ -197,12 +205,12 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64
 	var skip int
 	rand.Seed(time.Now().UnixNano())
 	//60fps, 60s/min, 2min
-	for s.f = 0; s.f < 60*length; s.f++ {
+	for s.F = 0; s.F < 60*length; s.F++ {
 		//tick target and each character
 		//target doesn't do anything, just takes punishment, so it won't affect cd
 		s.Target.tick(s)
 
-		s.decrementStatusDuration()
+		// s.decrementStatusDuration()
 		s.collectEnergyParticles()
 		s.executeCharacterTicks()
 		s.runEffects()
@@ -213,7 +221,7 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64
 		}
 
 		//damage for this frame
-		graph[s.f] = s.Target.Damage
+		graph[s.F] = s.Target.Damage
 
 		//if in cooldown, do nothing
 		if skip > 0 {
@@ -235,6 +243,7 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64
 			s.SwapCD = 150
 			skip = 20
 			s.ActiveChar = next.CharacterName
+			s.ActiveIndex = next.index
 			continue
 		}
 
@@ -246,19 +255,10 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64
 	return s.Target.Damage, s.Target.DamageDetails, graph
 }
 
-func (s *Sim) decrementStatusDuration() {
-	for k, v := range s.Status {
-		if v == 0 {
-			delete(s.Status, k)
-		} else {
-			s.Status[k]--
-		}
-	}
-}
-
 func (s *Sim) AddCharMod(c string, key string, val map[StatType]float64) {
-	if _, ok := s.Chars[c]; ok {
-		s.Chars[c].AddMod(key, val)
+	pos, ok := s.charPos[c]
+	if ok {
+		s.Chars[pos].AddMod(key, val)
 	}
 }
 
@@ -300,7 +300,7 @@ func (s *Sim) addResonance(count map[EleType]int) {
 }
 
 func (s *Sim) Frame() string {
-	return strconv.Itoa(int(1000*float64(s.f)/60)) + "ms|" + strconv.Itoa(s.f)
+	return strconv.Itoa(int(1000*float64(s.F)/60)) + "ms|" + strconv.Itoa(s.F)
 }
 
 type NewCharacterFunc func(s *Sim, p CharacterProfile) (Character, error)

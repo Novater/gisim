@@ -60,31 +60,31 @@ func (g *ganyu) Aimed(p map[string]interface{}) int {
 	f.AuraBase = combat.WeakAuraBase
 	f.AuraUnits = 1
 	f.ApplyAura = true
-	if _, ok := g.CD["A2"]; ok {
-		f.Stats[combat.CR] += 0.2
-	}
-
-	g.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(f)
-		s.Log.Infof("\t Ganyu frost arrow dealt %.0f damage", damage)
-		//apply A2 on hit
-		g.CD["A2"] = 5 * 60
-	}, "Ganyu-Aimed-FFA", 20+137)
 
 	b := g.Snapshot("Frost Flake Bloom", combat.ActionTypeAimedShot, combat.Cryo)
 	b.Mult = ffb[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
 	b.ApplyAura = true
 	b.AuraBase = combat.WeakAuraBase
 	b.AuraUnits = 1
-	if _, ok := g.CD["A2"]; ok {
+
+	a2 := g.CD["A2"]
+	if a2 > g.S.F {
 		f.Stats[combat.CR] += 0.2
+		b.Stats[combat.CR] += 0.2
 	}
+
+	g.S.AddTask(func(s *combat.Sim) {
+		damage := s.ApplyDamage(f)
+		s.Log.Infof("\t Ganyu frost arrow dealt %.0f damage", damage)
+		//apply A2 on hit
+		g.CD["A2"] = g.S.F + 5*60
+	}, "Ganyu-Aimed-FFA", 20+137)
 
 	g.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(b)
 		s.Log.Infof("\t Ganyu frost flake bloom dealt %.0f damage", damage)
 		//apply A2 on hit
-		g.CD["A2"] = 5 * 60
+		g.CD["A2"] = g.S.F + 5*60
 	}, "Ganyu-Aimed-FFB", 20+20+137)
 
 	return 137
@@ -93,15 +93,15 @@ func (g *ganyu) Aimed(p map[string]interface{}) int {
 func (g *ganyu) Skill(p map[string]interface{}) int {
 	//if c2, check if either cd is cooldown
 	charge := ""
-	_, c2ok := g.CD["skill-cd-2"]
-	_, ok := g.CD[charge]
+	c2onCD := g.CD["skill-cd-2"] > g.S.F
+	onCD := g.CD[charge] > g.S.F
 
 	if g.Profile.Constellation >= 2 {
-		if !c2ok {
+		if !c2onCD {
 			charge = "skill-cd-2"
 		}
 	}
-	if !ok {
+	if !onCD {
 		charge = "skill-cd"
 	}
 
@@ -134,14 +134,14 @@ func (g *ganyu) Skill(p map[string]interface{}) int {
 	}, "Ganyu Flower", 6*60)
 
 	//add cooldown to sim
-	g.CD[charge] = 10 * 60
+	g.CD[charge] = g.S.F + 10*60
 
 	return 30
 }
 
 func (g *ganyu) Burst(p map[string]interface{}) int {
 	//check if on cd first
-	if _, ok := g.CD["burst-cd"]; ok {
+	if g.CD[combat.BurstCD] > g.S.F {
 		g.S.Log.Debugf("\tGanyu burst still on CD; skipping")
 		return 0
 	}
@@ -172,29 +172,11 @@ func (g *ganyu) Burst(p map[string]interface{}) int {
 	}
 
 	//add cooldown to sim
-	g.CD[combat.BurstCD] = 15 * 60
+	g.CD[combat.BurstCD] = g.S.F + 15*60
 	//use up energy
 	g.Energy = 0
 
 	return 122
-}
-
-func (g *ganyu) ActionCooldown(a combat.ActionType) int {
-	switch a {
-	case combat.ActionTypeBurst:
-		return g.CD["burst-cd"]
-	case combat.ActionTypeSkill:
-		cd := g.CD["skill-cd"]
-		if g.Profile.Constellation >= 2 {
-			cd2 := g.CD["skill-cd2"]
-			if cd2 < cd {
-				return cd2
-			}
-		}
-		return cd
-	}
-	return 0
-
 }
 
 func (g *ganyu) ActionReady(a combat.ActionType) bool {
@@ -203,21 +185,16 @@ func (g *ganyu) ActionReady(a combat.ActionType) bool {
 		if g.Energy != g.MaxEnergy {
 			return false
 		}
-		if _, ok := g.CD["burst-cd"]; ok {
-			return false
-		}
+		return g.CD[combat.BurstCD] <= g.S.F
 	case combat.ActionTypeSkill:
-		_, cd := g.CD["skill-cd"]
-		//if skill-cd is not there, then return true
-		if !cd {
+		skillReady := g.CD[combat.SkillCD] <= g.S.F
+		//if skill ready return true regardless of c2
+		if skillReady {
 			return true
 		}
 		//other wise skill-cd is there, we check c2
 		if g.Profile.Constellation >= 2 {
-			_, cd2 := g.CD["skill-cd2"]
-			if !cd2 {
-				return true
-			}
+			return g.CD["skill-cd2"] <= g.S.F
 		}
 		return false
 	}

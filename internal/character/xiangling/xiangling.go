@@ -12,7 +12,7 @@ func init() {
 
 type xl struct {
 	*combat.CharacterTemplate
-	delayedFunc map[string]func() bool
+	delayedFunc map[int]func()
 }
 
 func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error) {
@@ -25,7 +25,11 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	x.Energy = 60
 	x.MaxEnergy = 60
 	x.Profile.WeaponClass = combat.WeaponClassSpear
-	x.delayedFunc = make(map[string]func() bool)
+	x.delayedFunc = make(map[int]func())
+
+	if x.Profile.Constellation >= 6 {
+		x.c6()
+	}
 
 	return &x, nil
 }
@@ -40,10 +44,9 @@ func (x *xl) c1() {
 
 func (x *xl) c6() {
 	x.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-		if _, ok := x.S.Status["Xiangling C6"]; !ok {
-			return false
+		if x.S.StatusActive("Xiangling C6") {
+			ds.Stats[combat.PyroP] += 0.15
 		}
-		ds.Stats[combat.PyroP] += 0.15
 		return false
 	}, "Xiangling C6", combat.PostSnapshot)
 }
@@ -137,7 +140,7 @@ func (x *xl) ChargeAttackStam() float64 {
 
 func (x *xl) Skill(p map[string]interface{}) int {
 	//check if on cd first
-	if _, ok := x.CD[combat.SkillCD]; ok {
+	if x.CD[combat.SkillCD] > x.S.F {
 		x.S.Log.Debugf("\tXiangling skill still on CD; skipping")
 		return 0
 	}
@@ -162,10 +165,13 @@ func (x *xl) Skill(p map[string]interface{}) int {
 			s.Log.Infof("\t Xiangling (Gouba - tick) dealt %.0f damage", damage)
 		}, "Xiangling Guoba", delay+i*95)
 		x.S.AddEnergyParticles("Xiangling", 1, combat.Pyro, delay+i*95+90+60)
+		if x.Profile.Constellation >= 1 {
+			x.c1()
+		}
 	}
 
 	//add cooldown to sim
-	x.CD[combat.SkillCD] = 12 * 60
+	x.CD[combat.SkillCD] = x.S.F + 12*60
 	x.NormalResetTimer = 0
 	//return animation cd
 	return 26
@@ -173,7 +179,7 @@ func (x *xl) Skill(p map[string]interface{}) int {
 
 func (x *xl) Burst(p map[string]interface{}) int {
 	//check if on cd first
-	if _, ok := x.CD[combat.BurstCD]; ok {
+	if x.CD[combat.BurstCD] > x.S.F {
 		x.S.Log.Debugf("\tXiangling skill still on CD; skipping")
 		return 0
 	}
@@ -190,12 +196,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 		}
 	}
 	//initial 3 hits are delayed and snapshotted at execution instead of at cast... no idea why...
-	h1d := 0
-	x.delayedFunc["hit1"] = func() bool {
-		h1d++
-		if h1d < 20 {
-			return false
-		}
+	x.delayedFunc[x.S.F+20] = func() {
 		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)
 		d.Mult = pyronado1[lvl]
 		d.AuraBase = combat.WeakAuraBase
@@ -205,15 +206,9 @@ func (x *xl) Burst(p map[string]interface{}) int {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("\t Xiangling Pyronado initial hit 1 dealt %.0f damagee", damage)
 		}, "Xiangling-Burst-Hit-1", 0)
-		return true
 	}
 
-	h2d := 0
-	x.delayedFunc["hit2"] = func() bool {
-		h2d++
-		if h2d < 50 {
-			return false
-		}
+	x.delayedFunc[x.S.F+50] = func() {
 		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)
 		d.Mult = pyronado2[lvl]
 		d.AuraBase = combat.WeakAuraBase
@@ -223,15 +218,9 @@ func (x *xl) Burst(p map[string]interface{}) int {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("\t Xiangling Pyronado initial hit 2 dealt %.0f damagee", damage)
 		}, "Xiangling-Burst-Hit-2", 0)
-		return true
 	}
 
-	h3d := 0
-	x.delayedFunc["hit2"] = func() bool {
-		h3d++
-		if h3d < 75 {
-			return false
-		}
+	x.delayedFunc[x.S.F+75] = func() {
 		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)
 		d.Mult = pyronado3[lvl]
 		d.AuraBase = combat.WeakAuraBase
@@ -241,7 +230,6 @@ func (x *xl) Burst(p map[string]interface{}) int {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("\t Xiangling Pyronado initial hit 3 dealt %.0f damagee", damage)
 		}, "Xiangling-Burst-Hit-3", 0)
-		return true
 	}
 
 	//spin to win; snapshot on cast
@@ -271,20 +259,14 @@ func (x *xl) Burst(p map[string]interface{}) int {
 	if x.Profile.Constellation >= 6 {
 		//wait 70 frames, add effect
 		//count to max, remove effect
-		c6tick := 0
-		x.delayedFunc["c6"] = func() bool {
-			c6tick++
-			if c6tick < 70 {
-				return false
-			}
-			x.S.Status["Xiangling C6"] = max
-			return true
+		x.delayedFunc[x.S.F+70] = func() {
+			x.S.Status["Xiangling C6"] = x.S.F + max
 		}
 
 	}
 
 	//add cooldown to sim
-	x.CD[combat.BurstCD] = 20 * 60
+	x.CD[combat.BurstCD] = x.S.F + 20*60
 	//use up energy
 	x.Energy = 0
 
@@ -295,9 +277,9 @@ func (x *xl) Burst(p map[string]interface{}) int {
 
 func (x *xl) Tick() {
 	x.CharacterTemplate.Tick()
-	for k, f := range x.delayedFunc {
-		if f() {
-			delete(x.delayedFunc, k)
-		}
+	f, ok := x.delayedFunc[x.S.F]
+	if ok {
+		f()
+		delete(x.delayedFunc, x.S.F)
 	}
 }
