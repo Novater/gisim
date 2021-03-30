@@ -51,7 +51,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	d.CharacterTemplate = t
 	d.Energy = 60
 	d.MaxEnergy = 60
-	d.Profile.WeaponClass = combat.WeaponClassClaymore
+	d.Weapon.Class = combat.WeaponClassClaymore
 	d.burstHook()
 
 	return &d, nil
@@ -59,7 +59,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 
 func (d *diluc) burstHook() {
 	d.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-		if ds.CharName != d.Profile.Name {
+		if ds.CharName != d.Base.Name {
 			return false
 		}
 		if ds.AbilType != combat.ActionTypeAttack {
@@ -98,7 +98,7 @@ func (d *diluc) Attack(p map[string]interface{}) int {
 	frames = int(float64(frames) / (1 + d.Stats[combat.AtkSpd]))
 
 	x := d.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
-	x.Mult = auto[d.NormalCounter][d.Profile.TalentLevel[combat.ActionTypeAttack]-1]
+	x.Mult = auto[d.NormalCounter][d.Talents.Attack-1]
 
 	d.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(x)
@@ -138,8 +138,8 @@ func (d *diluc) Skill(p map[string]interface{}) int {
 
 	//apply attack speed
 	frames = int(float64(frames) / (1 + d.Stats[combat.AtkSpd]))
-	lvl := d.Profile.TalentLevel[combat.ActionTypeSkill] - 1
-	if d.Profile.Constellation >= 3 {
+	lvl := d.Talents.Skill - 1
+	if d.Base.Cons >= 3 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14
@@ -171,8 +171,8 @@ func (d *diluc) Skill(p map[string]interface{}) int {
 func (d *diluc) Burst(p map[string]interface{}) int {
 	d.S.Status["Diluc Burst"] = 12 * 60
 
-	lvl := d.Profile.TalentLevel[combat.ActionTypeBurst] - 1
-	if d.Profile.Constellation >= 5 {
+	lvl := d.Talents.Burst - 1
+	if d.Base.Cons >= 5 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14

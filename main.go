@@ -47,11 +47,10 @@ func main() {
 	var err error
 
 	debugPtr := flag.String("d", "error", "output level: debug, info, warn")
-	secondsPtr := flag.Int("s", 2000, "how many seconds to run the sim for")
+	secondsPtr := flag.Int("s", 600, "how many seconds to run the sim for")
 	pPtr := flag.String("p", "config.yaml", "which profile to use")
 	f := flag.String("o", "", "detailed log file")
 	showCaller := flag.Bool("c", false, "show caller in debug low")
-	w := flag.String("w", "", "test weights for specified character")
 	flag.Parse()
 
 	defer profile.Start(profile.ProfilePath("./")).Stop()
@@ -67,90 +66,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	cfg.LogLevel = *debugPtr
-	cfg.LogFile = *f
-	cfg.LogShowCaller = *showCaller
+	cfg.LogConfig.LogLevel = *debugPtr
+	cfg.LogConfig.LogFile = *f
+	cfg.LogConfig.LogShowCaller = *showCaller
 	os.Remove(*f)
-
-	if *w != "" {
-		stat := []combat.Stat{
-			{
-				Type:  combat.ATK,
-				Value: 11,
-			},
-			{
-				Type:  combat.ATKP,
-				Value: 0.033,
-			},
-			{
-				Type:  combat.EM,
-				Value: 13,
-			},
-			{
-				Type:  combat.ER,
-				Value: 0.036,
-			},
-			{
-				Type:  combat.CR,
-				Value: 0.022,
-			},
-			{
-				Type:  combat.CD,
-				Value: 0.044,
-			},
-		}
-
-		start := time.Now()
-		result := make(map[combat.StatType]float64)
-
-		cfg.LogFile = ""
-		cfg.LogLevel = "error"
-
-		ok := false
-		name := *w
-		for _, c := range cfg.Characters {
-			if c.Name == name {
-				ok = true
-			}
-		}
-		if !ok {
-			log.Panic("invalid character to test weights")
-		}
-
-		dur := 6000
-
-		s2, err := combat.New(cfg)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		d1, _, _ := s2.Run(dur)
-
-		for _, v := range stat {
-
-			start := time.Now()
-			fmt.Printf("Testing %v stat %v\n", name, v.Type)
-
-			s, err := combat.New(cfg)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			val := make(map[combat.StatType]float64)
-			val[v.Type] = v.Value * 4
-			s.AddCharMod(name, "test", val)
-			d, _, _ := s.Run(dur)
-
-			elapsed := time.Since(start)
-
-			fmt.Printf("Increasing %v by %0.4f; New dps: %0.2f old dps: %0.2f;  team dps increased %0.6f%%, took %v\n", v.Type, v.Value*4, d/float64(dur), d1/float64(dur), (d/d1-1)*100, elapsed)
-			result[v.Type] = d/d1 - 1
-		}
-
-		elapsed := time.Since(start)
-		fmt.Printf("Finished in %v seconds\n", elapsed)
-		return
-	}
 
 	s, err := combat.New(cfg)
 	if err != nil {

@@ -9,11 +9,35 @@ import (
 	"os"
 	"time"
 
+	//characters
+	_ "github.com/srliao/gisim/internal/character/bennett"
+	_ "github.com/srliao/gisim/internal/character/eula"
+	_ "github.com/srliao/gisim/internal/character/fischl"
+	_ "github.com/srliao/gisim/internal/character/ganyu"
+	_ "github.com/srliao/gisim/internal/character/xiangling"
+	_ "github.com/srliao/gisim/internal/character/xingqiu"
+
+	//weapons
+	_ "github.com/srliao/gisim/internal/weapon/bow/favoniuswarbow"
+	_ "github.com/srliao/gisim/internal/weapon/bow/prototypecrescent"
+	_ "github.com/srliao/gisim/internal/weapon/claymore/skyward"
+	_ "github.com/srliao/gisim/internal/weapon/spear/blacktassel"
+	_ "github.com/srliao/gisim/internal/weapon/spear/skywardspine"
+	_ "github.com/srliao/gisim/internal/weapon/sword/festeringdesire"
+	_ "github.com/srliao/gisim/internal/weapon/sword/sacrificialsword"
+
+	//sets
+	_ "github.com/srliao/gisim/internal/artifact/blizzard"
+	_ "github.com/srliao/gisim/internal/artifact/bloodstained"
+	_ "github.com/srliao/gisim/internal/artifact/crimson"
+	_ "github.com/srliao/gisim/internal/artifact/gladiator"
+	_ "github.com/srliao/gisim/internal/artifact/noblesse"
+	_ "github.com/srliao/gisim/internal/artifact/wanderer"
+
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/components"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/srliao/gisim/pkg/combat"
-	"github.com/srliao/gisim/pkg/monte"
 	"gopkg.in/yaml.v2"
 )
 
@@ -22,11 +46,11 @@ func main() {
 	var cfg combat.Profile
 	var err error
 
-	t := flag.Int64("t", 1000000, "how many iterations default 1mil")
+	t := flag.Int("t", 1000000, "how many iterations default 1mil")
 	prf := flag.String("p", "config.yaml", "which profile to use; default config.yaml")
 	index := flag.Int("i", 0, "character index to sim; default 0")
-	worker := flag.Int64("w", 24, "number of works, default 24")
-	bin := flag.Int64("b", 100, "bin size, default 100")
+	worker := flag.Int("w", 24, "number of works, default 24")
+	bin := flag.Int("b", 100, "bin size, default 100")
 	out := flag.String("o", "out.html", "output file; default out.html")
 	flag.Parse()
 
@@ -40,22 +64,25 @@ func main() {
 	}
 
 	start := time.Now()
-	sim, err := monte.New(cfg, *index)
-	r := sim.SimDmgDist(*t, *bin, *worker)
+	sim, err := combat.NewArtifactSim(cfg, *index)
+	if err != nil {
+		panic(err)
+	}
+	r := sim.RunDmgSim(*bin, *t, *worker)
 	elapsed := time.Since(start)
 	fmt.Printf("Provie %v done in %s\n", *prf, elapsed)
 
 	page := components.NewPage()
 	page.PageTitle = "simulation results"
 
-	var bins []int64
+	var bins []int
 	var items []opts.LineData
 	var cumul, med float64
 	med = -1
 	binSize := *bin
 
 	for i, v := range r.Hist {
-		bins = append(bins, r.BinStart+binSize*int64(i))
+		bins = append(bins, r.BinStart+binSize*i)
 		items = append(items, opts.LineData{Value: v})
 		cumul += v / float64(*t)
 		if cumul >= 0.5 && med == -1 {

@@ -34,6 +34,28 @@ type aura struct {
 	Duration int64
 }
 
+func EleToDmgP(e EleType) StatType {
+	switch e {
+	case Anemo:
+		return AnemoP
+	case Cryo:
+		return CryoP
+	case Electro:
+		return ElectroP
+	case Geo:
+		return GeoP
+	case Hydro:
+		return HydroP
+	case Pyro:
+		return PyroP
+	case Dendro:
+		return DendroP
+	case Physical:
+		return PhyP
+	}
+	return -1
+}
+
 type ReactionType string
 
 const (

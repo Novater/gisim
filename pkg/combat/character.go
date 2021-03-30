@@ -1,5 +1,7 @@
 package combat
 
+import "fmt"
+
 type Character interface {
 	//ability functions to be defined by each character on how they will
 	Name() string
@@ -21,31 +23,11 @@ type Character interface {
 	ChargeAttackStam() float64
 	Tag(key string) int
 	//other actions
+	UnsafeSetStats(stats []float64)
 
 	ReceiveParticle(p Particle, isActive bool, partyCount int)
 	Snapshot(name string, t ActionType, e EleType) Snapshot
 	ResetActionCooldown(a ActionType)
-}
-
-//CharacterProfile ...
-type CharacterProfile struct {
-	Name                string               `yaml:"Name"`
-	Element             EleType              `yaml:"Element"`
-	Level               int64                `yaml:"Level"`
-	BaseHP              float64              `yaml:"BaseHP"`
-	BaseAtk             float64              `yaml:"BaseAtk"`
-	BaseDef             float64              `yaml:"BaseDef"`
-	BaseCR              float64              `yaml:"BaseCR"`
-	BaseCD              float64              `yaml:"BaseCD"`
-	Constellation       int                  `yaml:"Constellation"`
-	AscensionBonus      map[StatType]float64 `yaml:"AscensionBonus"`
-	TalentLevel         map[ActionType]int64 `yaml:"TalentLevel"`
-	WeaponName          string               `yaml:"WeaponName"`
-	WeaponClass         WeaponClass          `yaml:"WeaponClass"`
-	WeaponRefinement    int                  `yaml:"WeaponRefinement"`
-	WeaponBaseAtk       float64              `yaml:"WeaponBaseAtk"`
-	WeaponSecondaryStat map[StatType]float64 `yaml:"WeaponSecondaryStat"`
-	Artifacts           map[Slot]Artifact    `yaml:"Artifacts"`
 }
 
 type WeaponClass string
@@ -68,12 +50,15 @@ type CharacterTemplate struct {
 	S *Sim
 	//this should describe the frame in which the abil becomes available
 	//if frame > current then it's available. no need to decrement this way
-	CD    map[string]int
-	Stats map[StatType]float64
-	Mods  map[string]map[StatType]float64
-	Tags  map[string]int
+	CD   map[string]int
+	Mods map[string]map[StatType]float64
+	Tags map[string]int
 	//Profile info
-	Profile   CharacterProfile
+	Base    CharacterBase
+	Weapon  WeaponProfile
+	Stats   []float64
+	Talents TalentProfile
+
 	Energy    float64
 	MaxEnergy float64
 	//counters
@@ -96,30 +81,52 @@ const (
 )
 
 func NewTemplateChar(s *Sim, p CharacterProfile) (*CharacterTemplate, error) {
+	//error checks
+	if len(p.ArtifactsConfig) > 5 {
+		return nil, fmt.Errorf("number of artifacts exceeds 5 - %v", p.Base.Name)
+	}
 	c := CharacterTemplate{}
 	c.S = s
 	c.CD = make(map[string]int)
-	c.Stats = make(map[StatType]float64)
 	c.Mods = make(map[string]map[StatType]float64)
 	c.Tags = make(map[string]int)
-	c.Profile = p
+	c.Base = p.Base
+	c.Weapon = p.Weapon
+	c.Talents.Attack = p.TalentLevelConfig["attack"]
+	if c.Talents.Attack < 1 || c.Talents.Attack > 15 {
+		return nil, fmt.Errorf("invalid talent lvl: attack - %v", c.Talents.Attack)
+	}
+	c.Talents.Skill = p.TalentLevelConfig["skill"]
+	if c.Talents.Attack < 1 || c.Talents.Attack > 12 {
+		return nil, fmt.Errorf("invalid talent lvl: skill - %v", c.Talents.Skill)
+	}
+	c.Talents.Burst = p.TalentLevelConfig["burst"]
+	if c.Talents.Attack < 1 || c.Talents.Attack > 12 {
+		return nil, fmt.Errorf("invalid talent lvl: burst - %v", c.Talents.Burst)
+	}
+	c.Stats = make([]float64, len(StatTypeString))
+	//load artifacts
+	for _, a := range p.ArtifactsConfig {
+		//find out which main stat it is
 
-	for _, a := range p.Artifacts {
-		c.Stats[a.MainStat.Type] += a.MainStat.Value
-		for _, sub := range a.Substat {
-			c.Stats[sub.Type] += sub.Value
+		//load sub stats
+		for i := 0; i < len(c.Stats); i++ {
+			c.Stats[i] += a.Main[StatTypeString[i]]
+			c.Stats[i] += a.Sub[StatTypeString[i]]
 		}
+		s.Log.Debugw("loading artifacts", "a", a, "stats", c.Stats)
 	}
-
-	for k, v := range p.AscensionBonus {
-		c.Stats[k] += v
-	}
-
-	for k, v := range p.WeaponSecondaryStat {
-		c.Stats[k] += v
+	//load weapon and ascension bonus
+	for i := 0; i < len(c.Stats); i++ {
+		c.Stats[i] += p.WeaponBonusConfig[StatTypeString[i]]
+		c.Stats[i] += p.AscensionBonusConfig[StatTypeString[i]]
 	}
 
 	return &c, nil
+}
+
+func (c *CharacterTemplate) UnsafeSetStats(stats []float64) {
+	copy(c.Stats, stats)
 }
 
 func (c *CharacterTemplate) Tag(key string) int {
@@ -127,7 +134,7 @@ func (c *CharacterTemplate) Tag(key string) int {
 }
 
 func (c *CharacterTemplate) Name() string {
-	return c.Profile.Name
+	return c.Base.Name
 }
 
 func (c *CharacterTemplate) CurrentEnergy() float64 {
@@ -143,7 +150,7 @@ func (c *CharacterTemplate) ReceiveParticle(p Particle, isActive bool, partyCoun
 	//recharge amount - particles: same = 3, non-ele = 2, diff = 1
 	//recharge amount - orbs: same = 9, non-ele = 6, diff = 3 (3x particles)
 	switch {
-	case p.Ele == c.Profile.Element:
+	case p.Ele == c.Base.Element:
 		amt = 3
 	case p.Ele == NonElemental:
 		amt = 2
@@ -158,7 +165,7 @@ func (c *CharacterTemplate) ReceiveParticle(p Particle, isActive bool, partyCoun
 	}
 	amt = amt * (1 + er) * float64(p.Num)
 
-	c.S.Log.Debugw("\t\t orb", "name", c.Profile.Name, "count", p.Num, "ele", p.Ele, "on field", isActive, "party count", partyCount, "pre energ", c.Energy)
+	c.S.Log.Debugw("\t\t orb", "name", c.Base.Name, "count", p.Num, "ele", p.Ele, "on field", isActive, "party count", partyCount, "pre energ", c.Energy)
 
 	c.Energy += amt
 	if c.Energy > c.MaxEnergy {
@@ -170,10 +177,9 @@ func (c *CharacterTemplate) ReceiveParticle(p Particle, isActive bool, partyCoun
 
 func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType) Snapshot {
 	ds := Snapshot{}
-	ds.Stats = make(map[StatType]float64)
-	for k, v := range c.Stats {
-		ds.Stats[k] = v
-	}
+	ds.Stats = make([]float64, len(c.Stats))
+	copy(ds.Stats, c.Stats)
+
 	for key, m := range c.Mods {
 		c.S.Log.Debugw("\t\t char stat mod", "key", key, "mods", m)
 		for k, v := range m {
@@ -183,13 +189,13 @@ func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType) Snaps
 
 	ds.Abil = name
 	ds.AbilType = t
-	ds.CharName = c.Profile.Name
-	ds.BaseAtk = c.Profile.BaseAtk + c.Profile.WeaponBaseAtk
-	ds.CharLvl = c.Profile.Level
-	ds.BaseDef = c.Profile.BaseDef
+	ds.CharName = c.Base.Name
+	ds.BaseAtk = c.Base.Atk + c.Weapon.Atk
+	ds.CharLvl = c.Base.Level
+	ds.BaseDef = c.Base.Def
 	ds.Element = e
-	ds.Stats[CR] += c.Profile.BaseCR
-	ds.Stats[CD] += c.Profile.BaseCD
+	ds.Stats[CR] += c.Base.CR
+	ds.Stats[CD] += c.Base.CD
 
 	for _, f := range c.S.snapshotHooks[PostSnapshot] {
 		f(&ds)
@@ -227,14 +233,7 @@ func (c *CharacterTemplate) Burst(p map[string]interface{}) int {
 }
 
 func (c *CharacterTemplate) Tick() {
-	//this function gets called for every character every tick
-	// for k := range c.CD {
-	// 	c.CD[k]--
-	// 	if c.CD[k] <= 0 {
-	// 		c.S.Log.Infof("[%v] cooldown %v finished; deleting", c.S.Frame(), k)
-	// 		delete(c.CD, k)
-	// 	}
-	// }
+
 	//check normal reset
 	if c.NormalResetTimer == 0 {
 		if c.NRTChanged {

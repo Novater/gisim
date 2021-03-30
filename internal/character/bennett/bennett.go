@@ -25,21 +25,21 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	b.CharacterTemplate = t
 	b.Energy = 60
 	b.MaxEnergy = 60
-	b.Profile.WeaponClass = combat.WeaponClassSword
+	b.Weapon.Class = combat.WeaponClassSword
 
 	//add effect for burst
-	lvl := b.Profile.TalentLevel[combat.ActionTypeBurst] - 1
-	if b.Profile.Constellation >= 5 {
+	lvl := b.Talents.Burst - 1
+	if b.Base.Cons >= 5 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14
 		}
 	}
 	pc := burstatk[lvl]
-	if b.Profile.Constellation >= 1 {
+	if b.Base.Cons >= 1 {
 		pc += 0.2
 	}
-	atk := pc * float64(b.Profile.BaseAtk+b.Profile.WeaponBaseAtk)
+	atk := pc * float64(b.Base.Atk+b.Weapon.Atk)
 	b.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		if _, ok := b.S.Status["Bennett Burst"]; !ok {
 			return false
@@ -49,7 +49,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		}
 		//TODO: should have an HP check here but no one ever takes damage in this sim..
 		ds.Stats[combat.ATK] += atk
-		if b.Profile.Constellation == 6 {
+		if b.Base.Cons == 6 {
 			ok := ds.AbilType == combat.ActionTypeAttack || ds.AbilType == combat.ActionTypeChargedAttack
 			ok = ok && (ds.WeaponClass == combat.WeaponClassSpear || ds.WeaponClass == combat.WeaponClassSword || ds.WeaponClass == combat.WeaponClassClaymore)
 			if ok {
@@ -108,7 +108,7 @@ func (b *bennett) Attack(p map[string]interface{}) int {
 	b.NormalCounter++
 	//apply attack speed
 	frames = int(float64(frames) / (1 + b.Stats[combat.AtkSpd]))
-	d.Mult = hits[b.Profile.TalentLevel[combat.ActionTypeAttack]-1]
+	d.Mult = hits[b.Talents.Attack-1]
 
 	sb.Write([]byte(strconv.Itoa(n)))
 	b.S.AddTask(func(s *combat.Sim) {
@@ -144,8 +144,8 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 			hold = h
 		}
 	}
-	lvl := b.Profile.TalentLevel[combat.ActionTypeSkill] - 1
-	if b.Profile.Constellation >= 3 {
+	lvl := b.Talents.Skill - 1
+	if b.Base.Cons >= 3 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14
@@ -225,8 +225,8 @@ func (b *bennett) Burst(p map[string]interface{}) int {
 		return 0
 	}
 
-	lvl := b.Profile.TalentLevel[combat.ActionTypeBurst] - 1
-	if b.Profile.Constellation >= 5 {
+	lvl := b.Talents.Burst - 1
+	if b.Base.Cons >= 5 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14

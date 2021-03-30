@@ -17,10 +17,10 @@ type Snapshot struct {
 	FlatDmg   float64 //flat dmg; so far only zhongli
 	OtherMult float64 //so far just for xingqiu C4
 
-	Stats    map[StatType]float64 //total character stats including from artifact, bonuses, etc...
-	BaseAtk  float64              //base attack used in calc
-	BaseDef  float64              //base def used in calc
-	DmgBonus float64              //total damage bonus, including appropriate ele%, etc..
+	Stats    []float64 //total character stats including from artifact, bonuses, etc...
+	BaseAtk  float64   //base attack used in calc
+	BaseDef  float64   //base def used in calc
+	DmgBonus float64   //total damage bonus, including appropriate ele%, etc..
 	DefMod   float64
 
 	//reaction stuff
@@ -40,7 +40,8 @@ type Snapshot struct {
 }
 
 func (s *Snapshot) Clone() Snapshot {
-	c := Snapshot{}
-	c = *s
+	c := *s
+	c.Stats = make([]float64, len(s.Stats))
+	copy(c.Stats, s.Stats)
 	return c
 }

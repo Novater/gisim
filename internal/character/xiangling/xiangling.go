@@ -24,10 +24,10 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	x.CharacterTemplate = t
 	x.Energy = 60
 	x.MaxEnergy = 60
-	x.Profile.WeaponClass = combat.WeaponClassSpear
+	x.Weapon.Class = combat.WeaponClassSpear
 	x.delayedFunc = make(map[int]func())
 
-	if x.Profile.Constellation >= 6 {
+	if x.Base.Cons >= 6 {
 		x.c6()
 	}
 
@@ -88,7 +88,7 @@ func (x *xl) Attack(p map[string]interface{}) int {
 	frames = int(float64(frames) / (1 + x.Stats[combat.AtkSpd]))
 
 	for i, hit := range hits {
-		d.Mult = hit[x.Profile.TalentLevel[combat.ActionTypeAttack]-1]
+		d.Mult = hit[x.Talents.Attack-1]
 		t := i + 1
 		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
@@ -96,7 +96,7 @@ func (x *xl) Attack(p map[string]interface{}) int {
 		}, fmt.Sprintf("Xiangling-Normal-%v-%v", n, t), 5)
 	}
 	//if n = 5, add explosion for c2
-	if x.Profile.Constellation >= 2 && n == 5 {
+	if x.Base.Cons >= 2 && n == 5 {
 		c := d.Clone()
 		c.Element = combat.Pyro
 		c.ApplyAura = true
@@ -120,7 +120,7 @@ func (x *xl) Attack(p map[string]interface{}) int {
 
 func (x *xl) ChargeAttack(p map[string]interface{}) int {
 	d := x.Snapshot("Charge Attack", combat.ActionTypeChargedAttack, combat.Physical)
-	d.Mult = nc[x.Profile.TalentLevel[combat.ActionTypeAttack]-1]
+	d.Mult = nc[x.Talents.Attack-1]
 
 	//no delay for now? realistically the hits should have delay but not sure if it actually makes a diff
 	//since it doesnt apply any elements, only trigger weapon procs
@@ -146,8 +146,8 @@ func (x *xl) Skill(p map[string]interface{}) int {
 	}
 
 	d := x.Snapshot("Guoba", combat.ActionTypeSkill, combat.Pyro)
-	lvl := x.Profile.TalentLevel[combat.ActionTypeSkill] - 1
-	if x.Profile.Constellation >= 5 {
+	lvl := x.Talents.Skill - 1
+	if x.Base.Cons >= 5 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14
@@ -165,7 +165,7 @@ func (x *xl) Skill(p map[string]interface{}) int {
 			s.Log.Infof("\t Xiangling (Gouba - tick) dealt %.0f damage", damage)
 		}, "Xiangling Guoba", delay+i*95)
 		x.S.AddEnergyParticles("Xiangling", 1, combat.Pyro, delay+i*95+90+60)
-		if x.Profile.Constellation >= 1 {
+		if x.Base.Cons >= 1 {
 			x.c1()
 		}
 	}
@@ -188,8 +188,8 @@ func (x *xl) Burst(p map[string]interface{}) int {
 		x.S.Log.Debugf("\tXiangling burst - insufficent energy, current: %v", x.Energy)
 		return 0
 	}
-	lvl := x.Profile.TalentLevel[combat.ActionTypeBurst] - 1
-	if x.Profile.Constellation >= 5 {
+	lvl := x.Talents.Burst - 1
+	if x.Base.Cons >= 5 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14
@@ -242,7 +242,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 	//ok for now we assume it's 80 (or 70??) frames per cycle, that gives us roughly 10s uptime
 	//max is either 10s or 14s
 	max := 10 * 60
-	if x.Profile.Constellation >= 4 {
+	if x.Base.Cons >= 4 {
 		max = 14 * 60
 	}
 	count := 0
@@ -256,7 +256,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 	}
 
 	//add an effect starting at frame 70 to end of duration to increase pyro dmg by 15% if c6
-	if x.Profile.Constellation >= 6 {
+	if x.Base.Cons >= 6 {
 		//wait 70 frames, add effect
 		//count to max, remove effect
 		x.delayedFunc[x.S.F+70] = func() {

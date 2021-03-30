@@ -53,7 +53,6 @@ type Sim struct {
 func New(p Profile) (*Sim, error) {
 	s := &Sim{}
 	s.FindNextAction = FindNextAction
-
 	s.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	u := &Enemy{}
@@ -62,9 +61,99 @@ func New(p Profile) (*Sim, error) {
 	u.res = p.Enemy.Resist
 	u.DamageDetails = make(map[string]map[string]float64)
 	u.mod = make(map[string]ResistMod)
-
 	s.Target = u
 
+	s.initMaps()
+	s.Stam = 240
+
+	err := s.initLogs(p.LogConfig)
+	if err != nil {
+		return nil, err
+	}
+	err = s.initTeam(p)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, v := range p.Rotation {
+		//make sure char exists
+		pos, ok := s.charPos[v.CharacterName]
+		if !ok {
+			return nil, fmt.Errorf("invalid character %v in rotation list", v.CharacterName)
+		}
+		p.Rotation[i].index = pos
+	}
+	s.actions = p.Rotation
+
+	//add other hooks
+	return s, nil
+}
+
+func (s *Sim) initTeam(p Profile) error {
+	dup := make(map[string]bool)
+	res := make(map[EleType]int)
+
+	for i, v := range p.Characters {
+		//call new char function
+		f, ok := charMap[v.Base.Name]
+		if !ok {
+			return fmt.Errorf("invalid character: %v", v.Base.Name)
+		}
+		c, err := f(s, v)
+		if err != nil {
+			return err
+		}
+
+		s.Chars = append(s.Chars, c)
+		s.charPos[v.Base.Name] = i
+
+		if v.Base.Name == p.InitialActive {
+			s.ActiveChar = p.InitialActive
+			s.ActiveIndex = i
+		}
+
+		if _, ok := dup[v.Base.Name]; ok {
+			return fmt.Errorf("duplicated character %v", v.Base.Name)
+		}
+		dup[v.Base.Name] = true
+		s.Target.DamageDetails[v.Base.Name] = make(map[string]float64)
+
+		//initialize weapon
+		wf, ok := weaponMap[v.Weapon.Name]
+		if !ok {
+			return fmt.Errorf("unrecognized weapon %v for character %v", v.Weapon.Name, v.Base.Name)
+		}
+		wf(c, s, v.Weapon.Refine)
+
+		//check set bonus
+		sb := make(map[string]int)
+		for _, a := range v.ArtifactsConfig {
+			sb[a.Set]++
+		}
+
+		//add set bonus
+		for key, count := range sb {
+			f, ok := setMap[key]
+			if ok {
+				f(c, s, count)
+			} else {
+				s.Log.Warnf("character %v has unrecognized set %v", v.Base.Name, key)
+			}
+		}
+
+		//track resonance
+		res[v.Base.Element]++
+
+	}
+	if s.ActiveChar == "" {
+		return fmt.Errorf("invalid active initial character %v", p.InitialActive)
+	}
+
+	s.addResonance(res)
+	return nil
+}
+
+func (s *Sim) initMaps() {
 	s.snapshotHooks = make(map[snapshotHookType]map[string]snapshotHookFunc)
 	s.eventHooks = make(map[eventHookType]map[string]eventHookFunc)
 	s.tasks = make(map[int][]Task)
@@ -72,10 +161,9 @@ func New(p Profile) (*Sim, error) {
 	s.Chars = make([]Character, 0, 4)
 	s.particles = make(map[int][]Particle)
 	s.charPos = make(map[string]int)
-	// s.effects = make(map[string]ActionFunc)
+}
 
-	s.Stam = 240
-
+func (s *Sim) initLogs(p LogConfig) error {
 	config := zap.NewDevelopmentConfig()
 	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	switch p.LogLevel {
@@ -99,104 +187,11 @@ func New(p Profile) (*Sim, error) {
 
 	logger, err := config.Build()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	s.Log = logger.Sugar()
 	zap.ReplaceGlobals(logger)
-
-	dup := make(map[string]bool)
-	res := make(map[EleType]int)
-
-	//create the characters
-	for i, v := range p.Characters {
-
-		f, ok := charMap[v.Name]
-		if !ok {
-			return nil, fmt.Errorf("invalid character: %v", v.Name)
-		}
-		c, err := f(s, v)
-		if err != nil {
-			return nil, err
-		}
-
-		//check talent levels are valid
-		for key, val := range v.TalentLevel {
-			if key != ActionTypeAttack && key != ActionTypeSkill && key != ActionTypeBurst {
-				return nil, fmt.Errorf("invalid talent type: %v - %v", v.Name, key)
-			}
-			if val < 1 || val > 15 {
-				return nil, fmt.Errorf("invalid talent level: %v - %v - %v", v.Name, key, val)
-			}
-		}
-		//check talents not missing
-		if _, ok := v.TalentLevel[ActionTypeAttack]; !ok {
-			return nil, fmt.Errorf("char %v missing talent level for %v", v.Name, ActionTypeAttack)
-		}
-		if _, ok := v.TalentLevel[ActionTypeSkill]; !ok {
-			return nil, fmt.Errorf("char %v missing talent level for %v", v.Name, ActionTypeSkill)
-		}
-		if _, ok := v.TalentLevel[ActionTypeBurst]; !ok {
-			return nil, fmt.Errorf("char %v missing talent level for %v", v.Name, ActionTypeBurst)
-		}
-
-		s.Chars = append(s.Chars, c)
-		s.charPos[v.Name] = i
-
-		if v.Name == p.InitialActive {
-			s.ActiveChar = p.InitialActive
-			s.ActiveIndex = i
-		}
-
-		if _, ok := dup[v.Name]; ok {
-			return nil, fmt.Errorf("duplicated character %v", v.Name)
-		}
-
-		dup[v.Name] = true
-		s.Target.DamageDetails[v.Name] = make(map[string]float64)
-		res[v.Element]++
-
-		//initialize weapon
-		wf, ok := weaponMap[v.WeaponName]
-		if !ok {
-			return nil, fmt.Errorf("unrecognized weapon %v for character %v", v.WeaponName, v.Name)
-		}
-		wf(c, s, v.WeaponRefinement)
-
-		//check set bonus
-		sb := make(map[string]int)
-		for _, a := range v.Artifacts {
-			sb[a.Set]++
-		}
-
-		//add set bonus
-		for key, count := range sb {
-			f, ok := setMap[key]
-			if ok {
-				f(c, s, count)
-			} else {
-				s.Log.Warnf("character %v has unrecognized set %v", v.Name, key)
-			}
-		}
-
-	}
-	if s.ActiveChar == "" {
-		return nil, fmt.Errorf("invalid active initial character %v", p.InitialActive)
-	}
-	for i, v := range p.Rotation {
-		//make sure char exists
-		pos, ok := s.charPos[v.CharacterName]
-		if !ok {
-			return nil, fmt.Errorf("invalid character %v in rotation list", v.CharacterName)
-		}
-		p.Rotation[i].index = pos
-	}
-
-	s.actions = p.Rotation
-
-	s.addResonance(res)
-
-	//add other hooks
-	return s, nil
+	return nil
 }
 
 //Run the sim; length in seconds
@@ -323,21 +318,4 @@ func RegisterWeaponFunc(name string, f NewWeaponFunc) {
 		panic("combat: RegisterWeapon called twice for character " + name)
 	}
 	weaponMap[name] = f
-}
-
-type Profile struct {
-	Label         string             `yaml:"Label"`
-	Enemy         EnemyProfile       `yaml:"Enemy"`
-	InitialActive string             `yaml:"InitialActive"`
-	Characters    []CharacterProfile `yaml:"Characters"`
-	Rotation      []ActionItem       `yaml:"Rotation"`
-	LogLevel      string             `yaml:"LogLevel"`
-	LogFile       string
-	LogShowCaller bool
-}
-
-//EnemyProfile ...
-type EnemyProfile struct {
-	Level  int64               `yaml:"Level"`
-	Resist map[EleType]float64 `yaml:"Resist"`
 }

@@ -26,15 +26,12 @@ Characters:
         Type: "Flower"
         Set: "Bloodstained Chivalry"
         MainStat:
-          Type: "HP"
+          HP:
           Value: 4780
         Substat:
-          - Type: "CR"
-            Value: .429
-          - Type: "CD"
-            Value: 0.726
-          - Type: "ATK%"
-            Value: 0.20
+          CR: .429
+          CD: 0.726
+          ATK%: 0.20
       Feather:
         Level: 20
         Type: "Feather"
@@ -92,14 +89,10 @@ Characters:
           Type: "HP"
           Value: 4780
         Substat:
-          - Type: "CD"
-            Value: 0.109
-          - Type: "ATK%"
-            Value: 0.087
-          - Type: "CR"
-            Value: 0.109
-          - Type: "ATK"
-            Value: 33
+          CD: 0.109
+          ATK%: 0.087
+          CR: 0.109
+          ATK: 33
       Feather:
         Level: 20
         Type: "Feather"
@@ -108,14 +101,10 @@ Characters:
           Type: "ATK"
           Value: 311
         Substat:
-          - Type: "CD"
-            Value: 0.172
-          - Type: "ER"
-            Value: 0.091
-          - Type: "ATK%"
-            Value: 0.058
-          - Type: "CR"
-            Value: 0.062
+          CD: 0.172
+          ER: 0.091
+          ATK%: 0.058
+          CR: 0.062
       Sands:
         Level: 16
         Type: "Sands"
@@ -124,14 +113,10 @@ Characters:
           Type: "ATK%"
           Value: 0.387
         Substat:
-          - Type: "EM"
-            Value: 35
-          - Type: "CR"
-            Value: 0.039
-          - Type: "ATK"
-            Value: 49
-          - Type: "HP"
-            Value: 508
+          EM: 35
+          CR: 0.039
+          ATK: 49
+          HP: 508
       Goblet:
         Level: 20
         Type: "Goblet"
@@ -140,14 +125,10 @@ Characters:
           Type: "Electro%"
           Value: 0.466
         Substat:
-          - Type: "ATK%"
-            Value: 0.105
-          - Type: "EM"
-            Value: 61
-          - Type: "CR"
-            Value: 0.027
-          - Type: "ER"
-            Value: 0.11
+          ATK%: 0.105
+          EM: 61
+          CR: 0.027
+          ER: 0.11
       Circlet:
         Level: 16
         Type: "Circlet"
@@ -156,14 +137,10 @@ Characters:
           Type: "CR"
           Value: 0.258
         Substat:
-          - Type: "ATK%"
-            Value: 0.041
-          - Type: "ATK"
-            Value: 53
-          - Type: "ER%"
-            Value: 0.058
-          - Type: "HP"
-            Value: 568
+          ATK%: 0.041
+          ATK: 53
+          ER%: 0.058
+          HP: 568
 Enemy:
   Level: 88
   Resist:

@@ -25,7 +25,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	x.CharacterTemplate = t
 	x.Energy = 80
 	x.MaxEnergy = 80
-	x.Profile.WeaponClass = combat.WeaponClassSword
+	x.Weapon.Class = combat.WeaponClassSword
 
 	a4 := make(map[combat.StatType]float64)
 	a4[combat.HydroP] = 0.2
@@ -83,7 +83,7 @@ func (x *xingqiu) Attack(p map[string]interface{}) int {
 
 	for i, hit := range hits {
 		d := x.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
-		d.Mult = hit[x.Profile.TalentLevel[combat.ActionTypeAttack]-1]
+		d.Mult = hit[x.Talents.Attack-1]
 		//add a 20 frame delay; should be 18 and 42 for combo 3 and 5 actual
 		t := i + 1
 		x.S.AddTask(func(s *combat.Sim) {
@@ -110,14 +110,14 @@ func (x *xingqiu) Skill(p map[string]interface{}) int {
 		return 0
 	}
 	d := x.Snapshot("Guhua Sword: Fatal Rainscreen", combat.ActionTypeSkill, combat.Hydro)
-	lvl := x.Profile.TalentLevel[combat.ActionTypeSkill] - 1
-	if x.Profile.Constellation >= 5 {
+	lvl := x.Talents.Skill - 1
+	if x.Base.Cons >= 5 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14
 		}
 	}
-	if x.Profile.Constellation >= 4 {
+	if x.Base.Cons >= 4 {
 		//check if ult is up, if so increase multiplier
 		if x.S.StatusActive("Xingqiu-Burst") {
 			d.OtherMult = 1.5
@@ -162,8 +162,8 @@ func (x *xingqiu) burstHook() {
 			return false
 		}
 
-		lvl := x.Profile.TalentLevel[combat.ActionTypeBurst] - 1
-		if x.Profile.Constellation >= 3 {
+		lvl := x.Talents.Burst - 1
+		if x.Base.Cons >= 3 {
 			lvl += 3
 			if lvl > 14 {
 				lvl = 14
@@ -188,10 +188,10 @@ func (x *xingqiu) burstHook() {
 			x.S.AddTask(func(s *combat.Sim) {
 				damage := s.ApplyDamage(d)
 				s.Log.Infof("\t Xingqiu burst proc hit %v dealt %.0f damage", t, damage)
-				if x.Profile.Constellation >= 2 {
+				if x.Base.Cons >= 2 {
 					x.c2()
 				}
-				if x.Profile.Constellation == 6 && t-1 == 0 {
+				if x.Base.Cons == 6 && t-1 == 0 {
 					s.Log.Debugf("\tXingqiu C6 regenerating energy previous % next %v", x.Energy, x.Energy+3)
 					x.Energy += 3
 					if x.Energy > x.MaxEnergy {
@@ -206,7 +206,7 @@ func (x *xingqiu) burstHook() {
 		case 2:
 			x.numSwords = 3
 		case 3:
-			if x.Profile.Constellation == 6 {
+			if x.Base.Cons == 6 {
 				x.numSwords = 5
 			} else {
 				x.numSwords = 2
@@ -248,7 +248,7 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 	Decreases the Hydro RES of opponents hit by sword rain attacks by 15% for 4s.
 	**/
 	dur := 15
-	if x.Profile.Constellation >= 2 {
+	if x.Base.Cons >= 2 {
 		dur += 3
 	}
 	dur = dur * 60

@@ -32,14 +32,14 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	f.CharacterTemplate = t
 	f.Energy = 60
 	f.MaxEnergy = 60
-	f.Profile.WeaponClass = combat.WeaponClassBow
+	f.Weapon.Class = combat.WeaponClassBow
 
 	f.ozShootDelay = 50
 
 	//register A4
 	f.a4()
 
-	if p.Constellation >= 1 {
+	if p.Base.Cons >= 1 {
 		f.c1()
 	}
 	return &f, nil
@@ -102,7 +102,7 @@ func (f *fischl) c1() {
 		d.Mult = 0.22
 		f.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Fischl (Oz - C1) dealt %.0f damage", s.Frame(), damage)
+			s.Log.Infof("\t Fischl (Oz - C1) dealt %.0f damage", damage)
 		}, "Fischl C1", 1)
 
 		return false
@@ -138,7 +138,7 @@ func (f *fischl) ozShoot() {
 	//so oz is active and ready to shoot, we add damage
 	f.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Fischl (Oz - %v) dealt %.0f damage", s.Frame(), f.ozActiveSource, damage)
+		s.Log.Infof("\t Fischl (Oz - %v) dealt %.0f damage", f.ozActiveSource, damage)
 	}, "Fischl Oz (Damage)", 1)
 	f.ozShootCD += f.ozShootDelay
 	//assume fischl has 60% chance of generating orb every attack;
@@ -168,15 +168,15 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 	f.S.Status["Fischl-Oz"] = f.S.F + 10*60
 
 	d := f.Snapshot("Oz", combat.ActionTypeSkill, combat.Electro)
-	lvl := f.Profile.TalentLevel[combat.ActionTypeSkill] - 1
-	if f.Profile.Constellation >= 3 {
+	lvl := f.Talents.Skill - 1
+	if f.Base.Cons >= 3 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14
 		}
 	}
 	d.Mult = birdSum[lvl]
-	if f.Profile.Constellation >= 2 {
+	if f.Base.Cons >= 2 {
 		d.Mult += 2
 	}
 	d.AuraBase = combat.WeakAuraBase
@@ -190,7 +190,7 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 	//apply initial damage
 	f.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Fischl (Oz - Skill Initial) dealt %.0f damage", s.Frame(), damage)
+		s.Log.Infof("\t Fischl (Oz - Skill Initial) dealt %.0f damage", damage)
 	}, "Fischl Skill Initial", 1)
 
 	f.CD[combat.SkillCD] = f.S.F + 25*60
@@ -228,8 +228,8 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 
 	//initial damage
 	d := f.Snapshot("Midnight Phantasmagoria", combat.ActionTypeBurst, combat.Electro)
-	lvl := f.Profile.TalentLevel[combat.ActionTypeBurst] - 1
-	if f.Profile.Constellation >= 5 {
+	lvl := f.Talents.Burst - 1
+	if f.Base.Cons >= 5 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14
@@ -242,25 +242,25 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 	//apply initial damage
 	f.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Fischl (Burst Initial) dealt %.0f damage", s.Frame(), damage)
+		s.Log.Infof("\t Fischl (Burst Initial) dealt %.0f damage", damage)
 	}, "Fischl Burst Initial", 1)
 
 	//check for C4 damage
-	if f.Profile.Constellation >= 4 {
+	if f.Base.Cons >= 4 {
 		d1 := f.Snapshot("Midnight Phantasmagoria C4", combat.ActionTypeSpecialProc, combat.Electro)
 		d1.Mult = 2.22
 		d1.AuraBase = combat.WeakAuraBase
 		d1.AuraUnits = 1
 		f.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Fischl (Burst C4) dealt %.0f damage", s.Frame(), damage)
+			s.Log.Infof("\t Fischl (Burst C4) dealt %.0f damage", damage)
 		}, "Fischl Burst C4", 1)
 	}
 
 	//snapshot for Oz
 	b := f.Snapshot("Midnight Phantasmagoria (Oz)", combat.ActionTypeBurst, combat.Electro)
-	blvl := f.Profile.TalentLevel[combat.ActionTypeSkill] - 1
-	if f.Profile.Constellation >= 3 {
+	blvl := f.Talents.Skill - 1
+	if f.Base.Cons >= 3 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14

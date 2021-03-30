@@ -21,9 +21,9 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	g.CharacterTemplate = t
 	g.Energy = 60
 	g.MaxEnergy = 60
-	g.Profile.WeaponClass = combat.WeaponClassBow
+	g.Weapon.Class = combat.WeaponClassBow
 
-	if g.Profile.Constellation >= 1 {
+	if g.Base.Cons >= 1 {
 		g.c1()
 	}
 
@@ -41,7 +41,7 @@ func (g *ganyu) c1() {
 			if g.Energy > g.MaxEnergy {
 				g.Energy = g.MaxEnergy
 			}
-			s.Log.Debugf("\t[%v]: Ganyu C1 refunding 2 energy; current energy %v", s.Frame(), g.Energy)
+			s.Log.Debugf("\t Ganyu C1 refunding 2 energy; current energy %v", g.Energy)
 			//also add c1 debuff to target
 			s.Target.AddResMod("ganyu-c1", combat.ResistMod{
 				Ele:      combat.Cryo,
@@ -56,13 +56,13 @@ func (g *ganyu) c1() {
 func (g *ganyu) Aimed(p map[string]interface{}) int {
 	f := g.Snapshot("Frost Flake Arrow", combat.ActionTypeAimedShot, combat.Cryo)
 	f.HitWeakPoint = true
-	f.Mult = ffa[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
+	f.Mult = ffa[g.Talents.Attack-1]
 	f.AuraBase = combat.WeakAuraBase
 	f.AuraUnits = 1
 	f.ApplyAura = true
 
 	b := g.Snapshot("Frost Flake Bloom", combat.ActionTypeAimedShot, combat.Cryo)
-	b.Mult = ffb[g.Profile.TalentLevel[combat.ActionTypeAttack]-1]
+	b.Mult = ffb[g.Talents.Attack-1]
 	b.ApplyAura = true
 	b.AuraBase = combat.WeakAuraBase
 	b.AuraUnits = 1
@@ -96,7 +96,7 @@ func (g *ganyu) Skill(p map[string]interface{}) int {
 	c2onCD := g.CD["skill-cd-2"] > g.S.F
 	onCD := g.CD[charge] > g.S.F
 
-	if g.Profile.Constellation >= 2 {
+	if g.Base.Cons >= 2 {
 		if !c2onCD {
 			charge = "skill-cd-2"
 		}
@@ -112,8 +112,8 @@ func (g *ganyu) Skill(p map[string]interface{}) int {
 
 	//snap shot stats at cast time here
 	d := g.Snapshot("Ice Lotus", combat.ActionTypeSkill, combat.Cryo)
-	lvl := g.Profile.TalentLevel[combat.ActionTypeSkill] - 1
-	if g.Profile.Constellation >= 5 {
+	lvl := g.Talents.Skill - 1
+	if g.Base.Cons >= 5 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14
@@ -152,8 +152,8 @@ func (g *ganyu) Burst(p map[string]interface{}) int {
 	}
 	//snap shot stats at cast time here
 	d := g.Snapshot("Celestial Shower", combat.ActionTypeBurst, combat.Cryo)
-	lvl := g.Profile.TalentLevel[combat.ActionTypeBurst] - 1
-	if g.Profile.Constellation >= 3 {
+	lvl := g.Talents.Burst - 1
+	if g.Base.Cons >= 3 {
 		lvl += 3
 		if lvl > 14 {
 			lvl = 14
@@ -167,7 +167,7 @@ func (g *ganyu) Burst(p map[string]interface{}) int {
 	for delay := 120; delay <= 900; delay += 60 {
 		g.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Ganyu burst (tick) dealt %.0f damage", s.Frame(), damage)
+			s.Log.Infof("\t Ganyu burst (tick) dealt %.0f damage", damage)
 		}, "Ganyu Burst", delay)
 	}
 
@@ -193,7 +193,7 @@ func (g *ganyu) ActionReady(a combat.ActionType) bool {
 			return true
 		}
 		//other wise skill-cd is there, we check c2
-		if g.Profile.Constellation >= 2 {
+		if g.Base.Cons >= 2 {
 			return g.CD["skill-cd2"] <= g.S.F
 		}
 		return false
