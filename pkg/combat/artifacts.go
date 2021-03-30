@@ -11,6 +11,14 @@ func RegisterSetFunc(name string, f NewSetFunc) {
 	setMap[name] = f
 }
 
+type ArtifactSet struct {
+	Flower  Artifact
+	Feather Artifact
+	Sand    Artifact
+	Goblet  Artifact
+	Circlet Artifact
+}
+
 //Artifact represents one artfact
 type Artifact struct {
 	Level    int64  `yaml:"Level"`

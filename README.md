@@ -38,6 +38,7 @@ Typically I would run the command in bash with output piped to a file for debugg
 
 - [ ] change all stat mappings to arrays
 - [ ] change normal reset to a frame number and if s.F = frame, then reset
+- [ ] play test xl/xq/ben/fish w/ basic weapons
 - [ ] change runEffects back to a map; loops can break if one effect adds another effect
 - [ ] reread reactions, get rid of json cloning
 - [ ] artifact sets needs to be changed to manually labelled primitives, not maps
