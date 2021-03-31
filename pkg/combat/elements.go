@@ -5,11 +5,12 @@ type Aura interface {
 	Tick(s *Sim) bool //remove if true
 	Attach(e EleType, durability float64, f int)
 	Refresh(dur float64, s *Sim)
+	E() EleType
 }
 
 func (s *Sim) checkAura() {
 	if s.TargetAura.Tick(s) {
-		s.TargetAura = &NoAura{}
+		s.TargetAura = NewNoAura()
 	}
 }
 
@@ -24,15 +25,16 @@ type Element struct {
 	MaxDurability float64
 	Durability    float64
 	Expiry        int //when the aura is gone, use this instead of ticks
-	//we can get rid of these
-	Base  int
-	Units int
 }
 
 //react with next element, modifying the existing to = whatever the
 //result should be
 func (e *Element) React(ds Snapshot, s *Sim) Aura {
 	return e
+}
+
+func (e *Element) E() EleType {
+	return e.Type
 }
 
 func (e *Element) Refresh(durability float64, s *Sim) {
@@ -70,6 +72,11 @@ func (e *Element) Attach(ele EleType, durability float64, f int) {
 	e.Expiry = f + auraDuration(durability)
 }
 
+func auraDuration(d float64) int {
+	//calculate duration
+	return int(6*d + 420)
+}
+
 type NoAura struct {
 	*Element
 }
@@ -81,15 +88,15 @@ func (n *NoAura) React(ds Snapshot, s *Sim) Aura {
 	var r Aura
 	switch ds.Element {
 	case Pyro:
-		r = &PyroAura{}
+		r = NewPyro()
 	case Hydro:
-		r = &HydroAura{}
+		r = NewHydro()
 	case Cryo:
-		r = &CryoAura{}
+		r = NewCryo()
 	case Electro:
-		r = &ElectroAura{}
+		r = NewElectro()
 	default:
-		return &NoAura{}
+		return NewNoAura()
 	}
 	r.Attach(ds.Element, ds.Durability, s.F)
 	return r
@@ -115,7 +122,7 @@ func (p *PyroAura) React(ds Snapshot, s *Sim) Aura {
 		s.GlobalFlags.ReactionType = Vaporize
 		//fire gone
 		if p.Durability == 0 {
-			return &NoAura{}
+			return NewNoAura()
 		}
 		return p
 	case Cryo:
@@ -123,7 +130,7 @@ func (p *PyroAura) React(ds Snapshot, s *Sim) Aura {
 		p.Reduce(0.5*ds.Durability, s)
 		//fire gone
 		if p.Durability == 0 {
-			return &NoAura{}
+			return NewNoAura()
 		}
 		s.GlobalFlags.NextAttackMVMult = 1.5
 		s.GlobalFlags.ReactionDidOccur = true
@@ -138,11 +145,11 @@ func (p *PyroAura) React(ds Snapshot, s *Sim) Aura {
 		s.GlobalFlags.ReactionType = Overload
 		//fire gone
 		if p.Durability == 0 {
-			return &NoAura{}
+			return NewNoAura()
 		}
 		return p
 	default:
-		return &NoAura{}
+		return NewNoAura()
 	}
 }
 
@@ -163,7 +170,7 @@ func (h *HydroAura) React(ds Snapshot, s *Sim) Aura {
 		s.GlobalFlags.ReactionType = Vaporize
 		//fire gone
 		if h.Durability == 0 {
-			return &NoAura{}
+			return NewNoAura()
 		}
 		return h
 	case Hydro:
@@ -176,15 +183,15 @@ func (h *HydroAura) React(ds Snapshot, s *Sim) Aura {
 		return h
 	case Electro:
 		//ec??
-		e := &ElectroAura{}
+		e := NewElectro()
 		e.Attach(ds.Element, ds.Durability, s.F)
-		ec := &ElectroChargeAura{}
+		ec := NewEC()
 		ec.Init(e, h, ds, s)
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = ElectroCharged
 		return ec
 	default:
-		return &NoAura{}
+		return NewNoAura()
 	}
 }
 
@@ -206,14 +213,14 @@ func (e *ElectroAura) React(ds Snapshot, s *Sim) Aura {
 		s.GlobalFlags.ReactionType = Overload
 		//fire gone
 		if e.Durability == 0 {
-			return &NoAura{}
+			return NewNoAura()
 		}
 		return e
 	case Hydro:
 		//ec??
-		h := &HydroAura{}
+		h := NewHydro()
 		h.Attach(ds.Element, ds.Durability, s.F)
-		ec := &ElectroChargeAura{}
+		ec := NewEC()
 		ec.Init(e, h, ds, s)
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = ElectroCharged
@@ -225,7 +232,7 @@ func (e *ElectroAura) React(ds Snapshot, s *Sim) Aura {
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = Superconduct
 		if e.Durability == 0 {
-			return &NoAura{}
+			return NewNoAura()
 		}
 		return e
 	case Electro:
@@ -233,7 +240,7 @@ func (e *ElectroAura) React(ds Snapshot, s *Sim) Aura {
 		e.Refresh(ds.Durability, s)
 		return e
 	default:
-		return &NoAura{}
+		return NewNoAura()
 	}
 }
 
@@ -254,7 +261,7 @@ func (c *CryoAura) React(ds Snapshot, s *Sim) Aura {
 		s.GlobalFlags.ReactionType = Melt
 		//fire gone
 		if c.Durability == 0 {
-			return &NoAura{}
+			return NewNoAura()
 		}
 		return c
 	case Hydro:
@@ -273,11 +280,11 @@ func (c *CryoAura) React(ds Snapshot, s *Sim) Aura {
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = Overload
 		if c.Durability == 0 {
-			return &NoAura{}
+			return NewNoAura()
 		}
 		return c
 	default:
-		return &NoAura{}
+		return NewNoAura()
 	}
 }
 
@@ -311,7 +318,7 @@ func (f *FreezeAura) React(ds Snapshot, s *Sim) Aura {
 		s.GlobalFlags.ReactionType = Superconduct
 		return f
 	default:
-		return &NoAura{}
+		return NewNoAura()
 	}
 }
 
@@ -396,6 +403,47 @@ func (e *ElectroChargeAura) React(ds Snapshot, s *Sim) Aura {
 		//extend??
 		return e
 	default:
-		return &NoAura{}
+		return NewNoAura()
 	}
+}
+
+func NewElement() *Element {
+	return &Element{}
+}
+
+func NewNoAura() *NoAura {
+	r := &NoAura{}
+	r.Element = &Element{}
+	return r
+}
+
+func NewPyro() *PyroAura {
+	r := &PyroAura{}
+	r.Element = &Element{}
+	return r
+}
+func NewHydro() *HydroAura {
+	r := &HydroAura{}
+	r.Element = &Element{}
+	return r
+}
+func NewElectro() *ElectroAura {
+	r := &ElectroAura{}
+	r.Element = &Element{}
+	return r
+}
+func NewCryo() *CryoAura {
+	r := &CryoAura{}
+	r.Element = &Element{}
+	return r
+}
+func NewFreeze() *FreezeAura {
+	r := &FreezeAura{}
+	r.Element = &Element{}
+	return r
+}
+func NewEC() *ElectroChargeAura {
+	r := &ElectroChargeAura{}
+	r.Element = &Element{}
+	return r
 }

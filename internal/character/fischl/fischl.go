@@ -129,9 +129,7 @@ func (f *fischl) ozShoot() {
 	d := f.ozSnapshot.Clone()
 	if f.ozAuraICDHitCounter%4 == 0 {
 		//apply aura, add to timer
-		d.ApplyAura = true
-		d.AuraBase = combat.WeakAuraBase
-		d.AuraUnits = 1
+		d.Durability = combat.WeakDurability
 		f.ozAuraICDResetTimer = 5 * 60 // every 5 second force reset
 		f.ozAuraICDHitCounter++
 	}
@@ -172,8 +170,6 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 	if f.Base.Cons >= 2 {
 		d.Mult += 2
 	}
-	d.AuraBase = combat.WeakAuraBase
-	d.AuraUnits = 1
 	//set on field oz to be this one
 	f.ozSnapshot = d
 	//clone b without info re aura
@@ -222,9 +218,6 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 	//initial damage
 	d := f.Snapshot("Midnight Phantasmagoria", combat.ActionTypeBurst, combat.Electro, combat.WeakDurability)
 	d.Mult = burst[f.TalentLvlBurst()]
-	d.AuraBase = combat.WeakAuraBase
-	d.AuraUnits = 1
-	d.ApplyAura = true
 	//apply initial damage
 	f.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
@@ -233,10 +226,8 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 
 	//check for C4 damage
 	if f.Base.Cons >= 4 {
-		d1 := f.Snapshot("Midnight Phantasmagoria C4", combat.ActionTypeSpecialProc, combat.Electro, combat.WeakDurability)
+		d1 := f.Snapshot("Midnight Phantasmagoria C4", combat.ActionTypeSpecialProc, combat.Electro, 0)
 		d1.Mult = 2.22
-		d1.AuraBase = combat.WeakAuraBase
-		d1.AuraUnits = 1
 		f.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("\t Fischl (Burst C4) dealt %.0f damage", damage)
@@ -244,10 +235,8 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 	}
 
 	//snapshot for Oz
-	b := f.Snapshot("Midnight Phantasmagoria (Oz)", combat.ActionTypeBurst, combat.Electro, combat.WeakDurability)
+	b := f.Snapshot("Midnight Phantasmagoria (Oz)", combat.ActionTypeBurst, combat.Electro, 0)
 	b.Mult = birdAtk[f.TalentLvlSkill()]
-	b.AuraBase = combat.WeakAuraBase
-	b.AuraUnits = 1
 	f.ozSnapshot = b
 
 	f.Energy = 0

@@ -166,9 +166,6 @@ func (d *diluc) Burst(p map[string]interface{}) int {
 
 	//add initial damage
 	x := d.Snapshot("Dawn (Initial)", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
-	x.ApplyAura = true
-	x.AuraBase = combat.WeakAuraBase
-	x.AuraUnits = 1
 	x.Mult = burstInitial[d.TalentLvlBurst()]
 
 	d.S.AddTask(func(s *combat.Sim) {

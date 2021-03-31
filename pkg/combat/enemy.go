@@ -10,20 +10,8 @@ type Enemy struct {
 	res   map[EleType]float64
 	mod   map[string]ResistMod
 
-	//auras should be stored in an array
-	//there seems to be a priority system on what gets stored first; don't know how it works
-	//for now we're only concerned about EC and Freeze; so we'll just hard code though; EC is electro,hydro; Freeze is cryo,hydro
-	//in EC case, any additional reaction applied will first react with electro, then hydro
-	//	not sure if this is only applicable if first reaction is transformative i.e. overload or superconduct;
-	//	^ may make sense b/c additional application of hydro will prob trigger additional reaction? need to test this somehow??
-	//  but the code would be the same, i.e hydro gets applied to electro (does nothing), then added to more hydro
-	//in frozen's case we just have to hard code that any element will only react with cryo and hydro just dies off why cryo dies off
-	//unless we shatter in which case cryo gets removed
-	Auras []aura
 	//tracking
 	Status map[string]int //countdown to how long status last
-	//ec store
-	IsFrozen bool
 
 	//stats
 	Damage        float64 //total damage received

@@ -1,17 +1,5 @@
 package combat
 
-func auraDuration(d float64) int {
-	//calculate duration
-	return int(6*d + 420)
-}
-
-type aura struct {
-	Ele      EleType
-	Base     int64
-	Units    int64
-	Duration int64
-}
-
 func EleToDmgP(e EleType) StatType {
 	switch e {
 	case Anemo:
@@ -92,7 +80,7 @@ func (s *Sim) applyReactionDamage(ds Snapshot, r ReactionType) float64 {
 	damage := mult * (1 + ((6.66 * em) / (1400 + em)) + ds.ReactBonus) * lvlm * resmod
 	s.Log.Infof("[%v] %v (%v) caused %v, dealt %v damage", s.Frame(), ds.Actor, ds.Abil, ds.ReactionType, damage)
 	s.Target.Damage += damage
-	s.Target.DamageDetails[ds.Actor][string(ds.ReactionType)] += damage
+	s.Target.DamageDetails[ds.Actor][string(r)] += damage
 
 	return damage
 }

@@ -153,9 +153,6 @@ func (e *eula) pressE() {
 	//press e (60fps vid)
 	//starts 343 cancel 378
 	d := e.Snapshot("Icetide (Press)", combat.ActionTypeSkill, combat.Cryo, combat.WeakDurability)
-	d.ApplyAura = true
-	d.AuraBase = combat.WeakAuraBase
-	d.AuraUnits = 1
 	d.Mult = skillPress[e.TalentLvlSkill()]
 
 	e.S.AddTask(func(s *combat.Sim) {
@@ -184,9 +181,6 @@ func (e *eula) holdE() {
 	//60 fps = 108 frames cast, cd starts 62 frames in so need to + 62 frames to cd
 	lvl := e.TalentLvlSkill()
 	d := e.Snapshot("Icetide (Hold)", combat.ActionTypeSkill, combat.Cryo, combat.WeakDurability)
-	d.ApplyAura = true
-	d.AuraBase = combat.WeakAuraBase
-	d.AuraUnits = 1
 	d.Mult = skillHold[lvl]
 
 	e.S.AddTask(func(s *combat.Sim) {
@@ -199,9 +193,6 @@ func (e *eula) holdE() {
 
 	for i := 0; i < v; i++ {
 		d := e.Snapshot("Icetide (Icewhirl)", combat.ActionTypeSkill, combat.Cryo, combat.WeakDurability)
-		d.ApplyAura = true
-		d.AuraBase = combat.WeakAuraBase
-		d.AuraUnits = 1
 		d.Mult = icewhirl[lvl]
 		t := i + 1
 		e.S.AddTask(func(s *combat.Sim) {
@@ -213,9 +204,6 @@ func (e *eula) holdE() {
 	//A2
 	if v == 2 {
 		d := e.Snapshot("Icetide (Lightfall)", combat.ActionTypeSkill, combat.Cryo, combat.WeakDurability)
-		d.ApplyAura = true
-		d.AuraBase = combat.WeakAuraBase
-		d.AuraUnits = 1
 		d.Mult = burstExplodeBase[e.TalentLvlBurst()] * 0.5
 		e.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
@@ -249,9 +237,6 @@ func (e *eula) Burst(p map[string]interface{}) int {
 	lvl := e.TalentLvlBurst()
 	//add initial damage
 	d := e.Snapshot("Glacial Illumination", combat.ActionTypeBurst, combat.Cryo, combat.WeakDurability)
-	d.ApplyAura = true
-	d.AuraBase = combat.WeakAuraBase
-	d.AuraUnits = 1
 	d.Mult = burstInitial[lvl]
 
 	e.S.AddTask(func(s *combat.Sim) {
@@ -261,9 +246,6 @@ func (e *eula) Burst(p map[string]interface{}) int {
 
 	//add blow up after 8 seconds
 	d2 := e.Snapshot("Glacial Illumination (Lightfall)", combat.ActionTypeBurst, combat.Cryo, combat.WeakDurability)
-	d2.ApplyAura = true
-	d2.AuraBase = combat.WeakAuraBase
-	d2.AuraUnits = 1
 
 	e.S.AddTask(func(s *combat.Sim) {
 		stacks := e.burstCounter

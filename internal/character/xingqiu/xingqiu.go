@@ -116,9 +116,6 @@ func (x *xingqiu) Skill(p map[string]interface{}) int {
 			d.OtherMult = 1.5
 		}
 	}
-	d.ApplyAura = true
-	d.AuraBase = combat.WeakAuraBase
-	d.AuraUnits = 1
 	d.Mult = rainscreen[0][x.TalentLvlSkill()]
 	d2 := d.Clone()
 	d2.Mult = rainscreen[1][x.TalentLvlSkill()]
@@ -158,15 +155,13 @@ func (x *xingqiu) burstHook() {
 		//trigger swords, only first sword applies hydro
 		for i := 0; i < x.numSwords; i++ {
 
-			d := x.Snapshot("Guhua Sword: Raincutter", combat.ActionTypeBurst, combat.Hydro, combat.WeakDurability)
+			d := x.Snapshot("Guhua Sword: Raincutter", combat.ActionTypeBurst, combat.Hydro, 0)
 			d.Mult = burst[x.TalentLvlBurst()]
 
 			//apply aura every 3rd hit -> hit 0, 3, 6, etc...
 			//only first sword summoned can apply aura
 			if x.burstCounter%3 == 0 && i == 0 {
-				d.ApplyAura = true
-				d.AuraBase = combat.WeakAuraBase
-				d.AuraUnits = 1
+				d.Durability = combat.WeakDurability
 			}
 			t := i + 1
 

@@ -57,15 +57,9 @@ func (g *ganyu) Aimed(p map[string]interface{}) int {
 	f := g.Snapshot("Frost Flake Arrow", combat.ActionTypeAimedShot, combat.Cryo, combat.WeakDurability)
 	f.HitWeakPoint = true
 	f.Mult = ffa[g.TalentLvlAttack()]
-	f.AuraBase = combat.WeakAuraBase
-	f.AuraUnits = 1
-	f.ApplyAura = true
 
 	b := g.Snapshot("Frost Flake Bloom", combat.ActionTypeAimedShot, combat.Cryo, combat.WeakDurability)
 	b.Mult = ffb[g.TalentLvlAttack()]
-	b.ApplyAura = true
-	b.AuraBase = combat.WeakAuraBase
-	b.AuraUnits = 1
 
 	a2 := g.CD["A2"]
 	if a2 > g.S.F {
@@ -113,9 +107,6 @@ func (g *ganyu) Skill(p map[string]interface{}) int {
 	//snap shot stats at cast time here
 	d := g.Snapshot("Ice Lotus", combat.ActionTypeSkill, combat.Cryo, combat.WeakDurability)
 	d.Mult = lotus[g.TalentLvlSkill()]
-	d.ApplyAura = true
-	d.AuraBase = combat.WeakAuraBase
-	d.AuraUnits = 1
 
 	//we get the orbs right away
 	g.S.AddEnergyParticles("Ganyu", 2, combat.Cryo, 90) //90s travel time
@@ -146,9 +137,6 @@ func (g *ganyu) Burst(p map[string]interface{}) int {
 	//snap shot stats at cast time here
 	d := g.Snapshot("Celestial Shower", combat.ActionTypeBurst, combat.Cryo, combat.WeakDurability)
 	d.Mult = shower[g.TalentLvlBurst()]
-	d.ApplyAura = true
-	d.AuraBase = combat.WeakAuraBase
-	d.AuraUnits = 1
 
 	for delay := 120; delay <= 900; delay += 60 {
 		g.S.AddTask(func(s *combat.Sim) {

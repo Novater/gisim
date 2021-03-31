@@ -175,6 +175,7 @@ func (s *Sim) initMaps() {
 	s.Chars = make([]Character, 0, 4)
 	s.particles = make(map[int][]Particle)
 	s.charPos = make(map[string]int)
+	s.TargetAura = NewNoAura()
 }
 
 func (s *Sim) initLogs(p LogConfig) error {
@@ -286,16 +287,12 @@ func (s *Sim) addResonance(count map[EleType]int) {
 				//heal not implemented yet
 			case Cryo:
 				s.AddSnapshotHook(func(ds *Snapshot) bool {
-					if len(s.Target.Auras) == 0 {
-						return false
-					}
-
-					if s.Target.Auras[0].Ele == Cryo {
+					if s.TargetAura.E() == Cryo {
 						s.Log.Debugf("\tapplying cryo resonance on cryo target")
 						ds.Stats[CR] += .15
 					}
 
-					if s.Target.Auras[0].Ele == Frozen {
+					if s.TargetAura.E() == Frozen {
 						s.Log.Debugf("\tapplying cryo resonance on cryo target")
 						ds.Stats[CR] += .15
 					}

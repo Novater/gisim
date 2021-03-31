@@ -158,9 +158,6 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 
 	for i, s := range hits {
 		d := b.Snapshot("Passion Overload", combat.ActionTypeSkill, combat.Pyro, combat.MedDurability)
-		d.ApplyAura = true
-		d.AuraBase = combat.MedAuraBase
-		d.AuraUnits = 2
 		d.Mult = s[b.TalentLvlBurst()]
 		t := i + 1
 		sb.WriteString(strconv.Itoa(t))
@@ -219,9 +216,6 @@ func (b *bennett) Burst(p map[string]interface{}) int {
 	//hook for buffs; active right away after cast
 
 	d := b.Snapshot("Fantastic Voyage", combat.ActionTypeBurst, combat.Pyro, combat.MedDurability)
-	d.ApplyAura = true
-	d.AuraBase = combat.MedAuraBase
-	d.AuraUnits = 2
 	d.Mult = burst[b.TalentLvlBurst()]
 
 	b.S.AddTask(func(s *combat.Sim) {

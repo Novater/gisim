@@ -99,9 +99,6 @@ func (x *xl) Attack(p map[string]interface{}) int {
 	if x.Base.Cons >= 2 && n == 5 {
 		c := d.Clone()
 		c.Element = combat.Pyro
-		c.ApplyAura = true
-		c.AuraBase = combat.WeakAuraBase
-		c.AuraUnits = 1
 		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(c)
 			s.Log.Infof("\t Xiangling C2 explosion dealt %.0f damage", damage)
@@ -147,9 +144,6 @@ func (x *xl) Skill(p map[string]interface{}) int {
 
 	d := x.Snapshot("Guoba", combat.ActionTypeSkill, combat.Pyro, combat.WeakDurability)
 	d.Mult = guoba[x.TalentLvlSkill()]
-	d.ApplyAura = true //apparently every hit applies
-	d.AuraBase = combat.WeakAuraBase
-	d.AuraUnits = 1
 	delay := 120
 
 	for i := 0; i < 4; i++ {
@@ -186,9 +180,6 @@ func (x *xl) Burst(p map[string]interface{}) int {
 	x.delayedFunc[x.S.F+20] = func() {
 		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
 		d.Mult = pyronado1[lvl]
-		d.AuraBase = combat.WeakAuraBase
-		d.AuraUnits = 1
-		d.ApplyAura = true
 		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("\t Xiangling Pyronado initial hit 1 dealt %.0f damagee", damage)
@@ -198,9 +189,6 @@ func (x *xl) Burst(p map[string]interface{}) int {
 	x.delayedFunc[x.S.F+50] = func() {
 		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
 		d.Mult = pyronado2[lvl]
-		d.AuraBase = combat.WeakAuraBase
-		d.AuraUnits = 1
-		d.ApplyAura = true
 		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("\t Xiangling Pyronado initial hit 2 dealt %.0f damagee", damage)
@@ -210,9 +198,6 @@ func (x *xl) Burst(p map[string]interface{}) int {
 	x.delayedFunc[x.S.F+75] = func() {
 		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
 		d.Mult = pyronado3[lvl]
-		d.AuraBase = combat.WeakAuraBase
-		d.AuraUnits = 1
-		d.ApplyAura = true
 		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("\t Xiangling Pyronado initial hit 3 dealt %.0f damagee", damage)
@@ -222,9 +207,6 @@ func (x *xl) Burst(p map[string]interface{}) int {
 	//spin to win; snapshot on cast
 	d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
 	d.Mult = pyronadoSpin[lvl]
-	d.ApplyAura = true
-	d.AuraBase = combat.WeakAuraBase
-	d.AuraUnits = 1
 
 	//ok for now we assume it's 80 (or 70??) frames per cycle, that gives us roughly 10s uptime
 	//max is either 10s or 14s
