@@ -11,9 +11,30 @@ type Aura interface {
 }
 
 type Element struct {
-	Type  EleType
-	Base  int
-	Units int
+	Type          EleType
+	MaxDurability float64
+	Durability    float64
+	Expiry        int //when the aura is gone, use this instead of ticks
+	Base          int
+	Units         int
+}
+
+//react with next element, returning the resultant element
+func (e *Element) React(next Element, s *Sim) Element {
+	//reaction damage can be queued up in the next frame
+
+	//how to deal with multiplier? set a flag on the sim?
+	//flag to be cleared right after damage, should be ok
+	//since react is only called for apply damage
+	return Element{}
+}
+
+func (e *Element) Tick(s *Sim) bool {
+	return e.Expiry < s.F
+}
+
+func (e *Element) reactType(n EleType) ReactionType {
+	return ""
 }
 
 type Reaction struct {
