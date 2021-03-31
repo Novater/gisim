@@ -9,65 +9,34 @@ import (
 //ApplyDamage applies damage to the target given a snapshot
 func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 
-	target := s.Target
-
 	s.Log.Debugf("\t [%v] %v - %v triggered dmg", s.Frame(), ds.Actor, ds.Abil)
-	s.Log.Debugw("\t target", "auras", target.Auras)
+	s.Log.Debugw("\t target", "auras", s.TargetAura)
 
-	//in general, transformative reaction does not change the snapshot
-	//they will only trigger a sep damage calc
-	if ds.ApplyAura {
-		r := s.checkReact(ds)
-		s.Log.Debugw("\t reaction result", "r", r, "source", ds.Element)
-		if r.DidReact {
-			ds.WillReact = true
-			ds.ReactionType = r.Type
-			//handle pre reaction
-			s.executeSnapshotHooks(PreReaction, &ds)
+	//apply reactions
+	s.TargetAura = s.TargetAura.React(ds, s)
 
-			//either adjust damage snap, adjust stats, or add effect to deal damage after initial damage
-			switch r.Type {
-			case Melt:
-				if ds.Element == Pyro {
-					//tag it for melt
-					ds.IsMeltVape = true
-					ds.ReactMult = 2.0 //strong reaction
-				} else {
-					//tag it for melt
-					ds.IsMeltVape = true
-					ds.ReactMult = 1.5 //weak reaction
-				}
-			case Vaporize:
-				if ds.Element == Pyro {
-					//tag it for melt
-					ds.IsMeltVape = true
-					ds.ReactMult = 1.5 //weak, triggered by pyro
-				} else {
-					//tag it for melt
-					ds.IsMeltVape = true
-					ds.ReactMult = 2.0 //strong, triggered by hydro
-				}
-			case Superconduct:
-				s.Target.AddResMod("Superconduct", ResistMod{
-					Duration: 12 * 60,
-					Ele:      Physical,
-					Value:    -0.4,
-				})
-			case ElectroCharged:
-				target.Status["electrocharge icd"] = 60
-			}
-		}
-		target.Auras = r.Next
+	//check if reaction occured and call hooks
+	if s.GlobalFlags.ReactionDidOccur {
+		s.executeSnapshotHooks(PreReaction, &ds)
 	}
 
+	//add superconduct buff if triggered
+	if s.GlobalFlags.NextAttackSuperconductTriggered {
+		s.Target.AddResMod("Superconduct", ResistMod{
+			Duration: 12 * 60,
+			Ele:      Physical,
+			Value:    -0.4,
+		})
+	}
+
+	//change multiplier if vape or melt
+	if s.GlobalFlags.NextAttackMVMult > 1 {
+		ds.IsMeltVape = true
+		ds.ReactMult = s.GlobalFlags.NextAttackMVMult
+	}
+
+	//caculate damage
 	s.executeSnapshotHooks(PreDamageHook, &ds)
-
-	//for each reaction damage to occur -> call any pre reaction hooks
-	//we can have multiple reaction so snapshot should be made a copy
-	//of for each
-
-	//determine type of reaction
-
 	dr := calcDmg(ds, *s.Target, s.Rand, s.Log)
 	s.Target.Damage += dr.damage
 	s.Target.DamageDetails[ds.Actor][ds.Abil] += dr.damage
@@ -75,16 +44,35 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	if dr.isCrit {
 		s.executeSnapshotHooks(OnCritDamage, &ds)
 	}
-
 	s.executeSnapshotHooks(PostDamageHook, &ds)
 
-	//apply reaction damage now! not sure if this timing is right though; maybe we can add this to the next frame as a tick instead?
-	if ds.WillReact {
-		s.applyReactionDamage(ds, *s.Target)
+	//apply reaction damage
+	if s.GlobalFlags.NextAttackOverloadTriggered {
+		s.applyReactionDamage(ds, Overload)
+	}
+	if s.GlobalFlags.NextAttackSuperconductTriggered {
+		s.applyReactionDamage(ds, Superconduct)
+	}
+	if s.GlobalFlags.NextAttackShatterTriggered {
+		s.applyReactionDamage(ds, Shatter)
+	}
+	if s.GlobalFlags.ReactionDidOccur {
 		s.executeSnapshotHooks(PostReaction, &ds)
 	}
 
+	//reset reaction flags
+	s.ResetReactionFlags()
+
 	return dr.damage
+}
+
+func (s *Sim) ResetReactionFlags() {
+	s.GlobalFlags.ReactionDidOccur = false
+	s.GlobalFlags.ReactionType = ""
+	s.GlobalFlags.NextAttackMVMult = 1 // melt vape multiplier
+	s.GlobalFlags.NextAttackOverloadTriggered = false
+	s.GlobalFlags.NextAttackSuperconductTriggered = false
+	s.GlobalFlags.NextAttackShatterTriggered = false
 }
 
 type dmgResult struct {

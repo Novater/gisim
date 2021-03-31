@@ -29,7 +29,7 @@ type Character interface {
 	UnsafeSetStats(stats []float64)
 
 	ReceiveParticle(p Particle, isActive bool, partyCount int)
-	Snapshot(name string, t ActionType, e EleType) Snapshot
+	Snapshot(name string, t ActionType, e EleType, d float64) Snapshot
 	ResetActionCooldown(a ActionType)
 }
 
@@ -153,7 +153,7 @@ func (c *CharacterTemplate) TalentLvlBurst() int {
 	return c.Talents.Burst - 1
 }
 func (c *CharacterTemplate) TalentLvlAttack() int {
-	if c.S.Global.ChildeActive {
+	if c.S.GlobalFlags.ChildeActive {
 		return c.Talents.Attack
 	}
 	return c.Talents.Attack - 1
@@ -197,7 +197,7 @@ func (c *CharacterTemplate) ReceiveParticle(p Particle, isActive bool, partyCoun
 	c.S.Log.Debugw("\t\t orb", "energy rec'd", amt, "next energy", c.Energy, "ER", er)
 }
 
-func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType) Snapshot {
+func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType, d float64) Snapshot {
 	ds := Snapshot{}
 	ds.Stats = make([]float64, len(c.Stats))
 	copy(ds.Stats, c.Stats)
@@ -216,6 +216,7 @@ func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType) Snaps
 	ds.CharLvl = c.Base.Level
 	ds.BaseDef = c.Base.Def
 	ds.Element = e
+	ds.Durability = d
 	ds.Stats[CR] += c.Base.CR
 	ds.Stats[CD] += c.Base.CD
 

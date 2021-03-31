@@ -54,7 +54,7 @@ func (x *xl) c6() {
 func (x *xl) Attack(p map[string]interface{}) int {
 	//register action depending on number in chain
 	//3 and 4 need to be registered as multi action
-	d := x.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
+	d := x.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical, combat.WeakDurability)
 	//figure out which hit it is
 	var hits [][]float64
 	reset := false
@@ -119,7 +119,7 @@ func (x *xl) Attack(p map[string]interface{}) int {
 }
 
 func (x *xl) ChargeAttack(p map[string]interface{}) int {
-	d := x.Snapshot("Charge Attack", combat.ActionTypeChargedAttack, combat.Physical)
+	d := x.Snapshot("Charge Attack", combat.ActionTypeChargedAttack, combat.Physical, combat.WeakDurability)
 	d.Mult = nc[x.TalentLvlAttack()]
 
 	//no delay for now? realistically the hits should have delay but not sure if it actually makes a diff
@@ -145,7 +145,7 @@ func (x *xl) Skill(p map[string]interface{}) int {
 		return 0
 	}
 
-	d := x.Snapshot("Guoba", combat.ActionTypeSkill, combat.Pyro)
+	d := x.Snapshot("Guoba", combat.ActionTypeSkill, combat.Pyro, combat.WeakDurability)
 	d.Mult = guoba[x.TalentLvlSkill()]
 	d.ApplyAura = true //apparently every hit applies
 	d.AuraBase = combat.WeakAuraBase
@@ -184,7 +184,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 	lvl := x.TalentLvlBurst()
 	//initial 3 hits are delayed and snapshotted at execution instead of at cast... no idea why...
 	x.delayedFunc[x.S.F+20] = func() {
-		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)
+		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
 		d.Mult = pyronado1[lvl]
 		d.AuraBase = combat.WeakAuraBase
 		d.AuraUnits = 1
@@ -196,7 +196,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 	}
 
 	x.delayedFunc[x.S.F+50] = func() {
-		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)
+		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
 		d.Mult = pyronado2[lvl]
 		d.AuraBase = combat.WeakAuraBase
 		d.AuraUnits = 1
@@ -208,7 +208,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 	}
 
 	x.delayedFunc[x.S.F+75] = func() {
-		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)
+		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
 		d.Mult = pyronado3[lvl]
 		d.AuraBase = combat.WeakAuraBase
 		d.AuraUnits = 1
@@ -220,7 +220,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 	}
 
 	//spin to win; snapshot on cast
-	d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)
+	d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
 	d.Mult = pyronadoSpin[lvl]
 	d.ApplyAura = true
 	d.AuraBase = combat.WeakAuraBase

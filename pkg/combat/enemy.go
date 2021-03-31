@@ -1,8 +1,6 @@
 package combat
 
 import (
-	"encoding/json"
-
 	"go.uber.org/zap"
 )
 
@@ -25,8 +23,7 @@ type Enemy struct {
 	//tracking
 	Status map[string]int //countdown to how long status last
 	//ec store
-	ecTrigger []byte
-	IsFrozen  bool
+	IsFrozen bool
 
 	//stats
 	Damage        float64 //total damage received
@@ -79,83 +76,4 @@ func (e *Enemy) tick(s *Sim) {
 			e.mod[k] = v
 		}
 	}
-	e.auraTick(s)
-}
-
-func (e *Enemy) auraTick(s *Sim) {
-
-	if len(e.Auras) == 0 {
-		return
-	}
-	//tick down gauge, reduction is based on the rate of the aura
-	//multipliers are A: 9.5, B:6, C:4.25
-	//decay per frame (60fps) = 1 unit / (mult * 60)
-	//if only 1 aura we just decay it down
-	if len(e.Auras) == 1 {
-
-		e.Auras[0].Duration--
-
-		if e.Auras[0].Duration == 0 {
-			s.Log.Debugf("[%v] aura %v expired", s.Frame(), e.Auras[0].Ele)
-			//unfreeze
-			if e.Auras[0].Ele == Frozen {
-				e.IsFrozen = false
-			}
-			e.Auras = nil
-		}
-		return
-	}
-
-	if len(e.Auras) > 2 {
-		s.Log.Panicw("We don't know how to handle more than 2 auras!! aborting", "aura", e.Auras)
-	}
-
-	//if multiple we need to check for reactions
-	//right now that's only EC
-	//future may include burning
-	var next []aura
-
-	if e.Auras[0].Ele == Electro {
-		expired := false
-		//do our regular decay business
-		for i := 0; i < len(e.Auras); i++ {
-			e.Auras[i].Duration--
-			if e.Auras[i].Duration < 0 {
-				expired = true
-			}
-		}
-		//check if it's time for another electrocharged tick
-		cd, ok := e.Status["electrocharge icd"]
-		//either cd is gone (more than 60 frames passed) OR
-		//one aura expired and remaining cd is less than 0.5s
-		if !ok || (expired && cd < 30) {
-			var ds Snapshot
-			//this is kinda hacky, we forcefully put the trigger dmg profile in
-			//the electro part
-			err := json.Unmarshal(e.ecTrigger, &ds)
-			if err != nil {
-				s.Log.Panicw("tick json error", "err", err)
-			}
-			ds.ReactionType = ElectroCharged
-			damage := s.applyReactionDamage(ds, *s.Target)
-			//reduce both auras
-			e.Auras[0].Duration -= int64(0.5 * float64(e.Auras[0].Base))
-			e.Auras[1].Duration -= int64(0.4 * float64(e.Auras[1].Base))
-			s.Log.Debugf("\t [%v] EC reaction tick triggered", s.Frame())
-			s.Log.Debugw("\telectrocharged", "damage", damage, "auras", e.Auras)
-			e.Status["electrocharge icd"] = 60
-		}
-		//build next
-		for _, v := range e.Auras {
-			if v.Duration > 0 {
-				next = append(next, v)
-			} else {
-				s.Log.Debugf("[%v] aura %v expired", s.Frame(), v.Ele)
-			}
-		}
-		e.Auras = next
-		return
-	}
-
-	s.Log.Panicw("Unknown sequence of auras on target!! aborting", "aura", e.Auras)
 }

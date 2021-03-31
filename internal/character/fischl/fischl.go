@@ -75,7 +75,7 @@ func (f *fischl) a4() {
 			return false
 		}
 		//apparently a4 doesnt apply electro
-		d := f.Snapshot("Fischl A4", combat.ActionTypeSpecialProc, combat.Electro)
+		d := f.Snapshot("Fischl A4", combat.ActionTypeSpecialProc, combat.Electro, combat.WeakDurability)
 		d.Mult = 0.8
 		f.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
@@ -98,7 +98,7 @@ func (f *fischl) c1() {
 		if ds.AbilType != combat.ActionTypeAttack {
 			return false
 		}
-		d := f.Snapshot("Fischl C1", combat.ActionTypeSpecialProc, combat.Physical)
+		d := f.Snapshot("Fischl C1", combat.ActionTypeSpecialProc, combat.Physical, combat.WeakDurability)
 		d.Mult = 0.22
 		f.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
@@ -167,7 +167,7 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 	//put a tag on the sim
 	f.S.Status["Fischl-Oz"] = f.S.F + 10*60
 
-	d := f.Snapshot("Oz", combat.ActionTypeSkill, combat.Electro)
+	d := f.Snapshot("Oz", combat.ActionTypeSkill, combat.Electro, combat.WeakDurability)
 	d.Mult = birdSum[f.TalentLvlSkill()]
 	if f.Base.Cons >= 2 {
 		d.Mult += 2
@@ -220,7 +220,7 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 	f.S.Status["Fischl-Oz"] = f.S.F + 10*60
 
 	//initial damage
-	d := f.Snapshot("Midnight Phantasmagoria", combat.ActionTypeBurst, combat.Electro)
+	d := f.Snapshot("Midnight Phantasmagoria", combat.ActionTypeBurst, combat.Electro, combat.WeakDurability)
 	d.Mult = burst[f.TalentLvlBurst()]
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1
@@ -233,7 +233,7 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 
 	//check for C4 damage
 	if f.Base.Cons >= 4 {
-		d1 := f.Snapshot("Midnight Phantasmagoria C4", combat.ActionTypeSpecialProc, combat.Electro)
+		d1 := f.Snapshot("Midnight Phantasmagoria C4", combat.ActionTypeSpecialProc, combat.Electro, combat.WeakDurability)
 		d1.Mult = 2.22
 		d1.AuraBase = combat.WeakAuraBase
 		d1.AuraUnits = 1
@@ -244,7 +244,7 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 	}
 
 	//snapshot for Oz
-	b := f.Snapshot("Midnight Phantasmagoria (Oz)", combat.ActionTypeBurst, combat.Electro)
+	b := f.Snapshot("Midnight Phantasmagoria (Oz)", combat.ActionTypeBurst, combat.Electro, combat.WeakDurability)
 	b.Mult = birdAtk[f.TalentLvlSkill()]
 	b.AuraBase = combat.WeakAuraBase
 	b.AuraUnits = 1

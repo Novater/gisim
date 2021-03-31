@@ -97,7 +97,7 @@ func (d *diluc) Attack(p map[string]interface{}) int {
 	//apply attack speed
 	frames = int(float64(frames) / (1 + d.Stats[combat.AtkSpd]))
 
-	x := d.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
+	x := d.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical, combat.WeakDurability)
 	x.Mult = auto[d.NormalCounter][d.TalentLvlAttack()]
 
 	d.S.AddTask(func(s *combat.Sim) {
@@ -139,7 +139,7 @@ func (d *diluc) Skill(p map[string]interface{}) int {
 	//apply attack speed
 	frames = int(float64(frames) / (1 + d.Stats[combat.AtkSpd]))
 
-	x := d.Snapshot("Searing Onslaught", combat.ActionTypeSkill, combat.Pyro)
+	x := d.Snapshot("Searing Onslaught", combat.ActionTypeSkill, combat.Pyro, combat.WeakDurability)
 	x.Mult = skill[d.eCounter][d.TalentLvlSkill()]
 
 	d.S.AddTask(func(s *combat.Sim) {
@@ -165,7 +165,7 @@ func (d *diluc) Burst(p map[string]interface{}) int {
 	d.S.Status["Diluc Burst"] = 12 * 60
 
 	//add initial damage
-	x := d.Snapshot("Dawn (Initial)", combat.ActionTypeBurst, combat.Pyro)
+	x := d.Snapshot("Dawn (Initial)", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
 	x.ApplyAura = true
 	x.AuraBase = combat.WeakAuraBase
 	x.AuraUnits = 1

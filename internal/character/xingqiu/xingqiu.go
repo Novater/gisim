@@ -82,7 +82,7 @@ func (x *xingqiu) Attack(p map[string]interface{}) int {
 	frames = int(float64(frames) / (1 + x.Stats[combat.AtkSpd]))
 
 	for i, hit := range hits {
-		d := x.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
+		d := x.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical, combat.WeakDurability)
 		d.Mult = hit[x.TalentLvlAttack()]
 		//add a 20 frame delay; should be 18 and 42 for combo 3 and 5 actual
 		t := i + 1
@@ -109,7 +109,7 @@ func (x *xingqiu) Skill(p map[string]interface{}) int {
 		x.S.Log.Debugf("\tXingqiu skill still on CD; skipping")
 		return 0
 	}
-	d := x.Snapshot("Guhua Sword: Fatal Rainscreen", combat.ActionTypeSkill, combat.Hydro)
+	d := x.Snapshot("Guhua Sword: Fatal Rainscreen", combat.ActionTypeSkill, combat.Hydro, combat.WeakDurability)
 	if x.Base.Cons >= 4 {
 		//check if ult is up, if so increase multiplier
 		if x.S.StatusActive("Xingqiu-Burst") {
@@ -158,7 +158,7 @@ func (x *xingqiu) burstHook() {
 		//trigger swords, only first sword applies hydro
 		for i := 0; i < x.numSwords; i++ {
 
-			d := x.Snapshot("Guhua Sword: Raincutter", combat.ActionTypeBurst, combat.Hydro)
+			d := x.Snapshot("Guhua Sword: Raincutter", combat.ActionTypeBurst, combat.Hydro, combat.WeakDurability)
 			d.Mult = burst[x.TalentLvlBurst()]
 
 			//apply aura every 3rd hit -> hit 0, 3, 6, etc...

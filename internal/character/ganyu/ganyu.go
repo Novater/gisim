@@ -54,14 +54,14 @@ func (g *ganyu) c1() {
 }
 
 func (g *ganyu) Aimed(p map[string]interface{}) int {
-	f := g.Snapshot("Frost Flake Arrow", combat.ActionTypeAimedShot, combat.Cryo)
+	f := g.Snapshot("Frost Flake Arrow", combat.ActionTypeAimedShot, combat.Cryo, combat.WeakDurability)
 	f.HitWeakPoint = true
 	f.Mult = ffa[g.TalentLvlAttack()]
 	f.AuraBase = combat.WeakAuraBase
 	f.AuraUnits = 1
 	f.ApplyAura = true
 
-	b := g.Snapshot("Frost Flake Bloom", combat.ActionTypeAimedShot, combat.Cryo)
+	b := g.Snapshot("Frost Flake Bloom", combat.ActionTypeAimedShot, combat.Cryo, combat.WeakDurability)
 	b.Mult = ffb[g.TalentLvlAttack()]
 	b.ApplyAura = true
 	b.AuraBase = combat.WeakAuraBase
@@ -111,7 +111,7 @@ func (g *ganyu) Skill(p map[string]interface{}) int {
 	}
 
 	//snap shot stats at cast time here
-	d := g.Snapshot("Ice Lotus", combat.ActionTypeSkill, combat.Cryo)
+	d := g.Snapshot("Ice Lotus", combat.ActionTypeSkill, combat.Cryo, combat.WeakDurability)
 	d.Mult = lotus[g.TalentLvlSkill()]
 	d.ApplyAura = true
 	d.AuraBase = combat.WeakAuraBase
@@ -144,7 +144,7 @@ func (g *ganyu) Burst(p map[string]interface{}) int {
 		return 0
 	}
 	//snap shot stats at cast time here
-	d := g.Snapshot("Celestial Shower", combat.ActionTypeBurst, combat.Cryo)
+	d := g.Snapshot("Celestial Shower", combat.ActionTypeBurst, combat.Cryo, combat.WeakDurability)
 	d.Mult = shower[g.TalentLvlBurst()]
 	d.ApplyAura = true
 	d.AuraBase = combat.WeakAuraBase

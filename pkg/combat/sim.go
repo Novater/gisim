@@ -32,17 +32,16 @@ type Sim struct {
 	Chars       []Character
 	SwapCD      int
 	//reaction related
-	TargetElement Element
-	mvMult        float64 //multiplier for melt/vape, if > 1 then there's a reaction
+	TargetAura Aura
 	//overwritable functions
 	FindNextAction func(s *Sim) (ActionItem, error)
 
-	Rand      *rand.Rand
-	particles map[int][]Particle
-	tasks     map[int][]Task
-	F         int
-	charPos   map[string]int
-	Global    Flags
+	Rand        *rand.Rand
+	particles   map[int][]Particle
+	tasks       map[int][]Task
+	F           int
+	charPos     map[string]int
+	GlobalFlags Flags
 	//per tick effects
 	effects []EffectFunc
 	//event hooks
@@ -54,7 +53,13 @@ type Sim struct {
 }
 
 type Flags struct {
-	ChildeActive bool
+	ChildeActive                    bool
+	ReactionDidOccur                bool
+	ReactionType                    ReactionType
+	NextAttackMVMult                float64 // melt vape multiplier
+	NextAttackOverloadTriggered     bool
+	NextAttackSuperconductTriggered bool
+	NextAttackShatterTriggered      bool
 }
 
 //New creates new sim from given profile
@@ -70,7 +75,7 @@ func New(p Profile) (*Sim, error) {
 	u.DamageDetails = make(map[string]map[string]float64)
 	u.mod = make(map[string]ResistMod)
 	s.Target = u
-	s.mvMult = 1
+	s.GlobalFlags.NextAttackMVMult = 1
 
 	s.initMaps()
 	s.Stam = 240
@@ -218,6 +223,7 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64
 		s.collectEnergyParticles()
 		s.executeCharacterTicks()
 		s.runEffects()
+		s.checkAura()
 		s.runTasks()
 
 		if s.SwapCD > 0 {

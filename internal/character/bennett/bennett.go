@@ -59,7 +59,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 func (b *bennett) Attack(p map[string]interface{}) int {
 	//register action depending on number in chain
 	//3 and 4 need to be registered as multi action
-	d := b.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
+	d := b.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical, combat.MedDurability)
 	//figure out which hit it is
 	var hits []float64
 	reset := false
@@ -157,7 +157,7 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 	sb.WriteString("-Hit-")
 
 	for i, s := range hits {
-		d := b.Snapshot("Passion Overload", combat.ActionTypeSkill, combat.Pyro)
+		d := b.Snapshot("Passion Overload", combat.ActionTypeSkill, combat.Pyro, combat.MedDurability)
 		d.ApplyAura = true
 		d.AuraBase = combat.MedAuraBase
 		d.AuraUnits = 2
@@ -218,7 +218,7 @@ func (b *bennett) Burst(p map[string]interface{}) int {
 
 	//hook for buffs; active right away after cast
 
-	d := b.Snapshot("Fantastic Voyage", combat.ActionTypeBurst, combat.Pyro)
+	d := b.Snapshot("Fantastic Voyage", combat.ActionTypeBurst, combat.Pyro, combat.MedDurability)
 	d.ApplyAura = true
 	d.AuraBase = combat.MedAuraBase
 	d.AuraUnits = 2

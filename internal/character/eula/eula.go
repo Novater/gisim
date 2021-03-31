@@ -103,7 +103,7 @@ func (e *eula) Attack(p map[string]interface{}) int {
 
 	for i, mult := range auto[e.NormalCounter] {
 		t := i + 1
-		d := e.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
+		d := e.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical, combat.WeakDurability)
 		d.Mult = mult[e.TalentLvlAttack()]
 		e.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
@@ -152,7 +152,7 @@ func (e *eula) Skill(p map[string]interface{}) int {
 func (e *eula) pressE() {
 	//press e (60fps vid)
 	//starts 343 cancel 378
-	d := e.Snapshot("Icetide (Press)", combat.ActionTypeSkill, combat.Cryo)
+	d := e.Snapshot("Icetide (Press)", combat.ActionTypeSkill, combat.Cryo, combat.WeakDurability)
 	d.ApplyAura = true
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1
@@ -183,7 +183,7 @@ func (e *eula) holdE() {
 	//296 to 341, but cd starts at 322
 	//60 fps = 108 frames cast, cd starts 62 frames in so need to + 62 frames to cd
 	lvl := e.TalentLvlSkill()
-	d := e.Snapshot("Icetide (Hold)", combat.ActionTypeSkill, combat.Cryo)
+	d := e.Snapshot("Icetide (Hold)", combat.ActionTypeSkill, combat.Cryo, combat.WeakDurability)
 	d.ApplyAura = true
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1
@@ -198,7 +198,7 @@ func (e *eula) holdE() {
 	v := e.Tags["Grimheart"]
 
 	for i := 0; i < v; i++ {
-		d := e.Snapshot("Icetide (Icewhirl)", combat.ActionTypeSkill, combat.Cryo)
+		d := e.Snapshot("Icetide (Icewhirl)", combat.ActionTypeSkill, combat.Cryo, combat.WeakDurability)
 		d.ApplyAura = true
 		d.AuraBase = combat.WeakAuraBase
 		d.AuraUnits = 1
@@ -212,7 +212,7 @@ func (e *eula) holdE() {
 
 	//A2
 	if v == 2 {
-		d := e.Snapshot("Icetide (Lightfall)", combat.ActionTypeSkill, combat.Cryo)
+		d := e.Snapshot("Icetide (Lightfall)", combat.ActionTypeSkill, combat.Cryo, combat.WeakDurability)
 		d.ApplyAura = true
 		d.AuraBase = combat.WeakAuraBase
 		d.AuraUnits = 1
@@ -248,7 +248,7 @@ func (e *eula) Burst(p map[string]interface{}) int {
 	e.burstCounter = 0
 	lvl := e.TalentLvlBurst()
 	//add initial damage
-	d := e.Snapshot("Glacial Illumination", combat.ActionTypeBurst, combat.Cryo)
+	d := e.Snapshot("Glacial Illumination", combat.ActionTypeBurst, combat.Cryo, combat.WeakDurability)
 	d.ApplyAura = true
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1
@@ -260,7 +260,7 @@ func (e *eula) Burst(p map[string]interface{}) int {
 	}, "Eula-Burst-Initial", 100) //guess frames
 
 	//add blow up after 8 seconds
-	d2 := e.Snapshot("Glacial Illumination (Lightfall)", combat.ActionTypeBurst, combat.Cryo)
+	d2 := e.Snapshot("Glacial Illumination (Lightfall)", combat.ActionTypeBurst, combat.Cryo, combat.WeakDurability)
 	d2.ApplyAura = true
 	d2.AuraBase = combat.WeakAuraBase
 	d2.AuraUnits = 1
