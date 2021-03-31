@@ -34,7 +34,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		if !e.S.StatusActive("Eula Burst") {
 			return false
 		}
-		if ds.CharName != e.Base.Name {
+		if ds.Actor != e.Base.Name {
 			return false
 		}
 		if ds.AbilType != combat.ActionTypeBurst && ds.AbilType != combat.ActionTypeAttack && ds.AbilType != combat.ActionTypeSkill {
@@ -54,7 +54,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 
 func (e *eula) a4() {
 	e.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-		if ds.CharName != e.Base.Name {
+		if ds.Actor != e.Base.Name {
 			return false
 		}
 		if ds.AbilType != combat.ActionTypeAttack {
@@ -104,7 +104,7 @@ func (e *eula) Attack(p map[string]interface{}) int {
 	for i, mult := range auto[e.NormalCounter] {
 		t := i + 1
 		d := e.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
-		d.Mult = mult[e.Talents.Attack-1]
+		d.Mult = mult[e.TalentLvlAttack()]
 		e.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("\t Eula normal %v hit %v dealt %.0f damage", e.NormalCounter, t, damage)
@@ -152,18 +152,11 @@ func (e *eula) Skill(p map[string]interface{}) int {
 func (e *eula) pressE() {
 	//press e (60fps vid)
 	//starts 343 cancel 378
-	lvl := e.Talents.Skill - 1
-	if e.Base.Cons >= 3 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
 	d := e.Snapshot("Icetide (Press)", combat.ActionTypeSkill, combat.Cryo)
 	d.ApplyAura = true
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1
-	d.Mult = skillPress[lvl]
+	d.Mult = skillPress[e.TalentLvlSkill()]
 
 	e.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
@@ -189,13 +182,7 @@ func (e *eula) holdE() {
 	//hold e
 	//296 to 341, but cd starts at 322
 	//60 fps = 108 frames cast, cd starts 62 frames in so need to + 62 frames to cd
-	lvl := e.Talents.Skill - 1
-	if e.Base.Cons >= 3 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
+	lvl := e.TalentLvlSkill()
 	d := e.Snapshot("Icetide (Hold)", combat.ActionTypeSkill, combat.Cryo)
 	d.ApplyAura = true
 	d.AuraBase = combat.WeakAuraBase
@@ -225,18 +212,11 @@ func (e *eula) holdE() {
 
 	//A2
 	if v == 2 {
-		lvl := e.Talents.Burst - 1
-		if e.Base.Cons >= 5 {
-			lvl += 3
-			if lvl > 14 {
-				lvl = 14
-			}
-		}
 		d := e.Snapshot("Icetide (Lightfall)", combat.ActionTypeSkill, combat.Cryo)
 		d.ApplyAura = true
 		d.AuraBase = combat.WeakAuraBase
 		d.AuraUnits = 1
-		d.Mult = burstExplodeBase[lvl] * 0.5
+		d.Mult = burstExplodeBase[e.TalentLvlBurst()] * 0.5
 		e.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("\t Eula A2 on 2 Grimheart stacks dealt %.0f damage", damage)
@@ -266,15 +246,7 @@ func (e *eula) holdE() {
 func (e *eula) Burst(p map[string]interface{}) int {
 	e.S.Status["Eula Burst"] = e.S.F + 8*60
 	e.burstCounter = 0
-
-	lvl := e.Talents.Burst - 1
-	if e.Base.Cons >= 5 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
-
+	lvl := e.TalentLvlBurst()
 	//add initial damage
 	d := e.Snapshot("Glacial Illumination", combat.ActionTypeBurst, combat.Cryo)
 	d.ApplyAura = true

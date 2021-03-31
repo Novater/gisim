@@ -22,15 +22,18 @@ type EffectFunc func(s *Sim) bool
 
 //Sim keeps track of one simulation
 type Sim struct {
-	Target *Enemy
-	Log    *zap.SugaredLogger
+	Log *zap.SugaredLogger
 	//exposed fields
+	Target      *Enemy
 	Status      map[string]int
 	ActiveChar  string
 	ActiveIndex int
 	Stam        float64
 	Chars       []Character
 	SwapCD      int
+	//reaction related
+	TargetElement Element
+	mvMult        float64 //multiplier for melt/vape, if > 1 then there's a reaction
 	//overwritable functions
 	FindNextAction func(s *Sim) (ActionItem, error)
 
@@ -39,6 +42,7 @@ type Sim struct {
 	tasks     map[int][]Task
 	F         int
 	charPos   map[string]int
+	Global    Flags
 	//per tick effects
 	effects []EffectFunc
 	//event hooks
@@ -47,6 +51,10 @@ type Sim struct {
 
 	//action actions list
 	actions []ActionItem
+}
+
+type Flags struct {
+	ChildeActive bool
 }
 
 //New creates new sim from given profile
@@ -62,6 +70,7 @@ func New(p Profile) (*Sim, error) {
 	u.DamageDetails = make(map[string]map[string]float64)
 	u.mod = make(map[string]ResistMod)
 	s.Target = u
+	s.mvMult = 1
 
 	s.initMaps()
 	s.Stam = 240

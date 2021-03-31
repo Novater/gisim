@@ -48,7 +48,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 func (f *fischl) a4() {
 	f.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		//don't trigger A4 if Fischl dealt dmg thereby triggering reaction
-		if ds.CharName == "Fischl" {
+		if ds.Actor == "Fischl" {
 			return false
 		}
 		//check reaction type, only care for overload, electro charge, superconduct
@@ -92,7 +92,7 @@ func (f *fischl) c1() {
 		if f.ozActive {
 			return false
 		}
-		if ds.CharName != "Fischl" {
+		if ds.Actor != "Fischl" {
 			return false
 		}
 		if ds.AbilType != combat.ActionTypeAttack {
@@ -168,14 +168,7 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 	f.S.Status["Fischl-Oz"] = f.S.F + 10*60
 
 	d := f.Snapshot("Oz", combat.ActionTypeSkill, combat.Electro)
-	lvl := f.Talents.Skill - 1
-	if f.Base.Cons >= 3 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
-	d.Mult = birdSum[lvl]
+	d.Mult = birdSum[f.TalentLvlSkill()]
 	if f.Base.Cons >= 2 {
 		d.Mult += 2
 	}
@@ -185,7 +178,7 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 	f.ozSnapshot = d
 	//clone b without info re aura
 	b := d.Clone()
-	b.Mult = birdAtk[lvl]
+	b.Mult = birdAtk[f.TalentLvlSkill()]
 	b.ApplyAura = true
 	//apply initial damage
 	f.S.AddTask(func(s *combat.Sim) {
@@ -228,14 +221,7 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 
 	//initial damage
 	d := f.Snapshot("Midnight Phantasmagoria", combat.ActionTypeBurst, combat.Electro)
-	lvl := f.Talents.Burst - 1
-	if f.Base.Cons >= 5 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
-	d.Mult = burst[lvl]
+	d.Mult = burst[f.TalentLvlBurst()]
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1
 	d.ApplyAura = true
@@ -259,14 +245,7 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 
 	//snapshot for Oz
 	b := f.Snapshot("Midnight Phantasmagoria (Oz)", combat.ActionTypeBurst, combat.Electro)
-	blvl := f.Talents.Skill - 1
-	if f.Base.Cons >= 3 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
-	b.Mult = birdAtk[blvl]
+	b.Mult = birdAtk[f.TalentLvlSkill()]
 	b.AuraBase = combat.WeakAuraBase
 	b.AuraUnits = 1
 	f.ozSnapshot = b

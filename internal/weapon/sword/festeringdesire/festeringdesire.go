@@ -26,7 +26,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 	}
 
 	s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-		if ds.CharName != c.Name() {
+		if ds.Actor != c.Name() {
 			return false
 		}
 		if ds.AbilType == combat.ActionTypeSkill {

@@ -1,8 +1,8 @@
 package combat
 
 type Snapshot struct {
-	CharLvl  int64
-	CharName string //name of the character triggering the damage
+	CharLvl int64
+	Actor   string //name of the character triggering the damage
 
 	Abil        string      //name of ability triggering the damage
 	AbilType    ActionType  //type of ability triggering the damage
@@ -11,11 +11,12 @@ type Snapshot struct {
 	HitWeakPoint  bool
 	IsHeavyAttack bool
 
-	Mult      float64 //ability multiplier. could set to 0 from initial Mona dmg
-	Element   EleType //element of ability
-	UseDef    bool    //default false
-	FlatDmg   float64 //flat dmg; so far only zhongli
-	OtherMult float64 //so far just for xingqiu C4
+	Mult       float64 //ability multiplier. could set to 0 from initial Mona dmg
+	Element    EleType //element of ability
+	Durability float64 //durability of aura, 0 if nothing applied
+	UseDef     bool    //default false
+	FlatDmg    float64 //flat dmg; so far only zhongli
+	OtherMult  float64 //so far just for xingqiu C4
 
 	Stats    []float64 //total character stats including from artifact, bonuses, etc...
 	BaseAtk  float64   //base attack used in calc

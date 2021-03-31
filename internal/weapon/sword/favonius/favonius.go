@@ -28,7 +28,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 	//add on crit effect
 	s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		//check if char is correct?
-		if ds.CharName != c.Name() {
+		if ds.Actor != c.Name() {
 			return false
 		}
 		if s.StatusActive("Favonius Sword Proc") {
@@ -40,7 +40,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		}
 		s.Log.Debugf("\t Favonius Sword proc triggered")
 
-		s.AddEnergyParticles("Favonius Sword", 3, combat.NonElemental, 150) //90 to generate, 60 to get it
+		s.AddEnergyParticles("Favonius Sword", 3, combat.NoElement, 150) //90 to generate, 60 to get it
 
 		s.Status["Favonius Sword Proc"] = s.F + cd
 		return false

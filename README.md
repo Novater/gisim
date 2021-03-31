@@ -54,6 +54,10 @@ Typically I would run the command in bash with output piped to a file for debugg
 - [ ] swirl
 - [ ] frames returned per action should have at least 2 number, avg cancellable and avg normal; may actually required more than 2, 1 into each trailling action such as swap, dash, jump, burst, skill, auto
 
+## optimizations
+- [ ] change stat look ups to switch instead of maps
+
+
 ## credits
 
 - Most of the % data: https://genshin.honeyhunterworld.com/

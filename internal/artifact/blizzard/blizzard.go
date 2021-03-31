@@ -16,7 +16,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 	}
 	if count >= 4 {
 		s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-			if ds.CharName != c.Name() {
+			if ds.Actor != c.Name() {
 				return false
 			}
 

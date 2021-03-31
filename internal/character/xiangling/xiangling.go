@@ -88,7 +88,7 @@ func (x *xl) Attack(p map[string]interface{}) int {
 	frames = int(float64(frames) / (1 + x.Stats[combat.AtkSpd]))
 
 	for i, hit := range hits {
-		d.Mult = hit[x.Talents.Attack-1]
+		d.Mult = hit[x.TalentLvlAttack()]
 		t := i + 1
 		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
@@ -120,7 +120,7 @@ func (x *xl) Attack(p map[string]interface{}) int {
 
 func (x *xl) ChargeAttack(p map[string]interface{}) int {
 	d := x.Snapshot("Charge Attack", combat.ActionTypeChargedAttack, combat.Physical)
-	d.Mult = nc[x.Talents.Attack-1]
+	d.Mult = nc[x.TalentLvlAttack()]
 
 	//no delay for now? realistically the hits should have delay but not sure if it actually makes a diff
 	//since it doesnt apply any elements, only trigger weapon procs
@@ -146,14 +146,7 @@ func (x *xl) Skill(p map[string]interface{}) int {
 	}
 
 	d := x.Snapshot("Guoba", combat.ActionTypeSkill, combat.Pyro)
-	lvl := x.Talents.Skill - 1
-	if x.Base.Cons >= 5 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
-	d.Mult = guoba[lvl]
+	d.Mult = guoba[x.TalentLvlSkill()]
 	d.ApplyAura = true //apparently every hit applies
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1
@@ -188,13 +181,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 		x.S.Log.Debugf("\tXiangling burst - insufficent energy, current: %v", x.Energy)
 		return 0
 	}
-	lvl := x.Talents.Burst - 1
-	if x.Base.Cons >= 5 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
+	lvl := x.TalentLvlBurst()
 	//initial 3 hits are delayed and snapshotted at execution instead of at cast... no idea why...
 	x.delayedFunc[x.S.F+20] = func() {
 		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro)

@@ -6,6 +6,9 @@ type Character interface {
 	//ability functions to be defined by each character on how they will
 	Name() string
 	CurrentEnergy() float64 //current energy
+	TalentLvlSkill() int
+	TalentLvlAttack() int
+	TalentLvlBurst() int
 	//affect the unit
 	Attack(p map[string]interface{}) int
 	Aimed(p map[string]interface{}) int
@@ -137,6 +140,25 @@ func (c *CharacterTemplate) Name() string {
 	return c.Base.Name
 }
 
+func (c *CharacterTemplate) TalentLvlSkill() int {
+	if c.Base.Cons >= 3 {
+		return c.Talents.Skill + 2
+	}
+	return c.Talents.Skill - 1
+}
+func (c *CharacterTemplate) TalentLvlBurst() int {
+	if c.Base.Cons >= 5 {
+		return c.Talents.Burst + 2
+	}
+	return c.Talents.Burst - 1
+}
+func (c *CharacterTemplate) TalentLvlAttack() int {
+	if c.S.Global.ChildeActive {
+		return c.Talents.Attack
+	}
+	return c.Talents.Attack - 1
+}
+
 func (c *CharacterTemplate) CurrentEnergy() float64 {
 	return c.Energy
 }
@@ -152,7 +174,7 @@ func (c *CharacterTemplate) ReceiveParticle(p Particle, isActive bool, partyCoun
 	switch {
 	case p.Ele == c.Base.Element:
 		amt = 3
-	case p.Ele == NonElemental:
+	case p.Ele == NoElement:
 		amt = 2
 	default:
 		amt = 1
@@ -189,7 +211,7 @@ func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType) Snaps
 
 	ds.Abil = name
 	ds.AbilType = t
-	ds.CharName = c.Base.Name
+	ds.Actor = c.Base.Name
 	ds.BaseAtk = c.Base.Atk + c.Weapon.Atk
 	ds.CharLvl = c.Base.Level
 	ds.BaseDef = c.Base.Def

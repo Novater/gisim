@@ -33,7 +33,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 
 		//post snap shot to increase stacks
 		s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-			if ds.CharName != c.Name() {
+			if ds.Actor != c.Name() {
 				return false
 			}
 			if ds.AbilType != combat.ActionTypeSkill {
@@ -49,7 +49,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 		}, "crimson witch 4pc", combat.PostSnapshot)
 
 		s.AddSnapshotHook(func(snap *combat.Snapshot) bool {
-			if snap.CharName != c.Name() {
+			if snap.Actor != c.Name() {
 				return false
 			}
 

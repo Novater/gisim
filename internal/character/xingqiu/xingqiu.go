@@ -83,7 +83,7 @@ func (x *xingqiu) Attack(p map[string]interface{}) int {
 
 	for i, hit := range hits {
 		d := x.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
-		d.Mult = hit[x.Talents.Attack-1]
+		d.Mult = hit[x.TalentLvlAttack()]
 		//add a 20 frame delay; should be 18 and 42 for combo 3 and 5 actual
 		t := i + 1
 		x.S.AddTask(func(s *combat.Sim) {
@@ -110,13 +110,6 @@ func (x *xingqiu) Skill(p map[string]interface{}) int {
 		return 0
 	}
 	d := x.Snapshot("Guhua Sword: Fatal Rainscreen", combat.ActionTypeSkill, combat.Hydro)
-	lvl := x.Talents.Skill - 1
-	if x.Base.Cons >= 5 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
 	if x.Base.Cons >= 4 {
 		//check if ult is up, if so increase multiplier
 		if x.S.StatusActive("Xingqiu-Burst") {
@@ -126,9 +119,9 @@ func (x *xingqiu) Skill(p map[string]interface{}) int {
 	d.ApplyAura = true
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1
-	d.Mult = rainscreen[0][lvl]
+	d.Mult = rainscreen[0][x.TalentLvlSkill()]
 	d2 := d.Clone()
-	d2.Mult = rainscreen[1][lvl]
+	d2.Mult = rainscreen[1][x.TalentLvlSkill()]
 
 	x.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
@@ -162,19 +155,11 @@ func (x *xingqiu) burstHook() {
 			return false
 		}
 
-		lvl := x.Talents.Burst - 1
-		if x.Base.Cons >= 3 {
-			lvl += 3
-			if lvl > 14 {
-				lvl = 14
-			}
-		}
-
 		//trigger swords, only first sword applies hydro
 		for i := 0; i < x.numSwords; i++ {
 
 			d := x.Snapshot("Guhua Sword: Raincutter", combat.ActionTypeBurst, combat.Hydro)
-			d.Mult = burst[lvl]
+			d.Mult = burst[x.TalentLvlBurst()]
 
 			//apply aura every 3rd hit -> hit 0, 3, 6, etc...
 			//only first sword summoned can apply aura

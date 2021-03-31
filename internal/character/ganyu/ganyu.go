@@ -35,7 +35,7 @@ func (g *ganyu) c1() {
 	s.Log.Debugf("\tactivating Ganyu C1")
 
 	s.AddSnapshotHook(func(snap *combat.Snapshot) bool {
-		if snap.CharName == "Ganyu" && snap.Abil == "Frost Flake Arrow" {
+		if snap.Actor == "Ganyu" && snap.Abil == "Frost Flake Arrow" {
 			//if c1, increase character energy by 2, unaffected by ER; assume assuming arrow always hits here
 			g.Energy += 2
 			if g.Energy > g.MaxEnergy {
@@ -56,13 +56,13 @@ func (g *ganyu) c1() {
 func (g *ganyu) Aimed(p map[string]interface{}) int {
 	f := g.Snapshot("Frost Flake Arrow", combat.ActionTypeAimedShot, combat.Cryo)
 	f.HitWeakPoint = true
-	f.Mult = ffa[g.Talents.Attack-1]
+	f.Mult = ffa[g.TalentLvlAttack()]
 	f.AuraBase = combat.WeakAuraBase
 	f.AuraUnits = 1
 	f.ApplyAura = true
 
 	b := g.Snapshot("Frost Flake Bloom", combat.ActionTypeAimedShot, combat.Cryo)
-	b.Mult = ffb[g.Talents.Attack-1]
+	b.Mult = ffb[g.TalentLvlAttack()]
 	b.ApplyAura = true
 	b.AuraBase = combat.WeakAuraBase
 	b.AuraUnits = 1
@@ -112,14 +112,7 @@ func (g *ganyu) Skill(p map[string]interface{}) int {
 
 	//snap shot stats at cast time here
 	d := g.Snapshot("Ice Lotus", combat.ActionTypeSkill, combat.Cryo)
-	lvl := g.Talents.Skill - 1
-	if g.Base.Cons >= 5 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
-	d.Mult = lotus[lvl]
+	d.Mult = lotus[g.TalentLvlSkill()]
 	d.ApplyAura = true
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1
@@ -152,14 +145,7 @@ func (g *ganyu) Burst(p map[string]interface{}) int {
 	}
 	//snap shot stats at cast time here
 	d := g.Snapshot("Celestial Shower", combat.ActionTypeBurst, combat.Cryo)
-	lvl := g.Talents.Burst - 1
-	if g.Base.Cons >= 3 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
-	d.Mult = shower[lvl]
+	d.Mult = shower[g.TalentLvlBurst()]
 	d.ApplyAura = true
 	d.AuraBase = combat.WeakAuraBase
 	d.AuraUnits = 1

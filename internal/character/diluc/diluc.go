@@ -59,7 +59,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 
 func (d *diluc) burstHook() {
 	d.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-		if ds.CharName != d.Base.Name {
+		if ds.Actor != d.Base.Name {
 			return false
 		}
 		if ds.AbilType != combat.ActionTypeAttack {
@@ -98,7 +98,7 @@ func (d *diluc) Attack(p map[string]interface{}) int {
 	frames = int(float64(frames) / (1 + d.Stats[combat.AtkSpd]))
 
 	x := d.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical)
-	x.Mult = auto[d.NormalCounter][d.Talents.Attack-1]
+	x.Mult = auto[d.NormalCounter][d.TalentLvlAttack()]
 
 	d.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(x)
@@ -138,16 +138,9 @@ func (d *diluc) Skill(p map[string]interface{}) int {
 
 	//apply attack speed
 	frames = int(float64(frames) / (1 + d.Stats[combat.AtkSpd]))
-	lvl := d.Talents.Skill - 1
-	if d.Base.Cons >= 3 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
 
 	x := d.Snapshot("Searing Onslaught", combat.ActionTypeSkill, combat.Pyro)
-	x.Mult = skill[d.eCounter][lvl]
+	x.Mult = skill[d.eCounter][d.TalentLvlSkill()]
 
 	d.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(x)
@@ -171,20 +164,12 @@ func (d *diluc) Skill(p map[string]interface{}) int {
 func (d *diluc) Burst(p map[string]interface{}) int {
 	d.S.Status["Diluc Burst"] = 12 * 60
 
-	lvl := d.Talents.Burst - 1
-	if d.Base.Cons >= 5 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
-
 	//add initial damage
 	x := d.Snapshot("Dawn (Initial)", combat.ActionTypeBurst, combat.Pyro)
 	x.ApplyAura = true
 	x.AuraBase = combat.WeakAuraBase
 	x.AuraUnits = 1
-	x.Mult = burstInitial[lvl]
+	x.Mult = burstInitial[d.TalentLvlBurst()]
 
 	d.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(x)
@@ -194,7 +179,7 @@ func (d *diluc) Burst(p map[string]interface{}) int {
 	//no idea how many dot ticks
 
 	xFinal := x.Clone()
-	xFinal.Mult = burstExplode[lvl]
+	xFinal.Mult = burstExplode[d.TalentLvlBurst()]
 	d.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(xFinal)
 		s.Log.Infof("\t Diluc burst (initial) dealt %.0f damage", damage)

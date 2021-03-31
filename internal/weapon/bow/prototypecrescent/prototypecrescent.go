@@ -23,7 +23,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 	//add on hit effect
 	s.AddSnapshotHook(func(snap *combat.Snapshot) bool {
 		//check if char is correct?
-		if snap.CharName != c.Name() {
+		if snap.Actor != c.Name() {
 			return false
 		}
 		//check if weakpoint triggered
@@ -36,7 +36,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 
 	//add snapshot effect
 	s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-		if c.Name() != ds.CharName {
+		if c.Name() != ds.Actor {
 			return false
 		}
 		if !s.StatusActive("Prototype Crescent") {

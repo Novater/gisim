@@ -11,7 +11,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 
 	target := s.Target
 
-	s.Log.Debugf("\t [%v] %v - %v triggered dmg", s.Frame(), ds.CharName, ds.Abil)
+	s.Log.Debugf("\t [%v] %v - %v triggered dmg", s.Frame(), ds.Actor, ds.Abil)
 	s.Log.Debugw("\t target", "auras", target.Auras)
 
 	//in general, transformative reaction does not change the snapshot
@@ -70,7 +70,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 
 	dr := calcDmg(ds, *s.Target, s.Rand, s.Log)
 	s.Target.Damage += dr.damage
-	s.Target.DamageDetails[ds.CharName][ds.Abil] += dr.damage
+	s.Target.DamageDetails[ds.Actor][ds.Abil] += dr.damage
 
 	if dr.isCrit {
 		s.executeSnapshotHooks(OnCritDamage, &ds)

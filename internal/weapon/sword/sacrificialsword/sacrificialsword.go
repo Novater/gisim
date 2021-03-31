@@ -29,7 +29,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 	//add on crit effect
 	s.AddSnapshotHook(func(snap *combat.Snapshot) bool {
 		//check if char is correct?
-		if snap.CharName != c.Name() {
+		if snap.Actor != c.Name() {
 			return false
 		}
 		if snap.AbilType != combat.ActionTypeSkill {

@@ -52,7 +52,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 	//add on hit effect to sim?
 	s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		//check if char is correct?
-		if ds.CharName != c.Name() {
+		if ds.Actor != c.Name() {
 			return false
 		}
 		//check if this is normal or charged

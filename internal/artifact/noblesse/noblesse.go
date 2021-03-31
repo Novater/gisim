@@ -12,7 +12,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 	if count >= 2 {
 		s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 			// s.Log.Debugw("\t\tNoblesse 2 pc", "name", ds.CharName, "abil", ds.AbilType)
-			if ds.CharName != c.Name() {
+			if ds.Actor != c.Name() {
 				return false
 			}
 			if ds.AbilType != combat.ActionTypeBurst {

@@ -28,14 +28,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	b.Weapon.Class = combat.WeaponClassSword
 
 	//add effect for burst
-	lvl := b.Talents.Burst - 1
-	if b.Base.Cons >= 5 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
-	pc := burstatk[lvl]
+	pc := burstatk[b.TalentLvlBurst()]
 	if b.Base.Cons >= 1 {
 		pc += 0.2
 	}
@@ -44,7 +37,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		if _, ok := b.S.Status["Bennett Burst"]; !ok {
 			return false
 		}
-		if b.S.ActiveChar != ds.CharName {
+		if b.S.ActiveChar != ds.Actor {
 			return false
 		}
 		//TODO: should have an HP check here but no one ever takes damage in this sim..
@@ -108,7 +101,7 @@ func (b *bennett) Attack(p map[string]interface{}) int {
 	b.NormalCounter++
 	//apply attack speed
 	frames = int(float64(frames) / (1 + b.Stats[combat.AtkSpd]))
-	d.Mult = hits[b.Talents.Attack-1]
+	d.Mult = hits[b.TalentLvlAttack()]
 
 	sb.Write([]byte(strconv.Itoa(n)))
 	b.S.AddTask(func(s *combat.Sim) {
@@ -144,13 +137,6 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 			hold = h
 		}
 	}
-	lvl := b.Talents.Skill - 1
-	if b.Base.Cons >= 3 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
 	var sb strings.Builder
 	sb.WriteString("Bennett-Skill-Hold-")
 	var hits [][]float64
@@ -175,7 +161,7 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 		d.ApplyAura = true
 		d.AuraBase = combat.MedAuraBase
 		d.AuraUnits = 2
-		d.Mult = s[lvl]
+		d.Mult = s[b.TalentLvlBurst()]
 		t := i + 1
 		sb.WriteString(strconv.Itoa(t))
 		b.S.AddTask(func(s *combat.Sim) {
@@ -225,14 +211,6 @@ func (b *bennett) Burst(p map[string]interface{}) int {
 		return 0
 	}
 
-	lvl := b.Talents.Burst - 1
-	if b.Base.Cons >= 5 {
-		lvl += 3
-		if lvl > 14 {
-			lvl = 14
-		}
-	}
-
 	//add field effect timer
 	b.S.Status["Bennett Burst"] = 720
 	//we should be adding repeating tasks here every 1sec to heal active char but
@@ -244,7 +222,7 @@ func (b *bennett) Burst(p map[string]interface{}) int {
 	d.ApplyAura = true
 	d.AuraBase = combat.MedAuraBase
 	d.AuraUnits = 2
-	d.Mult = burst[lvl]
+	d.Mult = burst[b.TalentLvlBurst()]
 
 	b.S.AddTask(func(s *combat.Sim) {
 		damage := s.ApplyDamage(d)
