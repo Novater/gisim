@@ -62,7 +62,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			}
 
 			//increase bonus by 50% per stack
-			mult := 0.5*3 + 1
+			mult := 0.5*float64(stacks) + 1
 
 			switch snap.ReactionType {
 			case combat.Melt:
