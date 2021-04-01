@@ -17,16 +17,14 @@ func (s *Sim) AddEnergyParticles(source string, num int, ele EleType, delay int)
 }
 
 func (s *Sim) collectEnergyParticles() {
-
 	for _, p := range s.particles[s.F] {
 		s.distributeParticles(p)
 	}
-
 	delete(s.particles, s.F)
 }
 
 func (s *Sim) distributeParticles(p Particle) {
-
+	s.Log.Debugf("[%v] Distributing particles from %v; num %v ele %v", s.Frame(), p.Source, p.Num, p.Ele)
 	l := len(s.Chars)
 	for n, c := range s.Chars {
 		a := s.ActiveIndex == n

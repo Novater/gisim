@@ -316,6 +316,10 @@ Enemy: #blazing axe mitachurl
     physical: 0.1
 InitialActive: "Fischl"
 Rotation:
+  - CharacterName: "Xiangling"
+    Action: "skill"
+  - CharacterName: "Xiangling"
+    Action: "burst"
   - CharacterName: "Xingqiu"
     Action: "burst"
   - CharacterName: "Xingqiu"
@@ -340,10 +344,6 @@ Rotation:
     ConditionType: "status"
     ConditionTarget: "Fischl-Oz-Burst"
     ConditionBool: false
-  - CharacterName: "Xiangling"
-    Action: "skill"
-  - CharacterName: "Xiangling"
-    Action: "burst"
   - CharacterName: "Xiangling"
     Action: "attack"
   - CharacterName: "Xingqiu"

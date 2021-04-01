@@ -9,7 +9,7 @@ import (
 //ApplyDamage applies damage to the target given a snapshot
 func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 
-	s.Log.Debugf("\t [%v] %v - %v triggered dmg", s.Frame(), ds.Actor, ds.Abil)
+	s.Log.Debugf("  [%v] %v - %v triggered dmg", s.Frame(), ds.Actor, ds.Abil)
 	s.Log.Debugw("\t target", "auras", s.TargetAura)
 
 	//apply reactions
@@ -56,6 +56,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	if s.GlobalFlags.NextAttackShatterTriggered {
 		s.applyReactionDamage(ds, Shatter)
 	}
+
 	if s.GlobalFlags.ReactionDidOccur {
 		s.executeSnapshotHooks(PostReaction, &ds)
 	}
@@ -127,6 +128,7 @@ func calcDmg(ds Snapshot, target Enemy, rand *rand.Rand, log *zap.SugaredLogger)
 
 	//apply other multiplier bonus
 	if ds.OtherMult > 0 {
+		log.Debugw("\t\tcalc", "other mult", ds.OtherMult)
 		damage = damage * ds.OtherMult
 	}
 	log.Debugw("\t\tcalc", "def mod", defmod, "res", res, "res mod", resmod)

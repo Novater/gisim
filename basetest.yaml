@@ -1,0 +1,135 @@
+Label: "Test"
+Characters:
+  - Base:
+      Name: Bennett
+      Level: 70
+      Element: "pyro"
+      BaseHP: 10129
+      BaseAtk: 156
+      BaseDef: 630
+      BaseCR: 0.05
+      BaseCD: 0.50
+      Constellation: 2
+    AscensionBonus:
+      ER: 0.2
+    TalentLevel:
+      attack: 2
+      skill: 3
+      burst: 6
+    Weapon:
+      WeaponName: "Blackcliff Longsword"
+      WeaponRefinement: 1
+      WeaponBaseAtk: 40
+  - Base:
+      Name: Xiangling
+      Level: 80
+      Element: "pyro"
+      BaseHP: 9638
+      BaseAtk: 200
+      BaseDef: 593
+      BaseCR: 0.05
+      BaseCD: 0.50
+      Constellation: 6
+    AscensionBonus:
+      EM: 72
+    TalentLevel:
+      attack: 6
+      skill: 6
+      burst: 7
+    Weapon:
+      WeaponName: "Black Tassel"
+      WeaponRefinement: 1
+      WeaponBaseAtk: 38
+  - Base:
+      Name: Fischl
+      Level: 70
+      Element: "electro"
+      BaseHP: 7508
+      BaseAtk: 200
+      BaseDef: 485
+      BaseCR: 0.05
+      BaseCD: 0.50
+      Constellation: 4
+    AscensionBonus:
+      ATK%: 0.18
+    TalentLevel:
+      attack: 4
+      skill: 6
+      burst: 2
+    Weapon:
+      WeaponName: "Favonius Warbow"
+      WeaponRefinement: 1
+      WeaponBaseAtk: 41
+    WeaponSecondaryStat:
+      ER%: 0.133
+  - Base:
+      Name: Xingqiu
+      Level: 70
+      Element: "hydro"
+      BaseHP: 8352
+      BaseAtk: 165
+      BaseDef: 619
+      BaseCR: 0.05
+      BaseCD: 0.50
+      Constellation: 6
+    AscensionBonus:
+      ATK%: 0.18
+    TalentLevel:
+      attack: 1
+      skill: 6
+      burst: 6
+    Weapon:
+      WeaponName: "Sacrificial Sword"
+      WeaponRefinement: 1
+      WeaponBaseAtk: 41
+    WeaponSecondaryStat:
+      ER: 0.133
+Enemy: #blazing axe mitachurl
+  Level: 88
+  Resist:
+    pyro: 0.1
+    dendro: 0.1
+    hydro: 0.1
+    cryo: 0.1
+    electro: 0.1
+    geo: 0.1
+    anemo: 0.1
+    physical: 0.3
+InitialActive: "Fischl"
+Rotation:
+  - CharacterName: "Xiangling"
+    Action: "skill"
+  - CharacterName: "Xiangling"
+    Action: "burst"
+  - CharacterName: "Xingqiu"
+    Action: "skill"
+    SwapLock: 100
+  - CharacterName: "Xingqiu"
+    Action: "burst"
+  - CharacterName: "Bennett"
+    Action: "skill"
+    ConditionType: "energy lt"
+    ConditionFloat: 5
+  - CharacterName: "Bennett"
+    Action: "burst"
+  # - CharacterName: "Bennett"
+  #   Action: "attack"
+  - CharacterName: "Fischl"
+    Action: "burst"
+    ConditionType: "status"
+    ConditionTarget: "Fischl-Oz-Skill"
+    ConditionBool: false
+  - CharacterName: "Fischl"
+    Action: "skill"
+    ConditionType: "status"
+    ConditionTarget: "Fischl-Oz-Burst"
+    ConditionBool: false
+  - CharacterName: "Xiangling"
+    Action: "attack"
+  - CharacterName: "Xingqiu"
+    Action: "attack"
+  - CharacterName: "Bennett"
+    Action: "attack"
+  - CharacterName: "Fischl"
+    Action: "attack"
+

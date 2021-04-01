@@ -274,10 +274,12 @@ func (s *Sim) AddCharMod(c string, key string, val map[StatType]float64) {
 }
 
 func (s *Sim) addResonance(count map[EleType]int) {
+	s.Log.Debugw("checking resonance", "count", count)
 	for k, v := range count {
-		if v > 2 {
+		if v >= 2 {
 			switch k {
 			case Pyro:
+				s.Log.Debugf("activing pyro resonance")
 				s.AddSnapshotHook(func(ds *Snapshot) bool {
 					s.Log.Debugf("\tapplying pyro resonance + 25%% atk")
 					ds.Stats[ATKP] += 0.25
@@ -286,6 +288,7 @@ func (s *Sim) addResonance(count map[EleType]int) {
 			case Hydro:
 				//heal not implemented yet
 			case Cryo:
+				s.Log.Debugf("activing cryo resonance")
 				s.AddSnapshotHook(func(ds *Snapshot) bool {
 					if s.TargetAura.E() == Cryo {
 						s.Log.Debugf("\tapplying cryo resonance on cryo target")

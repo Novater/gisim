@@ -150,11 +150,12 @@ func (x *xl) Skill(p map[string]interface{}) int {
 		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
 			s.Log.Infof("\t Xiangling (Gouba - tick) dealt %.0f damage", damage)
+			if x.Base.Cons >= 1 {
+				x.c1()
+			}
 		}, "Xiangling Guoba", delay+i*95)
 		x.S.AddEnergyParticles("Xiangling", 1, combat.Pyro, delay+i*95+90+60)
-		if x.Base.Cons >= 1 {
-			x.c1()
-		}
+
 	}
 
 	//add cooldown to sim
@@ -182,7 +183,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 		d.Mult = pyronado1[lvl]
 		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Xiangling Pyronado initial hit 1 dealt %.0f damagee", damage)
+			s.Log.Infof("\t Xiangling Pyronado initial hit 1 dealt %.0f damage", damage)
 		}, "Xiangling-Burst-Hit-1", 0)
 	}
 
@@ -191,7 +192,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 		d.Mult = pyronado2[lvl]
 		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Xiangling Pyronado initial hit 2 dealt %.0f damagee", damage)
+			s.Log.Infof("\t Xiangling Pyronado initial hit 2 dealt %.0f damage", damage)
 		}, "Xiangling-Burst-Hit-2", 0)
 	}
 
@@ -200,7 +201,7 @@ func (x *xl) Burst(p map[string]interface{}) int {
 		d.Mult = pyronado3[lvl]
 		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Xiangling Pyronado initial hit 3 dealt %.0f damagee", damage)
+			s.Log.Infof("\t Xiangling Pyronado initial hit 3 dealt %.0f damage", damage)
 		}, "Xiangling-Burst-Hit-3", 0)
 	}
 

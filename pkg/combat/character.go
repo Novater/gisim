@@ -231,6 +231,34 @@ func (c *CharacterTemplate) Attack(p map[string]interface{}) int {
 	return 0
 }
 
+func (c *CharacterTemplate) AttackHelperSingle(frames []int, delay []int, mult [][]float64) int {
+	reset := c.NormalCounter >= len(frames)-1
+
+	//apply attack speed
+	f := int(float64(frames[c.NormalCounter]) / (1 + c.Stats[AtkSpd]))
+
+	x := c.Snapshot("Normal", ActionTypeAttack, Physical, WeakDurability)
+	x.Mult = mult[c.NormalCounter][c.TalentLvlAttack()]
+
+	c.S.AddTask(func(s *Sim) {
+		damage := s.ApplyDamage(x)
+		s.Log.Infof("\t %v normal %v dealt %.0f damage", c.Base.Name, c.NormalCounter, damage)
+	}, fmt.Sprintf("%v-Normal-%v", c.Base.Name, c.NormalCounter), delay[c.NormalCounter])
+
+	c.NormalCounter++
+
+	//add a 75 frame attackcounter reset
+	c.NormalResetTimer = 70
+
+	if reset {
+		c.NormalResetTimer = 0
+		c.NormalCounter = 0
+	}
+	//return animation cd
+	//this also depends on which hit in the chain this is
+	return f
+}
+
 func (c *CharacterTemplate) Aimed(p map[string]interface{}) int {
 	return 0
 }

@@ -41,6 +41,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 			return false
 		}
 		//TODO: should have an HP check here but no one ever takes damage in this sim..
+		b.S.Log.Debugf("\t applying Bennet burst buff; adding %v", atk)
 		ds.Stats[combat.ATK] += atk
 		if b.Base.Cons == 6 {
 			ok := ds.AbilType == combat.ActionTypeAttack || ds.AbilType == combat.ActionTypeChargedAttack

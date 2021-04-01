@@ -67,7 +67,7 @@ func (e *Element) Tick(s *Sim) bool {
 
 func (e *Element) Attach(ele EleType, durability float64, f int) {
 	e.Type = ele
-	e.MaxDurability = durability
+	e.MaxDurability = durability * 0.8 //TODO not sure on this part
 	e.Durability = durability * 0.8
 	e.Expiry = f + auraDuration(durability)
 }

@@ -172,7 +172,7 @@ func (x *xingqiu) burstHook() {
 					x.c2()
 				}
 				if x.Base.Cons == 6 && t-1 == 0 {
-					s.Log.Debugf("\tXingqiu C6 regenerating energy previous % next %v", x.Energy, x.Energy+3)
+					s.Log.Debugf("\tXingqiu C6 regenerating energy previous %v next %v", x.Energy, x.Energy+3)
 					x.Energy += 3
 					if x.Energy > x.MaxEnergy {
 						x.Energy = x.MaxEnergy
@@ -212,6 +212,12 @@ func (x *xingqiu) Burst(p map[string]interface{}) int {
 		return 0
 	}
 	//also applies hydro on cast
+	d := x.Snapshot("Xingqiu Burst", combat.ActionTypeBurst, combat.Hydro, 25)
+	d.Mult = 0
+	x.S.AddTask(func(s *combat.Sim) {
+		s.ApplyDamage(d)
+		s.Log.Infof("\t Xingqiu initial burst applying hydro")
+	}, "Xingqiu-Burst-Initial", 20) //second hit 39 frames
 	//how we doing that?? trigger 0 dmg?
 
 	/**
