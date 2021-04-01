@@ -49,7 +49,7 @@ func main() {
 
 	debugPtr := flag.String("d", "error", "output level: debug, info, warn")
 	secondsPtr := flag.Int("s", 600, "how many seconds to run the sim for")
-	pPtr := flag.String("p", "basetest.yaml", "which profile to use")
+	pPtr := flag.String("p", "config.yaml", "which profile to use")
 	f := flag.String("o", "", "detailed log file")
 	showCaller := flag.Bool("c", false, "show caller in debug low")
 	flag.Parse()
@@ -87,7 +87,7 @@ func main() {
 			fmt.Printf("\t%v: %.2f (%.2f%%; total = %.0f)\n", k, v/float64(*secondsPtr), 100*v/dmg, v)
 			total += v
 		}
-		fmt.Printf("%v total dps: %.2f (dmg: %.2f); total percentage: %.0f\n", char, total/float64(*secondsPtr), total, 100*total/dmg)
+		fmt.Printf("%v total dps: %.2f (dmg: %.2f); total percentage: %.0f%%\n", char, total/float64(*secondsPtr), total, 100*total/dmg)
 	}
 	fmt.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", *pPtr, dmg, *secondsPtr, dmg/float64(*secondsPtr), elapsed)
 

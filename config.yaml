@@ -313,7 +313,7 @@ Enemy: #blazing axe mitachurl
     electro: 0.1
     geo: 0.1
     anemo: 0.1
-    physical: 0.1
+    physical: 0.3
 InitialActive: "Fischl"
 Rotation:
   - CharacterName: "Xiangling"
@@ -321,36 +321,31 @@ Rotation:
   - CharacterName: "Xiangling"
     Action: "burst"
   - CharacterName: "Xingqiu"
-    Action: "burst"
-  - CharacterName: "Xingqiu"
     Action: "skill"
     SwapLock: 100
-  - CharacterName: "Bennett"
-    Action: "skill"
-    ConditionType: "status"
-    ConditionTarget: "Bennett Burst"
-    ConditionFloat: 5
+  - CharacterName: "Xingqiu"
+    Action: "burst"
   - CharacterName: "Bennett"
     Action: "burst"
-  # - CharacterName: "Bennett"
-  #   Action: "attack"
+  - CharacterName: "Bennett"
+    Action: "skill"
+    ConditionType: "energy lt"
+    ConditionFloat: 5
   - CharacterName: "Fischl"
     Action: "burst"
     ConditionType: "status"
-    ConditionTarget: "Fischl-Oz-Skill"
+    ConditionTarget: "Fischl-Oz"
     ConditionBool: false
   - CharacterName: "Fischl"
     Action: "skill"
     ConditionType: "status"
-    ConditionTarget: "Fischl-Oz-Burst"
+    ConditionTarget: "Fischl-Oz"
     ConditionBool: false
   - CharacterName: "Xiangling"
     Action: "attack"
   - CharacterName: "Xingqiu"
     Action: "attack"
-  # - CharacterName: "Ganyu"
-  #   Action: "skill"
-  # - CharacterName: "Ganyu"
-  #   Action: "burst"
-  # - CharacterName: "Ganyu"
-  #   Action: "charge"
+  - CharacterName: "Bennett"
+    Action: "attack"
+  - CharacterName: "Fischl"
+    Action: "attack"

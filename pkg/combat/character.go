@@ -117,7 +117,7 @@ func NewTemplateChar(s *Sim, p CharacterProfile) (*CharacterTemplate, error) {
 			c.Stats[i] += a.Main[StatTypeString[i]]
 			c.Stats[i] += a.Sub[StatTypeString[i]]
 		}
-		s.Log.Debugw("loading artifacts", "a", a, "stats", c.Stats)
+		// s.Log.Debugw("loading artifacts", "a", a, "stats", c.Stats)
 	}
 	//load weapon and ascension bonus
 	for i := 0; i < len(c.Stats); i++ {
