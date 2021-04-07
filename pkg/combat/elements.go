@@ -400,7 +400,15 @@ func (e *ElectroChargeAura) React(ds Snapshot, s *Sim) Aura {
 		s.GlobalFlags.ReactionType = Overload //this here will trigger our super vape
 		return e
 	case Hydro:
-		//extend??
+		//first 984 (barb), tick 1055 (barb dmg), apply 1078(barb), (no more electro), apply 1276 (electro - bd dmg), apply 1353 (water - barb dmg)
+		//1418 (razor apply dmg), 1449 (barb reapply), 1481 (xq apply), 1570 xq tick, 1719 razor, 1776 razor tick, 1801 barb auto, 1856 barb tick
+		//so basically whatever triggers next overrides the dmg profile and ticks down using the new profile
+
+		//here we extend the original hydro and then trigger a tick immediately
+		e.Hydro.Refresh(ds.Durability, s)
+		//also reset the snapshot
+		e.Snap = ds.Clone()
+		e.NextTick = s.F
 		return e
 	case Cryo:
 		//just superconduct
@@ -410,7 +418,10 @@ func (e *ElectroChargeAura) React(ds Snapshot, s *Sim) Aura {
 
 		return e
 	case Electro:
-		//extend??
+		e.Electro.Refresh(ds.Durability, s)
+		//also reset the snapshot
+		e.Snap = ds.Clone()
+		e.NextTick = s.F
 		return e
 	default:
 		return NewNoAura()
