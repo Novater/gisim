@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 
@@ -82,11 +83,18 @@ func main() {
 	elapsed := time.Since(start)
 	for char, t := range details {
 		fmt.Printf("%v contributed the following dps:\n", char)
+		keys := make([]string, 0, len(t))
+		for k := range t {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
 		var total float64
-		for k, v := range t {
+		for _, k := range keys {
+			v := t[k]
 			fmt.Printf("\t%v: %.2f (%.2f%%; total = %.0f)\n", k, v/float64(*secondsPtr), 100*v/dmg, v)
 			total += v
 		}
+
 		fmt.Printf("%v total dps: %.2f (dmg: %.2f); total percentage: %.0f%%\n", char, total/float64(*secondsPtr), total, 100*total/dmg)
 	}
 	fmt.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", *pPtr, dmg, *secondsPtr, dmg/float64(*secondsPtr), elapsed)

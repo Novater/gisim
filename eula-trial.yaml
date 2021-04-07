@@ -1,13 +1,14 @@
 Label: "Test"
 Characters:
-  - Name: Eula
-    Level: 90
-    Element: "cryo"
-    BaseHP: 13226
-    BaseAtk: 342
-    BaseDef: 751
-    BaseCR: 0.05
-    BaseCD: 0.50
+  - Base:
+      Name: Eula
+      Level: 90
+      Element: "cryo"
+      BaseHP: 13226
+      BaseAtk: 342
+      BaseDef: 751
+      BaseCR: 0.05
+      BaseCD: 0.50
     Constellation: 0
     AscensionBonus:
       CD: 0.384
@@ -15,110 +16,87 @@ Characters:
       attack: 8
       skill: 6
       burst: 9
-    WeaponName: "Skyward Pride"
-    WeaponRefinement: 1
-    WeaponBaseAtk: 674
+    Weapon:
+      WeaponName: "Skyward Pride"
+      WeaponRefinement: 1
+      WeaponBaseAtk: 674
     WeaponSecondaryStat:
       ER: 0.368
     Artifacts:
       Flower:
         Level: 20
-        Type: "Flower"
         Set: "Gladiator's Finale"
-        MainStat:
-          Type: "HP"
-          Value: 4780
-        Substat:
-          - Type: "EM"
-            Value: 21
-          - Type: "ATK"
-            Value: 47
-          - Type: "CD"
-            Value: 0.179
-          - Type: "DEF"
-            Value: 19
+        Main:
+          HP: 4780
+        Sub:
+          EM: 21
+          ATK: 47
+          CD: 0.179
+          DEF: 19
       Feather:
         Level: 20
         Type: "Feather"
         Set: "Gladiator's Finale"
-        MainStat:
-          Type: "ATK"
-          Value: 311
-        Substat:
-          - Type: "CD"
-            Value: 0.062
-          - Type: "EM"
-            Value: 35
-          - Type: "ATK%"
-            Value: 0.157
-          - Type: "CR"
-            Value: 0.07
+        Main:
+          ATK: 311
+        Sub:
+          CD: 0.062
+          EM: 35
+          ATK%: 0.157
+          CR: 0.07
       Sands:
         Level: 20
         Type: "Sands"
         Set: "Bloodstained Chivalry"
-        MainStat:
-          Type: "ATK%"
-          Value: 0.466
-        Substat:
-          - Type: "ATK"
-            Value: 31
-          - Type: "CD"
-            Value: 0.225
-          - Type: "HP%"
-            Value: 0.047
-          - Type: "ER"
-            Value: 0.168
+        Main:
+          ATK%: 0.466
+        Sub:
+          ATK: 31
+          CD: 0.225
+          HP%: 0.047
+          ER: 0.168
       Goblet:
         Level: 20
         Type: "Goblet"
         Set: "Bloodstained Chivalry"
-        MainStat:
-          Type: "Phys%"
-          Value: 0.466
-        Substat:
-          - Type: "CD"
-            Value: 0.07
-          - Type: "CR"
-            Value: 0.093
-          - Type: "HP"
-            Value: 717
-          - Type: "DEF"
-            Value: 16
+        Main:
+          Phys%: 0.466
+        Sub:
+          CD: 0.07
+          CR: 0.093
+          HP: 717
+          DEF: 16
       Circlet:
         Level: 20
         Type: "Circlet"
         Set: "Bloodstained Chivalry"
-        MainStat:
-          Type: "CR"
-          Value: 0.311
-        Substat:
-          - Type: "CD"
-            Value: 0.194
-          - Type: "DEF"
-            Value: 21
-          - Type: "ATK%"
-            Value: 0.14
-          - Type: "DEF%"
-            Value: 0.066
-  - Name: Fischl
-    Level: 70
-    Element: "electro"
-    BaseHP: 7508
-    BaseAtk: 200
-    BaseDef: 485
-    BaseCR: 0.05
-    BaseCD: 0.50
-    Constellation: 4
+        Main:
+          CR: 0.311
+        Sub:
+          CD: 0.194
+          DEF: 21
+          ATK%: 0.14
+          DEF%: 0.066
+  - Base:
+      Name: Fischl
+      Level: 70
+      Element: "electro"
+      BaseHP: 7508
+      BaseAtk: 200
+      BaseDef: 485
+      BaseCR: 0.05
+      BaseCD: 0.50
+      Constellation: 4
     AscensionBonus:
       ATK%: 0.18
     TalentLevel:
       attack: 4
       skill: 6
       burst: 2
-    WeaponName: "Favonius Warbow"
-    WeaponRefinement: 5
-    WeaponBaseAtk: 401
+    Weapon:
+      WeaponName: "Favonius Warbow"
+      WeaponRefinement: 5
+      WeaponBaseAtk: 401
     WeaponSecondaryStat:
       ER%: 0.559
     Artifacts:
@@ -126,201 +104,77 @@ Characters:
         Level: 20
         Type: "Flower"
         Set: "Wanderer's Troupe"
-        MainStat:
-          Type: "HP"
-          Value: 4780
-        Substat:
-          - Type: "CD"
-            Value: 0.109
-          - Type: "ATK%"
-            Value: 0.087
-          - Type: "CR"
-            Value: 0.109
-          - Type: "ATK"
-            Value: 33
+        Main:
+          HP: 4780
+        Sub:
+          CD: 0.109
+          ATK%: 0.087
+          CR: 0.109
+          ATK: 33
       Feather:
         Level: 20
         Type: "Feather"
         Set: "Wanderer's Troupe"
-        MainStat:
-          Type: "ATK"
-          Value: 311
-        Substat:
-          - Type: "CD"
-            Value: 0.172
-          - Type: "ER"
-            Value: 0.091
-          - Type: "ATK%"
-            Value: 0.058
-          - Type: "CR"
-            Value: 0.062
+        Main:
+          ATK: 311
+        Sub:
+          CD: 0.172
+          ER: 0.091
+          ATK%: 0.058
+          CR: 0.062
       Sands:
         Level: 16
         Type: "Sands"
         Set: "Gladiator's Finale"
-        MainStat:
-          Type: "ATK%"
-          Value: 0.387
-        Substat:
-          - Type: "EM"
-            Value: 35
-          - Type: "CR"
-            Value: 0.039
-          - Type: "ATK"
-            Value: 49
-          - Type: "HP"
-            Value: 508
+        Main:
+          ATK%: 0.387
+        Sub:
+          EM: 35
+          CR: 0.039
+          ATK: 49
+          HP: 508
       Goblet:
         Level: 20
         Type: "Goblet"
         Set: "Gladiator's Finale"
-        MainStat:
-          Type: "Electro%"
-          Value: 0.466
-        Substat:
-          - Type: "ATK%"
-            Value: 0.105
-          - Type: "EM"
-            Value: 61
-          - Type: "CR"
-            Value: 0.027
-          - Type: "ER"
-            Value: 0.11
+        Main:
+          Electro%: 0.466
+        Sub:
+          ATK%: 0.105
+          EM: 61
+          CR: 0.027
+          ER: 0.11
       Circlet:
         Level: 16
         Type: "Circlet"
         Set: "Blizzard Strayer"
-        MainStat:
-          Type: "CR"
-          Value: 0.258
-        Substat:
-          - Type: "ATK%"
-            Value: 0.041
-          - Type: "ATK"
-            Value: 53
-          - Type: "ER%"
-            Value: 0.058
-          - Type: "HP"
-            Value: 568
-  - Name: Xiangling
-    Level: 80
-    Element: "pyro"
-    BaseHP: 9638
-    BaseAtk: 200
-    BaseDef: 593
-    BaseCR: 0.05
-    BaseCD: 0.50
-    Constellation: 6
-    AscensionBonus:
-      EM: 72
-    TalentLevel:
-      attack: 6
-      skill: 6
-      burst: 7
-    WeaponName: "Skyward Spine"
-    WeaponRefinement: 1
-    WeaponBaseAtk: 674
-    WeaponSecondaryStat:
-      ER: 0.368
-    Artifacts:
-      Flower:
-        Level: 20
-        Type: "Flower"
-        Set: "Crimson Witch of Flames"
-        MainStat:
-          Type: "HP"
-          Value: 4780
-        Substat:
-          - Type: "HP%"
-            Value: 0.047
-          - Type: "ATK%"
-            Value: .152
-          - Type: "EM"
-            Value: 21
-          - Type: "CD"
-            Value: 0.264
-      Feather:
-        Level: 20
-        Type: "Feather"
-        Set: "Crimson Witch of Flames"
-        MainStat:
-          Type: "ATK"
-          Value: 311
-        Substat:
-          - Type: "DEF"
-            Value: 37
-          - Type: "DEF%"
-            Value: 0.051
-          - Type: "CR"
-            Value: 0.097
-          - Type: "CD"
-            Value: 0.218
-      Sands:
-        Level: 16
-        Type: "Sands"
-        Set: "Noblesse Oblige"
-        MainStat:
-          Type: "ATK%"
-          Value: 0.387
-        Substat:
-          - Type: "ATK"
-            Value: 37
-          - Type: "DEF"
-            Value: 23
-          - Type: "HP%"
-            Value: 0.099
-          - Type: "ER"
-            Value: 0.168
-      Goblet:
-        Level: 20
-        Type: "Goblet"
-        Set: "Maiden Beloved"
-        MainStat:
-          Type: "Pyro%"
-          Value: 0.466
-        Substat:
-          - Type: "CR"
-            Value: 0.089
-          - Type: "ER"
-            Value: 0.052
-          - Type: "ATK%"
-            Value: 0.093
-          - Type: "ATK"
-            Value: 43
-      Circlet:
-        Level: 20
-        Type: "Circlet"
-        Set: "Noblesse Oblige"
-        MainStat:
-          Type: "CR"
-          Value: 0.232
-        Substat:
-          - Type: "CD"
-            Value: 0.056
-          - Type: "ATK"
-            Value: 28
-          - Type: "EM"
-            Value: 30
-          - Type: "DEF%"
-            Value: 0.053
-  - Name: Xingqiu
-    Level: 70
-    Element: "hydro"
-    BaseHP: 8352
-    BaseAtk: 165
-    BaseDef: 619
-    BaseCR: 0.05
-    BaseCD: 0.50
-    Constellation: 6
+        Main:
+          CR: 0.258
+        Sub:
+          ATK%: 0.041
+          ATK: 53
+          ER%: 0.058
+          HP: 568
+  - Base:
+      Name: Xingqiu
+      Level: 70
+      Element: "hydro"
+      BaseHP: 8352
+      BaseAtk: 165
+      BaseDef: 619
+      BaseCR: 0.05
+      BaseCD: 0.50
+      Constellation: 6
     AscensionBonus:
       ATK%: 0.18
     TalentLevel:
       attack: 1
       skill: 6
       burst: 6
-    WeaponName: "Sacrificial Sword"
-    WeaponRefinement: 3
-    WeaponBaseAtk: 401
+    Weapon:
+      WeaponName: "Sacrificial Sword"
+      WeaponRefinement: 3
+      WeaponBaseAtk: 401
     WeaponSecondaryStat:
       ER: 0.559
     Artifacts:
@@ -328,82 +182,57 @@ Characters:
         Level: 20
         Type: "Flower"
         Set: "Gladiator's Finale"
-        MainStat:
-          Type: "HP"
-          Value: 4780
-        Substat:
-          - Type: "ATK"
-            Value: 45
-          - Type: "DEF"
-            Value: 21
-          - Type: "ATK%"
-            Value: 0.105
-          - Type: "CD"
-            Value: 0.194
+        Main:
+          HP: 4780
+        Sub:
+          ATK: 45
+          DEF: 21
+          ATK%: 0.105
+          CD: 0.194
       Feather:
         Level: 20
         Type: "Feather"
         Set: "Gladiator's Finale"
-        MainStat:
-          Type: "ATK"
-          Value: 311
-        Substat:
-          - Type: "CD"
-            Value: 0.218
-          - Type: "DEF"
-            Value: 19
-          - Type: "ATK%"
-            Value: 0.117
-          - Type: "EM"
-            Value: 40
+        Main:
+          ATK: 311
+        Sub:
+          CD: 0.218
+          DEF: 19
+          ATK%: 0.117
+          EM: 40
       Sands:
         Level: 20
         Type: "Sands"
         Set: "Thundersoother"
-        MainStat:
-          Type: "ATK%"
-          Value: 0.466
-        Substat:
-          - Type: "CR"
-            Value: 0.066
-          - Type: "HP"
-            Value: 209
-          - Type: "ER"
-            Value: 0.175
-          - Type: "DEF%"
-            Value: 0.109
+        Main:
+          ATK%: 0.466
+        Sub:
+          CR: 0.066
+          HP: 209
+          ER: 0.175
+          DEF%: 0.109
       Goblet:
         Level: 20
         Type: "Goblet"
         Set: "Maiden Beloved"
-        MainStat:
-          Type: "Hydro%"
-          Value: 0.466
-        Substat:
-          - Type: "CD"
-            Value: 0.124
-          - Type: "HP%"
-            Value: 0.047
-          - Type: "ATK%"
-            Value: 0.146
-          - Type: "ATK"
-            Value: 31
+        Main:
+          Hydro%: 0.466
+        Sub:
+          CD: 0.124
+          HP%: 0.047
+          ATK%: 0.146
+          ATK: 31
       Circlet:
         Level: 16
         Type: "Circlet"
         Set: "Bloodstained Chivalry"
-        MainStat:
-          Type: "CR"
-          Value: 0.258
-        Substat:
-          - Type: "HP%"
-            Value: 0.093
-          - Type: "ATK"
-            Value: 31
-          - Type: "DEF"
-            Value: 42
-          - Type: "CD"
-            Value: 0.14
+        Main:
+          CR: 0.258
+        Sub:
+          HP%: 0.093
+          ATK: 31
+          DEF: 42
+          CD: 0.14
 Enemy:
   Level: 88
   Resist:
@@ -415,23 +244,23 @@ Enemy:
     geo: 0.1
     anemo: 0.1
     physical: 0.1
-InitialActive: "Fischl"
+InitialActive: "Xingqiu"
 Rotation:
-  # - CharacterName: "Xingqiu"
-  #   Action: "burst"
-  # - CharacterName: "Xingqiu"
-  #   Action: "skill"
-    # SwapLock: 100
-  # - CharacterName: "Fischl"
-  #   Action: "burst"
-  #   ConditionType: "status"
-  #   ConditionTarget: "Fischl-Oz"
-  #   ConditionBool: false
-  # - CharacterName: "Fischl"
-  #   Action: "skill"
-  #   ConditionType: "status"
-  #   ConditionTarget: "Fischl-Oz"
-  #   ConditionBool: false
+  - CharacterName: "Xingqiu"
+    Action: "burst"
+  - CharacterName: "Xingqiu"
+    Action: "skill"
+    SwapLock: 100
+  - CharacterName: "Fischl"
+    Action: "burst"
+    ConditionType: "status"
+    ConditionTarget: "Fischl-Oz"
+    ConditionBool: false
+  - CharacterName: "Fischl"
+    Action: "skill"
+    ConditionType: "status"
+    ConditionTarget: "Fischl-Oz"
+    ConditionBool: false
   # - CharacterName: "Xiangling"
   #   Action: "burst"
   # - CharacterName: "Xiangling"
@@ -450,5 +279,7 @@ Rotation:
     Action: "skill"
   - CharacterName: "Eula"
     Action: "attack"
-  # - CharacterName: "Xingqiu"
-  #   Action: "attack"
+  - CharacterName: "Fischl"
+    Action: "attack"
+  - CharacterName: "Xingqiu"
+    Action: "attack"

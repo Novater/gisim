@@ -24,6 +24,7 @@ type Element struct {
 	Type          EleType
 	MaxDurability float64
 	Durability    float64
+	Start         int //when the aura was first added
 	Expiry        int //when the aura is gone, use this instead of ticks
 }
 
@@ -62,14 +63,23 @@ func (e *Element) Reduce(durability float64, s *Sim) {
 }
 
 func (e *Element) Tick(s *Sim) bool {
-	return e.Expiry < s.F
+	return e.Expiry < s.F //TODO: not sure if this should be <, or <=
 }
 
 func (e *Element) Attach(ele EleType, durability float64, f int) {
+	e.Start = f
 	e.Type = ele
 	e.MaxDurability = durability * 0.8 //TODO not sure on this part
 	e.Durability = durability * 0.8
 	e.Expiry = f + auraDuration(durability)
+}
+
+//calculate how much of the durability remains after passage of time
+func (e *Element) Remain(f int) float64 {
+	if f <= e.Expiry {
+		return float64((e.Expiry-f)/(e.Expiry-e.Start)) * e.Durability
+	}
+	return 0
 }
 
 func auraDuration(d float64) int {

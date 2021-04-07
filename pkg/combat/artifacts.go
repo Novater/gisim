@@ -209,7 +209,7 @@ func (a *ArtifactSim) worker(p Profile, resp chan float64, req chan bool, done c
 			stats := make([]float64, len(StatTypeString))
 
 			for i := range ms {
-				x := a.rand(rand, ms[i], lvls[i])
+				x := randArtifact(rand, ms[i], lvls[i])
 				for i, v := range x {
 					stats[i] += v
 				}
@@ -235,7 +235,7 @@ func (a *ArtifactSim) worker(p Profile, resp chan float64, req chan bool, done c
 
 //generate set of random artifact with stats
 //return main stat type and the total stats
-func (a *ArtifactSim) rand(rand *rand.Rand, main StatType, lvl int) []float64 {
+func randArtifact(rand *rand.Rand, main StatType, lvl int) []float64 {
 	stats := make([]float64, len(StatTypeString))
 
 	//how many substats

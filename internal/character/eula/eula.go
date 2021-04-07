@@ -53,6 +53,24 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 }
 
 func (e *eula) a4() {
+	e.S.AddEventHook(func(s *combat.Sim) bool {
+		if s.ActiveChar != e.Base.Name {
+			return false
+		}
+		//reset CD, add 1 stack
+		v := e.Tags["Grimheart"]
+		if v < 2 {
+			v++
+		}
+		e.Tags["Grimheart"] = v
+
+		e.CD[combat.SkillCD] = s.F - 1
+
+		return false
+	}, "eula-a4", combat.PostBurstHook)
+}
+
+func (e *eula) a4Old() {
 	e.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		if ds.Actor != e.Base.Name {
 			return false
@@ -161,7 +179,11 @@ func (e *eula) pressE() {
 	}, "Eula-Skill-Press", 35)
 
 	//RANDOM GUESS
-	e.S.AddEnergyParticles("Eula", 2, combat.Cryo, 100)
+	n := 2
+	if e.S.Rand.Float64() < .5 {
+		n = 1
+	}
+	e.S.AddEnergyParticles("Eula", n, combat.Cryo, 100)
 
 	//add 1 stack to Grimheart
 	v := e.Tags["Grimheart"]
@@ -211,7 +233,11 @@ func (e *eula) holdE() {
 		}, "Eula-Skill-Hold-A2-Lightfall", 108)
 	}
 	//RANDOM GUESS
-	e.S.AddEnergyParticles("Eula", 3, combat.Cryo, 100)
+	n := 3
+	if e.S.Rand.Float64() < .5 {
+		n = 2
+	}
+	e.S.AddEnergyParticles("Eula", n, combat.Cryo, 100)
 
 	//add debuff per hit
 	e.S.Target.AddResMod("Icewhirl Cryo", combat.ResistMod{
