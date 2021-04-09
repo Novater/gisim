@@ -284,7 +284,7 @@ func (c *CryoAura) React(ds Snapshot, s *Sim) Aura {
 		c.Reduce(ds.Durability, s)
 		s.GlobalFlags.NextAttackSuperconductTriggered = true
 		s.GlobalFlags.ReactionDidOccur = true
-		s.GlobalFlags.ReactionType = Overload
+		s.GlobalFlags.ReactionType = Superconduct
 		if c.Durability == 0 {
 			return NewNoAura()
 		}
@@ -323,6 +323,7 @@ func (f *FreezeAura) React(ds Snapshot, s *Sim) Aura {
 		//freeze is done, trigger shatter damage
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.NextAttackShatterTriggered = true
+		s.GlobalFlags.ReactionType = Shatter
 		//check if we have new aura to return
 		if f.NewCryo != nil {
 			return f.NewCryo

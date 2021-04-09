@@ -69,6 +69,7 @@ type SimStats struct {
 	DamageByChar         map[string]map[string]float64
 	CharActiveTime       map[string]int
 	AbilUsageCountByChar map[string]map[string]int
+	ReactionsTriggered   map[ReactionType]int
 }
 
 //New creates new sim from given profile
@@ -189,7 +190,8 @@ func (s *Sim) initMaps() {
 	s.Stats.AuraUptime = make(map[EleType]int)
 	s.Stats.DamageByChar = make(map[string]map[string]float64)
 	s.Stats.CharActiveTime = make(map[string]int)
-	s.Stats.AbilUsageCountByChar = map[string]map[string]int{}
+	s.Stats.AbilUsageCountByChar = make(map[string]map[string]int)
+	s.Stats.ReactionsTriggered = make(map[ReactionType]int)
 }
 
 func (s *Sim) initLogs(p LogConfig) error {

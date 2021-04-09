@@ -37,6 +37,8 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	//check if reaction occured and call hooks
 	if s.GlobalFlags.ReactionDidOccur {
 		s.executeSnapshotHooks(PreReaction, &ds)
+		s.Stats.ReactionsTriggered[s.GlobalFlags.ReactionType]++
+		s.Log.Debugf("\t reaction %v occured", s.GlobalFlags.ReactionType)
 	}
 
 	//add superconduct buff if triggered

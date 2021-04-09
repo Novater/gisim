@@ -132,6 +132,15 @@ func main() {
 		fmt.Printf("%v active for %v (%v seconds)\n", k, v, v/60)
 	}
 	fmt.Println("------------------------------------------")
+	rk := make([]combat.ReactionType, 0, len(stats.ReactionsTriggered))
+	for k := range stats.ReactionsTriggered {
+		rk = append(rk, k)
+	}
+	for _, k := range rk {
+		v := stats.ReactionsTriggered[k]
+		fmt.Printf("%v: %v\n", k, v)
+	}
+	fmt.Println("------------------------------------------")
 	fmt.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", *pPtr, dmg, *secondsPtr, dmg/float64(*secondsPtr), elapsed)
 
 	graphToCSV(stats.DamageHist)
