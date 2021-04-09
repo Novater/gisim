@@ -25,7 +25,7 @@ Characters:
     Artifacts:
       Flower:
         Level: 20
-        Set: "Gladiator's Finale"
+        Set: "Pale Flame"
         Main:
           HP: 4780
         Sub:
@@ -36,7 +36,7 @@ Characters:
       Feather:
         Level: 20
         Type: "Feather"
-        Set: "Gladiator's Finale"
+        Set: "Pale Flame"
         Main:
           ATK: 311
         Sub:
@@ -47,7 +47,7 @@ Characters:
       Sands:
         Level: 20
         Type: "Sands"
-        Set: "Bloodstained Chivalry"
+        Set: "Pale Flame"
         Main:
           ATK%: 0.466
         Sub:
@@ -58,7 +58,7 @@ Characters:
       Goblet:
         Level: 20
         Type: "Goblet"
-        Set: "Bloodstained Chivalry"
+        Set: "Pale Flame"
         Main:
           Phys%: 0.466
         Sub:
@@ -69,7 +69,7 @@ Characters:
       Circlet:
         Level: 20
         Type: "Circlet"
-        Set: "Bloodstained Chivalry"
+        Set: "Pale Flame"
         Main:
           CR: 0.311
         Sub:
@@ -233,6 +233,57 @@ Characters:
           ATK: 31
           DEF: 42
           CD: 0.14
+  - Base:
+      Name: Diona
+      Level: 70
+      Element: "cryo"
+      BaseHP: 8352
+      BaseAtk: 165
+      BaseDef: 619
+      BaseCR: 0.05
+      BaseCD: 0.50
+      Constellation: 6
+    TalentLevel:
+      attack: 1
+      skill: 6
+      burst: 6
+    Weapon:
+      WeaponName: "Favonius Warbow"
+      WeaponRefinement: 3
+      WeaponBaseAtk: 401
+    WeaponSecondaryStat:
+      ER: 0.559
+    Artifacts:
+      Flower:
+        Level: 20
+        Type: "Flower"
+        Set: "Gladiator's Finale"
+        Main:
+          HP: 4780
+      Feather:
+        Level: 20
+        Type: "Feather"
+        Set: "Gladiator's Finale"
+        Main:
+          ATK: 311
+      Sands:
+        Level: 20
+        Type: "Sands"
+        Set: "Thundersoother"
+        Main:
+          ATK%: 0.466
+      Goblet:
+        Level: 20
+        Type: "Goblet"
+        Set: "Maiden Beloved"
+        Main:
+          Hydro%: 0.466
+      Circlet:
+        Level: 16
+        Type: "Circlet"
+        Set: "Bloodstained Chivalry"
+        Main:
+          CR: 0.258
 Enemy:
   Level: 88
   Resist:
@@ -244,13 +295,13 @@ Enemy:
     geo: 0.1
     anemo: 0.1
     physical: 0.1
-InitialActive: "Xingqiu"
+InitialActive: "Fischl"
 Rotation:
-  - CharacterName: "Xingqiu"
-    Action: "burst"
-  - CharacterName: "Xingqiu"
-    Action: "skill"
-    SwapLock: 100
+  # - CharacterName: "Xingqiu"
+  #   Action: "burst"
+  # - CharacterName: "Xingqiu"
+  #   Action: "skill"
+  #   SwapLock: 100
   - CharacterName: "Fischl"
     Action: "burst"
     ConditionType: "status"
@@ -281,5 +332,5 @@ Rotation:
     Action: "attack"
   - CharacterName: "Fischl"
     Action: "attack"
-  - CharacterName: "Xingqiu"
-    Action: "attack"
+  # - CharacterName: "Xingqiu"
+  #   Action: "attack"

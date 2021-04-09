@@ -16,6 +16,7 @@ import (
 
 	//characters
 	_ "github.com/srliao/gisim/internal/character/bennett"
+	_ "github.com/srliao/gisim/internal/character/diona"
 	_ "github.com/srliao/gisim/internal/character/eula"
 	_ "github.com/srliao/gisim/internal/character/fischl"
 	_ "github.com/srliao/gisim/internal/character/ganyu"
@@ -38,6 +39,7 @@ import (
 	_ "github.com/srliao/gisim/internal/artifact/crimson"
 	_ "github.com/srliao/gisim/internal/artifact/gladiator"
 	_ "github.com/srliao/gisim/internal/artifact/noblesse"
+	_ "github.com/srliao/gisim/internal/artifact/paleflame"
 	_ "github.com/srliao/gisim/internal/artifact/wanderer"
 
 	"gopkg.in/yaml.v2"

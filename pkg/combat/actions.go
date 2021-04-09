@@ -12,8 +12,10 @@ func FindNextAction(s *Sim) (ActionItem, error) {
 }
 
 func (s *Sim) abilityConditionsOk(a ActionItem) bool {
+
 	switch a.ConditionType {
 	case "status":
+		s.Log.Debugw("\t current status", "map", s.Status)
 		return s.StatusActive(a.ConditionTarget) == a.ConditionBool
 	case "energy lt":
 		//check if target energy < threshold
@@ -21,6 +23,8 @@ func (s *Sim) abilityConditionsOk(a ActionItem) bool {
 		if t > a.ConditionFloat {
 			return false
 		}
+	case "cd":
+		return s.Chars[a.index].ActionReady(ActionType(a.ConditionTarget)) == a.ConditionBool
 	case "tags":
 		t := s.Chars[a.index].Tag(a.ConditionTarget)
 		s.Log.Debugw("\t checking for tags", "want", a.ConditionInt, "got", t, "action", a)

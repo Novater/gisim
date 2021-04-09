@@ -1,96 +1,23 @@
 Label: "Test"
 Characters:
   - Base:
-      Name: Bennett
-      Level: 70
-      Element: "pyro"
-      BaseHP: 10129
-      BaseAtk: 156
-      BaseDef: 630
+      Name: Eula
+      Level: 90
+      Element: "cryo"
+      BaseHP: 13226
+      BaseAtk: 342
+      BaseDef: 751
       BaseCR: 0.05
       BaseCD: 0.50
-      Constellation: 2
+    Constellation: 0
     AscensionBonus:
-      ER: 0.2
+      CD: 0.384
     TalentLevel:
-      attack: 2
-      skill: 3
-      burst: 6
-    Weapon:
-      WeaponName: "Festering Desire"
-      WeaponRefinement: 5
-      WeaponBaseAtk: 510
-    WeaponSecondaryStat:
-      ER: 0.459
-    Artifacts:
-      Flower:
-        Level: 16
-        Set: "Noblesse Oblige"
-        Main:
-          HP: 3967
-        Sub:
-          DEF: 44
-          ER: 0.065
-          CR: 0.097
-          CD: 0.07
-      Feather:
-        Level: 16
-        Set: "Noblesse Oblige"
-        Main:
-          ATK: 258
-        Sub:
-          ATK%: .117
-          DEF: 16
-          ER: 0.104
-          EM: 42
-      Sands:
-        Level: 16
-        Set: "Noblesse Oblige"
-        Main:
-          ER: 0.43
-        Sub:
-          ATK%: 0.163
-          HP%: 0.058
-          CD: 0.117
-          HP: 209
-      Goblet:
-        Level: 16
-        Set: "Noblesse Oblige"
-        Main:
-          ATK%: 0.387
-        Sub:
-          ER: 0.097
-          HP: 538
-          CR: 0.031
-          EM: 35
-      Circlet:
-        Level: 20
-        Set: "Thundering Fury"
-        Main:
-          ATK%: 0.387
-        Sub:
-          EM: 63
-          HP: 209
-          CR: 0.031
-          ATK: 35
-  - Base:
-      Name: Xiangling
-      Level: 80
-      Element: "pyro"
-      BaseHP: 9638
-      BaseAtk: 200
-      BaseDef: 593
-      BaseCR: 0.05
-      BaseCD: 0.50
-      Constellation: 6
-    AscensionBonus:
-      EM: 72
-    TalentLevel:
-      attack: 6
+      attack: 8
       skill: 6
-      burst: 8
+      burst: 9
     Weapon:
-      WeaponName: "Skyward Spine"
+      WeaponName: "Skyward Pride"
       WeaponRefinement: 1
       WeaponBaseAtk: 674
     WeaponSecondaryStat:
@@ -98,55 +25,37 @@ Characters:
     Artifacts:
       Flower:
         Level: 20
-        Set: "Crimson Witch of Flames"
+        Set: "Pale Flame"
         Main:
           HP: 4780
         Sub:
-          HP%: 0.047
-          ATK%: .152
-          EM: 21
-          CD: 0.264
+          CR: .429
+          CD: 0.726
+          ATK%: 0.20
       Feather:
         Level: 20
-        Set: "Crimson Witch of Flames"
+        Type: "Feather"
+        Set: "Pale Flame"
         Main:
           ATK: 311
-        Sub:
-          DEF: 37
-          DEF%: 0.051
-          CR: 0.097
-          CD: 0.218
       Sands:
-        Level: 16
-        Set: "Noblesse Oblige"
+        Level: 20
+        Type: "Sands"
+        Set: "Pale Flame"
         Main:
-          ATK%: 0.387
-        Sub:
-          ATK: 37
-          DEF: 23
-          HP%: 0.099
-          ER: 0.168
+          ATK%: 0.466
       Goblet:
         Level: 20
-        Set: "Maiden Beloved"
+        Type: "Goblet"
+        Set: "Pale Flame"
         Main:
-          Pyro%: 0.466
-        Sub:
-          CR: 0.089
-          ER: 0.052
-          ATK%: 0.093
-          ATK: 43
+          Phys%: 0.466
       Circlet:
         Level: 20
         Type: "Circlet"
-        Set: "Noblesse Oblige"
+        Set: "Pale Flame"
         Main:
-          CR: 0.232
-        Sub:
-          CD: 0.056
-          ATK: 28
-          EM: 30
-          DEF%: 0.053
+          CR: 0.311
   - Base:
       Name: Fischl
       Level: 70
@@ -161,7 +70,7 @@ Characters:
       ATK%: 0.18
     TalentLevel:
       attack: 4
-      skill: 8
+      skill: 6
       burst: 2
     Weapon:
       WeaponName: "Favonius Warbow"
@@ -239,8 +148,8 @@ Characters:
       ATK%: 0.18
     TalentLevel:
       attack: 1
-      skill: 8
-      burst: 8
+      skill: 6
+      burst: 6
     Weapon:
       WeaponName: "Sacrificial Sword"
       WeaponRefinement: 3
@@ -303,7 +212,58 @@ Characters:
           ATK: 31
           DEF: 42
           CD: 0.14
-Enemy: #blazing axe mitachurl
+  - Base:
+      Name: Diona
+      Level: 70
+      Element: "cryo"
+      BaseHP: 8352
+      BaseAtk: 165
+      BaseDef: 619
+      BaseCR: 0.05
+      BaseCD: 0.50
+      Constellation: 6
+    TalentLevel:
+      attack: 1
+      skill: 6
+      burst: 6
+    Weapon:
+      WeaponName: "Favonius Warbow"
+      WeaponRefinement: 3
+      WeaponBaseAtk: 401
+    WeaponSecondaryStat:
+      ER: 0.559
+    Artifacts:
+      Flower:
+        Level: 20
+        Type: "Flower"
+        Set: "Gladiator's Finale"
+        Main:
+          HP: 4780
+      Feather:
+        Level: 20
+        Type: "Feather"
+        Set: "Gladiator's Finale"
+        Main:
+          ATK: 311
+      Sands:
+        Level: 20
+        Type: "Sands"
+        Set: "Thundersoother"
+        Main:
+          ATK%: 0.466
+      Goblet:
+        Level: 20
+        Type: "Goblet"
+        Set: "Maiden Beloved"
+        Main:
+          Hydro%: 0.466
+      Circlet:
+        Level: 16
+        Type: "Circlet"
+        Set: "Bloodstained Chivalry"
+        Main:
+          CR: 0.258
+Enemy:
   Level: 88
   Resist:
     pyro: 0.1
@@ -313,24 +273,14 @@ Enemy: #blazing axe mitachurl
     electro: 0.1
     geo: 0.1
     anemo: 0.1
-    physical: 0.3
-InitialActive: "Fischl"
+    physical: 0.1
+InitialActive: "Eula"
 Rotation:
-  - CharacterName: "Xiangling"
-    Action: "skill"
-  - CharacterName: "Xiangling"
-    Action: "burst"
-  - CharacterName: "Xingqiu"
-    Action: "skill"
-    SwapLock: 100
-  - CharacterName: "Xingqiu"
-    Action: "burst"
-  - CharacterName: "Bennett"
-    Action: "burst"
-  - CharacterName: "Bennett"
-    Action: "skill"
-    ConditionType: "energy lt"
-    ConditionFloat: 5
+  # - CharacterName: "Xingqiu"
+  #   Action: "burst"
+  # - CharacterName: "Xingqiu"
+  #   Action: "skill"
+  #   SwapLock: 100
   - CharacterName: "Fischl"
     Action: "burst"
     ConditionType: "status"
@@ -340,12 +290,26 @@ Rotation:
     Action: "skill"
     ConditionType: "status"
     ConditionTarget: "Fischl-Oz"
-    ConditionBool: false
-  - CharacterName: "Xiangling"
-    Action: "attack"
-  - CharacterName: "Xingqiu"
-    Action: "attack"
-  - CharacterName: "Bennett"
+  #   ConditionBool: false
+  # - CharacterName: "Xiangling"
+  #   Action: "burst"
+  # - CharacterName: "Xiangling"
+  #   Action: "skill"
+  - CharacterName: "Eula"
+    Action: "burst"
+    SwapLock: 480
+  - CharacterName: "Eula"
+    Action: "skill"
+    Params:
+      Hold: 1
+    ConditionType: "tags"
+    ConditionTarget: "Grimheart"
+    ConditionInt: 2
+  - CharacterName: "Eula"
+    Action: "skill"
+  - CharacterName: "Eula"
     Action: "attack"
   - CharacterName: "Fischl"
     Action: "attack"
+  # - CharacterName: "Xingqiu"
+  #   Action: "attack"

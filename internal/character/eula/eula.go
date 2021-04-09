@@ -271,7 +271,7 @@ func (e *eula) Burst(p map[string]interface{}) int {
 	}, "Eula-Burst-Initial", 100) //guess frames
 
 	//add blow up after 8 seconds
-	d2 := e.Snapshot("Glacial Illumination (Lightfall)", combat.ActionTypeBurst, combat.Cryo, combat.WeakDurability)
+	d2 := e.Snapshot("Glacial Illumination (Lightfall)", combat.ActionTypeBurst, combat.Physical, combat.WeakDurability)
 
 	e.S.AddTask(func(s *combat.Sim) {
 		stacks := e.burstCounter
