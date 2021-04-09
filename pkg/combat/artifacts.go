@@ -222,7 +222,7 @@ func (a *ArtifactSim) worker(p Profile, resp chan float64, req chan bool, done c
 
 			//calculate dmg
 			t := 5000
-			r, _, _ := sim.Run(t)
+			r, _ := sim.Run(t)
 
 			resp <- (r / float64(t))
 		case <-done:

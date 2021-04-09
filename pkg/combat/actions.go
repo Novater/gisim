@@ -85,6 +85,8 @@ func (s *Sim) executeAbilityQueue(a ActionItem) int {
 		s.Log.Debugw("\t locking swap", "swaplock", a.SwapLock, "new cd", s.SwapCD)
 	}
 
+	s.Stats.AbilUsageCountByChar[c.Name()][string(a.Action)]++
+
 	return f
 }
 

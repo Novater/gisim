@@ -14,8 +14,7 @@ type Enemy struct {
 	Status map[string]int //countdown to how long status last
 
 	//stats
-	Damage        float64 //total damage received
-	DamageDetails map[string]map[string]float64
+	Damage float64 //total damage received
 }
 
 type ResistMod struct {

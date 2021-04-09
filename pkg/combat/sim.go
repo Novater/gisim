@@ -31,6 +31,7 @@ type Sim struct {
 	Stam        float64
 	Chars       []Character
 	SwapCD      int
+	Stats       SimStats
 	//reaction related
 	TargetAura Aura
 	//overwritable functions
@@ -63,10 +64,11 @@ type Flags struct {
 }
 
 type SimStats struct {
-	AuraUptime     map[EleType]int //uptime in frames
-	DamageHist     []float64
-	DamageByChar   map[string]map[string]float64
-	CharActiveTime map[string]int
+	AuraUptime           map[EleType]int //uptime in frames
+	DamageHist           []float64
+	DamageByChar         map[string]map[string]float64
+	CharActiveTime       map[string]int
+	AbilUsageCountByChar map[string]map[string]int
 }
 
 //New creates new sim from given profile
@@ -79,7 +81,6 @@ func New(p Profile) (*Sim, error) {
 	u.Status = make(map[string]int)
 	u.Level = p.Enemy.Level
 	u.res = p.Enemy.Resist
-	u.DamageDetails = make(map[string]map[string]float64)
 	u.mod = make(map[string]ResistMod)
 	s.Target = u
 	s.GlobalFlags.NextAttackMVMult = 1
@@ -137,7 +138,8 @@ func (s *Sim) initTeam(p Profile) error {
 			return fmt.Errorf("duplicated character %v", v.Base.Name)
 		}
 		dup[v.Base.Name] = true
-		s.Target.DamageDetails[v.Base.Name] = make(map[string]float64)
+		s.Stats.DamageByChar[v.Base.Name] = make(map[string]float64)
+		s.Stats.AbilUsageCountByChar[v.Base.Name] = make(map[string]int)
 
 		//initialize weapon
 		wf, ok := weaponMap[v.Weapon.Name]
@@ -183,6 +185,11 @@ func (s *Sim) initMaps() {
 	s.particles = make(map[int][]Particle)
 	s.charPos = make(map[string]int)
 	s.TargetAura = NewNoAura()
+
+	s.Stats.AuraUptime = make(map[EleType]int)
+	s.Stats.DamageByChar = make(map[string]map[string]float64)
+	s.Stats.CharActiveTime = make(map[string]int)
+	s.Stats.AbilUsageCountByChar = map[string]map[string]int{}
 }
 
 func (s *Sim) initLogs(p LogConfig) error {
@@ -217,8 +224,8 @@ func (s *Sim) initLogs(p LogConfig) error {
 }
 
 //Run the sim; length in seconds
-func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64) {
-	graph := make([]float64, length*60)
+func (s *Sim) Run(length int) (float64, SimStats) {
+	s.Stats.DamageHist = make([]float64, length*60)
 	var skip int
 	rand.Seed(time.Now().UnixNano())
 	//60fps, 60s/min, 2min
@@ -234,12 +241,16 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64
 		s.checkAura()
 		s.runTasks()
 
+		//add char active time
+		s.Stats.CharActiveTime[s.ActiveChar]++
+		s.Stats.AuraUptime[s.TargetAura.E()]++
+
 		if s.SwapCD > 0 {
 			s.SwapCD--
 		}
 
 		//damage for this frame
-		graph[s.F] = s.Target.Damage
+		s.Stats.DamageHist[s.F] = s.Target.Damage
 
 		//if in cooldown, do nothing
 		if skip > 0 {
@@ -270,7 +281,7 @@ func (s *Sim) Run(length int) (float64, map[string]map[string]float64, []float64
 		s.Log.Infof("[%v] action executed; skip %v swap cd %v", s.Frame(), skip, s.SwapCD)
 	}
 
-	return s.Target.Damage, s.Target.DamageDetails, graph
+	return s.Target.Damage, s.Stats
 }
 
 func (s *Sim) AddCharMod(c string, key string, val map[StatType]float64) {

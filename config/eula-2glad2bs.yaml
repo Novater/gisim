@@ -280,7 +280,6 @@ Rotation:
     Action: "burst"
   - CharacterName: "Xingqiu"
     Action: "skill"
-    SwapLock: 100
   - CharacterName: "Fischl"
     Action: "burst"
     ConditionType: "status"

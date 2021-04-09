@@ -81,9 +81,10 @@ func main() {
 	}
 
 	start := time.Now()
-	dmg, details, graph := s.Run(*secondsPtr)
+	dmg, stats := s.Run(*secondsPtr)
 	elapsed := time.Since(start)
-	for char, t := range details {
+	fmt.Println("------------------------------------------")
+	for char, t := range stats.DamageByChar {
 		fmt.Printf("%v contributed the following dps:\n", char)
 		keys := make([]string, 0, len(t))
 		for k := range t {
@@ -99,9 +100,41 @@ func main() {
 
 		fmt.Printf("%v total dps: %.2f (dmg: %.2f); total percentage: %.0f%%\n", char, total/float64(*secondsPtr), total, 100*total/dmg)
 	}
+	fmt.Println("------------------------------------------")
+	for char, t := range stats.AbilUsageCountByChar {
+		fmt.Printf("%v used the following abilities:\n", char)
+		keys := make([]string, 0, len(t))
+		for k := range t {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			v := t[k]
+			fmt.Printf("\t%v: %v\n", k, v)
+		}
+	}
+	fmt.Println("------------------------------------------")
+	ck := make([]string, 0, len(stats.CharActiveTime))
+	for k := range stats.CharActiveTime {
+		ck = append(ck, k)
+	}
+	for _, k := range ck {
+		v := stats.CharActiveTime[k]
+		fmt.Printf("%v active for %v (%v seconds)\n", k, v, v/60)
+	}
+	fmt.Println("------------------------------------------")
+	tk := make([]combat.EleType, 0, len(stats.AuraUptime))
+	for k := range stats.AuraUptime {
+		tk = append(tk, k)
+	}
+	for _, k := range tk {
+		v := stats.AuraUptime[k]
+		fmt.Printf("%v active for %v (%v seconds)\n", k, v, v/60)
+	}
+	fmt.Println("------------------------------------------")
 	fmt.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", *pPtr, dmg, *secondsPtr, dmg/float64(*secondsPtr), elapsed)
 
-	graphToCSV(graph)
+	graphToCSV(stats.DamageHist)
 
 }
 

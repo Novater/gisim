@@ -36,15 +36,13 @@ To save the log to file (easier to read) `go run main.go -d=debug -o=out.log`
 ## todo list
 
 - [ ] play test xl/xq/ben/fish w/ basic weapons
-- [ ] reimplement freezing
+- [ ] implement swirl
+- [ ] implement crystallize
 - [ ] change normal reset to a frame number and if s.F = frame, then reset
 - [ ] rand artifact code is bugged
 - [ ] change runEffects back to a map; loops can break if one effect adds another effect
 - [ ] aura ICD
-- [ ] EC testing
 - [ ] jump/dash/char switch/burst/skill force reset all char normal counter
-- [ ] crystallize
-- [ ] swirl
 - [ ] frames returned per action should have at least 2 number, avg cancellable and avg normal; may actually required more than 2, 1 into each trailling action such as swap, dash, jump, burst, skill, auto
 
 ## optimizations

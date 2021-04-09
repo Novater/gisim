@@ -34,7 +34,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	}
 	atk := pc * float64(b.Base.Atk+b.Weapon.Atk)
 	b.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-		if _, ok := b.S.Status["Bennett Burst"]; !ok {
+		if !b.S.StatusActive("Bennett Burst") {
 			return false
 		}
 		if b.S.ActiveChar != ds.Actor {
