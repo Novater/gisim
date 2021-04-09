@@ -276,11 +276,11 @@ Enemy:
     physical: 0.1
 InitialActive: "Eula"
 Rotation:
-  # - CharacterName: "Xingqiu"
-  #   Action: "burst"
-  # - CharacterName: "Xingqiu"
-  #   Action: "skill"
-  #   SwapLock: 100
+  - CharacterName: "Xingqiu"
+    Action: "burst"
+  - CharacterName: "Xingqiu"
+    Action: "skill"
+    SwapLock: 100
   - CharacterName: "Fischl"
     Action: "burst"
     ConditionType: "status"
@@ -311,5 +311,5 @@ Rotation:
     Action: "attack"
   - CharacterName: "Fischl"
     Action: "attack"
-  # - CharacterName: "Xingqiu"
-  #   Action: "attack"
+  - CharacterName: "Xingqiu"
+    Action: "attack"

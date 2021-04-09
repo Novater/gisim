@@ -47,6 +47,7 @@ func (e *Element) Refresh(durability float64, s *Sim) {
 	n := auraDuration(e.MaxDurability)
 	next := int(float64(n) * e.Durability / e.MaxDurability)
 	e.Expiry = s.F + next
+	s.Log.Debugf("\t element %v duration refreshed", e.E())
 }
 
 func (e *Element) Reduce(durability float64, s *Sim) {
@@ -123,7 +124,6 @@ func (p *PyroAura) React(ds Snapshot, s *Sim) Aura {
 	switch ds.Element {
 	case Pyro:
 		p.Refresh(ds.Durability, s)
-		return p
 	case Hydro:
 		//hydro on pyro, x2, strong so x2
 		p.Reduce(2*ds.Durability, s)
@@ -134,7 +134,6 @@ func (p *PyroAura) React(ds Snapshot, s *Sim) Aura {
 		if p.Durability == 0 {
 			return NewNoAura()
 		}
-		return p
 	case Cryo:
 		//cyro on pyro, x1.5, weak so only .5 applied
 		p.Reduce(0.5*ds.Durability, s)
@@ -145,7 +144,6 @@ func (p *PyroAura) React(ds Snapshot, s *Sim) Aura {
 		s.GlobalFlags.NextAttackMVMult = 1.5
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = Melt
-		return p
 	case Electro:
 		//electro on pyro, queue overload
 		//reduction in durability is 1:1, no tax on the
@@ -157,10 +155,8 @@ func (p *PyroAura) React(ds Snapshot, s *Sim) Aura {
 		if p.Durability == 0 {
 			return NewNoAura()
 		}
-		return p
-	default:
-		return NewNoAura()
 	}
+	return p
 }
 
 type HydroAura struct {
@@ -182,15 +178,12 @@ func (h *HydroAura) React(ds Snapshot, s *Sim) Aura {
 		if h.Durability == 0 {
 			return NewNoAura()
 		}
-		return h
 	case Hydro:
 		h.Refresh(ds.Durability, s)
-		return h
 	case Cryo:
 		//freeze??
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = Freeze
-		return h
 	case Electro:
 		//ec??
 		e := NewElectro()
@@ -200,9 +193,8 @@ func (h *HydroAura) React(ds Snapshot, s *Sim) Aura {
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = ElectroCharged
 		return ec
-	default:
-		return NewNoAura()
 	}
+	return h
 }
 
 type ElectroAura struct {
@@ -225,7 +217,6 @@ func (e *ElectroAura) React(ds Snapshot, s *Sim) Aura {
 		if e.Durability == 0 {
 			return NewNoAura()
 		}
-		return e
 	case Hydro:
 		//ec??
 		h := NewHydro()
@@ -244,14 +235,11 @@ func (e *ElectroAura) React(ds Snapshot, s *Sim) Aura {
 		if e.Durability == 0 {
 			return NewNoAura()
 		}
-		return e
 	case Electro:
 		//ec??
 		e.Refresh(ds.Durability, s)
-		return e
-	default:
-		return NewNoAura()
 	}
+	return e
 }
 
 type CryoAura struct {
@@ -273,15 +261,23 @@ func (c *CryoAura) React(ds Snapshot, s *Sim) Aura {
 		if c.Durability == 0 {
 			return NewNoAura()
 		}
-		return c
 	case Hydro:
-		//freeze?
+		//figure out units to reduce by
+		r := c.Durability * (1 - float64(s.F-c.Start)/float64(c.Expiry))
+		if r > ds.Durability {
+			r = ds.Durability
+		}
+		h := NewHydro()
+		h.Attach(ds.Element, ds.Durability, s.F) //TODO: not sure if this part is accurate
+		h.Reduce(r, s)
+		c.Reduce(r, s)
+		f := NewFreeze()
+		f.Init(c, h, r, s)
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = Freeze
-		return c
+		return f
 	case Cryo:
 		c.Refresh(ds.Durability, s)
-		return c
 	case Electro:
 		//electro on cryo, queue on superconduct
 		//reduction in durability is 1:1, no tax on the
@@ -293,43 +289,140 @@ func (c *CryoAura) React(ds Snapshot, s *Sim) Aura {
 			return NewNoAura()
 		}
 		return c
-	default:
-		return NewNoAura()
 	}
+	return c
 }
 
 type FreezeAura struct {
 	*Element
+	OldHydro *HydroAura
+	OldCryo  *CryoAura
+	NewHydro *HydroAura
+	NewCryo  *CryoAura
+	Expire   int
 }
 
-func (f *FreezeAura) Init() {
+const ax = -0.08652942693631073258
+const bx = 10.48493477815584323194
 
+func (f *FreezeAura) Init(cryo *CryoAura, hydro *HydroAura, dur float64, s *Sim) {
+	f.Expiry = s.F + int(ax*dur*dur+bx*dur)
+	f.OldCryo = cryo
+	f.OldHydro = hydro
+	f.Type = Frozen
 }
 
+//TODO: what happens if we apply new hydro then new cryo all before freeze expires? shouldn't be possible to due cds but
+//right now this code wouldn't retrigger freeze even though it probably should
 func (f *FreezeAura) React(ds Snapshot, s *Sim) Aura {
 	if ds.Durability == 0 && !ds.IsHeavyAttack {
 		return f
+	}
+	//check heavy attack
+	if ds.IsHeavyAttack {
+		//freeze is done, trigger shatter damage
+		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.NextAttackShatterTriggered = true
+		//check if we have new aura to return
+		if f.NewCryo != nil {
+			return f.NewCryo
+		}
+		if f.NewHydro != nil {
+			return f.NewHydro
+		}
+		//otherwise return max duration of the old
+		if f.OldCryo.Expiry > s.F && f.OldHydro.Expiry > s.F {
+			if f.OldCryo.Expiry > f.OldHydro.Expiry {
+				return f.OldCryo
+			}
+			return f.OldHydro
+		}
+		if f.OldCryo.Expiry > s.F {
+			return f.OldCryo
+		}
+		if f.OldHydro.Expiry > s.F {
+			return f.OldHydro
+		}
+		return NewNoAura()
 	}
 	switch ds.Element {
 	case Pyro:
 		//just melt
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = Melt
-		return f
+		//no residual aura; melt always triggers 2x so we wipe out regardless
+		return NewNoAura()
 	case Hydro:
-		//extend??
+		//extend freeze?
+		if f.NewCryo != nil {
+			r := f.NewCryo.Durability * (1 - float64(s.F-f.NewCryo.Start)/float64(f.NewCryo.Expiry))
+			if r > ds.Durability {
+				r = ds.Durability
+			}
+			h := NewHydro()
+			h.Attach(ds.Element, ds.Durability, s.F) //TODO: not sure if this part is accurate
+			h.Reduce(r, s)
+			f.NewCryo.Reduce(r, s)
+			nf := NewFreeze()
+			nf.Init(f.NewCryo, h, r, s)
+			s.GlobalFlags.ReactionDidOccur = true
+			s.GlobalFlags.ReactionType = Freeze
+			return nf
+		}
+		//overwrite?
+		h := NewHydro()
+		h.Attach(ds.Element, ds.Durability, s.F)
+		f.NewHydro = h
 		return f
 	case Cryo:
-		//extend??
+		//extend freeze?
+		if f.NewHydro != nil {
+			r := f.NewHydro.Durability * (1 - float64(s.F-f.NewHydro.Start)/float64(f.NewHydro.Expiry))
+			if r > ds.Durability {
+				r = ds.Durability
+			}
+			c := NewCryo()
+			c.Attach(ds.Element, ds.Durability, s.F) //TODO: not sure if this part is accurate
+			c.Reduce(r, s)
+			f.NewHydro.Reduce(r, s)
+			nf := NewFreeze()
+			nf.Init(c, f.NewHydro, r, s)
+			s.GlobalFlags.ReactionDidOccur = true
+			s.GlobalFlags.ReactionType = Freeze
+			return nf
+		}
+		//overwrite?
+		c := NewCryo()
+		c.Attach(ds.Element, ds.Durability, s.F)
+		f.NewCryo = c
 		return f
 	case Electro:
 		//just superconuct
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = Superconduct
-		return f
-	default:
+		//no residual aura
 		return NewNoAura()
+	default:
+		return f
 	}
+}
+
+func (f *FreezeAura) Tick(s *Sim) bool {
+	//do nothing if freeze not defrosted yet
+	if f.Expiry > s.F {
+		return false
+	}
+	//if we have new underlying
+	if f.NewCryo != nil {
+		s.TargetAura = f.NewCryo
+		return false
+	}
+	if f.NewHydro != nil {
+		s.TargetAura = f.NewHydro
+		return false
+	}
+	//if both nil then just expire (only shatter exposes underlying)
+	return true
 }
 
 type ElectroChargeAura struct {
@@ -398,7 +491,6 @@ func (e *ElectroChargeAura) React(ds Snapshot, s *Sim) Aura {
 		s.GlobalFlags.NextAttackOverloadTriggered = true
 		s.GlobalFlags.NextAttackMVMult = 1.5
 		s.GlobalFlags.ReactionType = Overload //this here will trigger our super vape
-		return e
 	case Hydro:
 		//first 984 (barb), tick 1055 (barb dmg), apply 1078(barb), (no more electro), apply 1276 (electro - bd dmg), apply 1353 (water - barb dmg)
 		//1418 (razor apply dmg), 1449 (barb reapply), 1481 (xq apply), 1570 xq tick, 1719 razor, 1776 razor tick, 1801 barb auto, 1856 barb tick
@@ -409,23 +501,19 @@ func (e *ElectroChargeAura) React(ds Snapshot, s *Sim) Aura {
 		//also reset the snapshot
 		e.Snap = ds.Clone()
 		e.NextTick = s.F
-		return e
 	case Cryo:
 		//just superconduct
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.NextAttackSuperconductTriggered = true
 		s.GlobalFlags.ReactionType = Superconduct
-
-		return e
 	case Electro:
 		e.Electro.Refresh(ds.Durability, s)
 		//also reset the snapshot
 		e.Snap = ds.Clone()
 		e.NextTick = s.F
-		return e
-	default:
-		return NewNoAura()
 	}
+
+	return e
 }
 
 func NewElement() *Element {

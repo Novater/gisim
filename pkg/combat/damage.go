@@ -10,24 +10,7 @@ import (
 func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 
 	s.Log.Debugf("  [%v] %v - %v triggered dmg", s.Frame(), ds.Actor, ds.Abil)
-	s.Log.Debugw("\t target", "auras", s.TargetAura)
-
-	//apply reactions
-	s.TargetAura = s.TargetAura.React(ds, s)
-
-	//check if reaction occured and call hooks
-	if s.GlobalFlags.ReactionDidOccur {
-		s.executeSnapshotHooks(PreReaction, &ds)
-	}
-
-	//add superconduct buff if triggered
-	if s.GlobalFlags.NextAttackSuperconductTriggered {
-		s.Target.AddResMod("Superconduct", ResistMod{
-			Duration: 12 * 60,
-			Ele:      Physical,
-			Value:    -0.4,
-		})
-	}
+	s.Log.Debugw("\t target", "auras", s.TargetAura, "ele applied", ds.Element, "dur applied", ds.Durability)
 
 	//change multiplier if vape or melt
 	if s.GlobalFlags.NextAttackMVMult > 1 {
@@ -45,6 +28,25 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 		s.executeSnapshotHooks(OnCritDamage, &ds)
 	}
 	s.executeSnapshotHooks(PostDamageHook, &ds)
+
+	//apply new aura
+	s.TargetAura = s.TargetAura.React(ds, s)
+
+	s.Log.Debugw("\t target", "next aura", s.TargetAura)
+
+	//check if reaction occured and call hooks
+	if s.GlobalFlags.ReactionDidOccur {
+		s.executeSnapshotHooks(PreReaction, &ds)
+	}
+
+	//add superconduct buff if triggered
+	if s.GlobalFlags.NextAttackSuperconductTriggered {
+		s.Target.AddResMod("Superconduct", ResistMod{
+			Duration: 12 * 60,
+			Ele:      Physical,
+			Value:    -0.4,
+		})
+	}
 
 	//apply reaction damage
 	if s.GlobalFlags.NextAttackOverloadTriggered {

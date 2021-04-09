@@ -62,6 +62,13 @@ type Flags struct {
 	NextAttackShatterTriggered      bool
 }
 
+type SimStats struct {
+	AuraUptime     map[EleType]int //uptime in frames
+	DamageHist     []float64
+	DamageByChar   map[string]map[string]float64
+	CharActiveTime map[string]int
+}
+
 //New creates new sim from given profile
 func New(p Profile) (*Sim, error) {
 	s := &Sim{}

@@ -297,3 +297,9 @@ func (e *eula) Tick() {
 		e.Tags["Grimheart"] = 0
 	}
 }
+
+func (e *eula) Snapshot(name string, t combat.ActionType, x combat.EleType, d float64) combat.Snapshot {
+	s := e.CharacterTemplate.Snapshot(name, t, x, d)
+	s.IsHeavyAttack = true
+	return s
+}
