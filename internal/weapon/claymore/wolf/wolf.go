@@ -30,7 +30,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 			lock = 0
 		}
 		return false
-	}, "wolf's gravestone")
+	}, "wolf's gravestone duration")
 
 	//check hp
 	s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
@@ -50,7 +50,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		dur = 720   //12 seconds
 		lock = 1800 // can only occur once every 30s
 		return false
-	}, "wolf's gravestone", combat.PreDamageHook)
+	}, "wolf's gravestone proc", combat.PreDamageHook)
 
 	s.AddSnapshotHook(func(snap *combat.Snapshot) bool {
 		if dur <= 0 {
@@ -61,6 +61,6 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		s.Log.Debugf("\t wolf's gravestone adding attack: %v", bonus)
 
 		return false
-	}, "wolf's gravestone", combat.PostSnapshot)
+	}, "wolf's gravestone dmg", combat.PostSnapshot)
 
 }

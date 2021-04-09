@@ -27,7 +27,7 @@ func (s *Sim) AddSnapshotHook(f snapshotHookFunc, key string, hook snapshotHookT
 		s.snapshotHooks[hook] = make(map[string]snapshotHookFunc)
 	}
 	s.snapshotHooks[hook][key] = f
-	s.Log.Debugf("\t[%v] new snapshot hook added %v", s.Frame(), key)
+	s.Log.Debugf("\t[%v] new snapshot hook added %v; %v", s.Frame(), key, hook)
 }
 
 //AddHook adds a hook to sim. Hook will be called based on the type of hook

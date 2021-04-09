@@ -49,7 +49,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		}
 		lock = 18 // This effect can be triggered once every 0.3s.
 		return false
-	}, "broken pines", combat.PostDamageHook)
+	}, "broken pines stacks", combat.PostDamageHook)
 
 	//counter to reduce duration
 	s.AddEffect(func(s *combat.Sim) bool {
@@ -68,7 +68,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 			lock = 0
 		}
 		return false
-	}, "broken pines")
+	}, "broken pines dur")
 
 	s.AddSnapshotHook(func(snap *combat.Snapshot) bool {
 
@@ -82,6 +82,6 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		s.Log.Debugf("\t skyrider greatsword adding atkp: %v atkspd: %v", ba, bs)
 
 		return false
-	}, "broken pines", combat.PostSnapshot)
+	}, "broken pines stats", combat.PostSnapshot)
 
 }

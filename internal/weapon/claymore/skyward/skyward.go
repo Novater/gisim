@@ -43,6 +43,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 			return false
 		}
 		//20s timer
+		s.Log.Debugf("\t Skyward Pride activated, expiring at %v", s.F+20*60)
 		s.Status["Skyward Pride Proc"] = s.F + 20*60
 		counter = 0
 
@@ -51,6 +52,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 
 	//add on hit effect to sim?
 	s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
+		// s.Log.Debugf("\t Skyward Pride checking for proc")
 		//check if char is correct?
 		if ds.Actor != c.Name() {
 			return false
@@ -59,6 +61,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if ds.AbilType != combat.ActionTypeAttack && ds.AbilType != combat.ActionTypeChargedAttack {
 			return false
 		}
+
 		//check if buff is active
 		if !s.StatusActive("Skyward Pride Proc") {
 			return false
@@ -78,5 +81,5 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		}, fmt.Sprintf("Skyward Pride Proc (hit %v) %v", counter, c.Name()), 1)
 
 		return false
-	}, "skyward-spine-proc", combat.PostDamageHook)
+	}, "skyward-pride-proc", combat.PostDamageHook)
 }
