@@ -26,7 +26,10 @@ import (
 	//weapons
 	_ "github.com/srliao/gisim/internal/weapon/bow/favoniuswarbow"
 	_ "github.com/srliao/gisim/internal/weapon/bow/prototypecrescent"
+	_ "github.com/srliao/gisim/internal/weapon/claymore/pine"
+	_ "github.com/srliao/gisim/internal/weapon/claymore/skyrider"
 	_ "github.com/srliao/gisim/internal/weapon/claymore/skyward"
+	_ "github.com/srliao/gisim/internal/weapon/claymore/wolf"
 	_ "github.com/srliao/gisim/internal/weapon/spear/blacktassel"
 	_ "github.com/srliao/gisim/internal/weapon/spear/skywardspine"
 	_ "github.com/srliao/gisim/internal/weapon/sword/blackcliff"
@@ -54,6 +57,7 @@ func main() {
 	secondsPtr := flag.Int("s", 600, "how many seconds to run the sim for")
 	pPtr := flag.String("p", "config.yaml", "which profile to use")
 	f := flag.String("o", "", "detailed log file")
+	hp := flag.Float64("hp", 0, "hp mode: how much hp to deal damage to")
 	showCaller := flag.Bool("c", false, "show caller in debug low")
 	flag.Parse()
 
@@ -80,8 +84,17 @@ func main() {
 		log.Fatal(err)
 	}
 
+	var stats combat.SimStats
+	var dmg float64
+
+	dur := *secondsPtr
 	start := time.Now()
-	dmg, stats := s.Run(*secondsPtr)
+	if *hp > 0 {
+		dmg, stats = s.RunHPMode(*hp)
+		dur = stats.SimDuration / 60
+	} else {
+		dmg, stats = s.Run(*secondsPtr)
+	}
 	elapsed := time.Since(start)
 	fmt.Println("------------------------------------------")
 	for char, t := range stats.DamageByChar {
@@ -94,11 +107,11 @@ func main() {
 		var total float64
 		for _, k := range keys {
 			v := t[k]
-			fmt.Printf("\t%v: %.2f (%.2f%%; total = %.0f)\n", k, v/float64(*secondsPtr), 100*v/dmg, v)
+			fmt.Printf("\t%v: %.2f (%.2f%%; total = %.0f)\n", k, v/float64(dur), 100*v/dmg, v)
 			total += v
 		}
 
-		fmt.Printf("%v total dps: %.2f (dmg: %.2f); total percentage: %.0f%%\n", char, total/float64(*secondsPtr), total, 100*total/dmg)
+		fmt.Printf("%v total dps: %.2f (dmg: %.2f); total percentage: %.0f%%\n", char, total/float64(dur), total, 100*total/dmg)
 	}
 	fmt.Println("------------------------------------------")
 	for char, t := range stats.AbilUsageCountByChar {
@@ -120,7 +133,7 @@ func main() {
 	}
 	for _, k := range ck {
 		v := stats.CharActiveTime[k]
-		fmt.Printf("%v active for %v (%v seconds)\n", k, v, v/60)
+		fmt.Printf("%v active for %v (%v seconds - %.0f%%)\n", k, v, v/60, 100*float64(v)/float64(stats.SimDuration))
 	}
 	fmt.Println("------------------------------------------")
 	tk := make([]combat.EleType, 0, len(stats.AuraUptime))
@@ -129,7 +142,7 @@ func main() {
 	}
 	for _, k := range tk {
 		v := stats.AuraUptime[k]
-		fmt.Printf("%v active for %v (%v seconds)\n", k, v, v/60)
+		fmt.Printf("%v active for %v (%v seconds - %.0f%%)\n", k, v, v/60, 100*float64(v)/float64(stats.SimDuration))
 	}
 	fmt.Println("------------------------------------------")
 	rk := make([]combat.ReactionType, 0, len(stats.ReactionsTriggered))
@@ -141,9 +154,11 @@ func main() {
 		fmt.Printf("%v: %v\n", k, v)
 	}
 	fmt.Println("------------------------------------------")
-	fmt.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", *pPtr, dmg, *secondsPtr, dmg/float64(*secondsPtr), elapsed)
+	fmt.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", *pPtr, dmg, dur, dmg/float64(dur), elapsed)
 
-	graphToCSV(stats.DamageHist)
+	if *hp == 0 {
+		graphToCSV(stats.DamageHist)
+	}
 
 }
 

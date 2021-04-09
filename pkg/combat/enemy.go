@@ -6,9 +6,12 @@ import (
 
 //Enemy keeps track of the status of one enemy Enemy
 type Enemy struct {
-	Level int64
-	res   map[EleType]float64
-	mod   map[string]ResistMod
+	Level  int64
+	res    map[EleType]float64
+	mod    map[string]ResistMod
+	HPMode bool
+	MaxHP  float64
+	HP     float64
 
 	//tracking
 	Status map[string]int //countdown to how long status last

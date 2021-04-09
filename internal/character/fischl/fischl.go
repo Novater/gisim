@@ -41,7 +41,33 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		f.c6()
 	}
 
+	f.turbo()
+
 	return &f, nil
+}
+
+func (f *fischl) turbo() {
+	f.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
+		//if Oz dealt damage
+		if ds.Actor != "Fischl" {
+			return false
+		}
+		//do nothing if oz not on field
+		if f.ozActiveUntil < f.S.F {
+			return false
+		}
+		if ds.AbilType != combat.ActionTypeSkill {
+			return false
+		}
+		if f.S.GlobalFlags.ReactionType != combat.Overload && f.S.GlobalFlags.ReactionType != combat.Superconduct {
+			return false
+		}
+		//trigger one particle
+		f.S.Log.Debugf("\t Fischl (Oz) turbo triggered")
+		f.S.AddEnergyParticles("Fischl", 1, combat.Electro, 120)
+
+		return false
+	}, "fischl turbo", combat.PostReaction)
 }
 
 func (f *fischl) a4() {
@@ -253,7 +279,7 @@ func (f *fischl) Burst(p map[string]interface{}) int {
 	}
 
 	//snapshot for Oz
-	f.ozSnapshot = f.Snapshot("Midnight Phantasmagoria (Oz)", combat.ActionTypeBurst, combat.Electro, 0)
+	f.ozSnapshot = f.Snapshot("Midnight Phantasmagoria (Oz)", combat.ActionTypeSkill, combat.Electro, 0)
 	f.ozSnapshot.Mult = birdAtk[f.TalentLvlSkill()]
 
 	f.Energy = 0

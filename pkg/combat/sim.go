@@ -70,6 +70,7 @@ type SimStats struct {
 	CharActiveTime       map[string]int
 	AbilUsageCountByChar map[string]map[string]int
 	ReactionsTriggered   map[ReactionType]int
+	SimDuration          int
 }
 
 //New creates new sim from given profile
@@ -223,6 +224,67 @@ func (s *Sim) initLogs(p LogConfig) error {
 	s.Log = logger.Sugar()
 	zap.ReplaceGlobals(logger)
 	return nil
+}
+
+//Run the sim; length in seconds
+func (s *Sim) RunHPMode(hp float64) (float64, SimStats) {
+	var skip int
+	rand.Seed(time.Now().UnixNano())
+	s.Target.HPMode = true
+	s.Target.MaxHP = hp
+	s.Target.HP = hp
+	//60fps, 60s/min, 2min
+	for s.F = 0; s.Target.HP >= 0; s.F++ {
+		//tick target and each character
+		//target doesn't do anything, just takes punishment, so it won't affect cd
+		s.Target.tick(s)
+
+		// s.decrementStatusDuration()
+		s.collectEnergyParticles()
+		s.executeCharacterTicks()
+		s.runEffects()
+		s.checkAura()
+		s.runTasks()
+
+		//add char active time
+		s.Stats.CharActiveTime[s.ActiveChar]++
+		s.Stats.AuraUptime[s.TargetAura.E()]++
+		s.Stats.SimDuration++
+
+		if s.SwapCD > 0 {
+			s.SwapCD--
+		}
+
+		//if in cooldown, do nothing
+		if skip > 0 {
+			skip--
+			continue
+		}
+
+		next, err := s.FindNextAction(s)
+		s.Log.Infof("[%v] off skip, next action: %v swap cd %v", s.Frame(), next, s.SwapCD)
+		if err != nil {
+			s.Log.Infof("[%v] no action found (%v)", s.Frame(), next)
+			//skip this round
+			continue
+		}
+
+		if s.ActiveChar != next.CharacterName {
+			//swap
+			s.Log.Infof("[%v] swapping from %v to %v; cd: %v action %v", s.Frame(), s.ActiveChar, next.CharacterName, s.SwapCD, next)
+			s.SwapCD = 150
+			skip = 20
+			s.ActiveChar = next.CharacterName
+			s.ActiveIndex = next.index
+			continue
+		}
+
+		//other wise excute
+		skip = s.executeAbilityQueue(next)
+		s.Log.Infof("[%v] action executed; skip %v swap cd %v", s.Frame(), skip, s.SwapCD)
+	}
+
+	return s.Target.Damage, s.Stats
 }
 
 //Run the sim; length in seconds

@@ -22,6 +22,7 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 	s.executeSnapshotHooks(PreDamageHook, &ds)
 	dr := calcDmg(ds, *s.Target, s.Rand, s.Log)
 	s.Target.Damage += dr.damage
+	s.Target.HP -= dr.damage
 	s.Stats.DamageByChar[ds.Actor][ds.Abil] += dr.damage
 
 	if dr.isCrit {

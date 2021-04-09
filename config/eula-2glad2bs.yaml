@@ -22,6 +22,18 @@ Characters:
       WeaponBaseAtk: 674
     WeaponSecondaryStat:
       ER: 0.368
+    # Weapon:
+    #   WeaponName: "Song of Broken Pines"
+    #   WeaponRefinement: 1
+    #   WeaponBaseAtk: 741
+    # WeaponSecondaryStat:
+    #   Phys%: .207
+    # Weapon:
+    #   WeaponName: "Wolf's Gravestone"
+    #   WeaponRefinement: 1
+    #   WeaponBaseAtk: 608
+    # WeaponSecondaryStat:
+    #   ATK%: .496
     Artifacts:
       Flower:
         Level: 20
@@ -213,56 +225,79 @@ Characters:
           DEF: 42
           CD: 0.14
   - Base:
-      Name: Diona
-      Level: 70
-      Element: "cryo"
-      BaseHP: 8352
-      BaseAtk: 165
-      BaseDef: 619
+      Name: Xiangling
+      Level: 80
+      Element: "pyro"
+      BaseHP: 9638
+      BaseAtk: 200
+      BaseDef: 593
       BaseCR: 0.05
       BaseCD: 0.50
       Constellation: 6
+    AscensionBonus:
+      EM: 72
     TalentLevel:
-      attack: 1
+      attack: 6
       skill: 6
-      burst: 6
+      burst: 8
     Weapon:
-      WeaponName: "Favonius Warbow"
-      WeaponRefinement: 3
-      WeaponBaseAtk: 401
+      WeaponName: "Skyward Spine"
+      WeaponRefinement: 1
+      WeaponBaseAtk: 674
     WeaponSecondaryStat:
-      ER: 0.559
+      ER: 0.368
     Artifacts:
       Flower:
         Level: 20
-        Type: "Flower"
-        Set: "Gladiator's Finale"
+        Set: "Crimson Witch of Flames"
         Main:
           HP: 4780
+        Sub:
+          HP%: 0.047
+          ATK%: .152
+          EM: 21
+          CD: 0.264
       Feather:
         Level: 20
-        Type: "Feather"
-        Set: "Gladiator's Finale"
+        Set: "Crimson Witch of Flames"
         Main:
           ATK: 311
+        Sub:
+          DEF: 37
+          DEF%: 0.051
+          CR: 0.097
+          CD: 0.218
       Sands:
-        Level: 20
-        Type: "Sands"
-        Set: "Thundersoother"
+        Level: 16
+        Set: "Noblesse Oblige"
         Main:
-          ATK%: 0.466
+          ATK%: 0.387
+        Sub:
+          ATK: 37
+          DEF: 23
+          HP%: 0.099
+          ER: 0.168
       Goblet:
         Level: 20
-        Type: "Goblet"
         Set: "Maiden Beloved"
         Main:
-          Hydro%: 0.466
+          Pyro%: 0.466
+        Sub:
+          CR: 0.089
+          ER: 0.052
+          ATK%: 0.093
+          ATK: 43
       Circlet:
-        Level: 16
+        Level: 20
         Type: "Circlet"
-        Set: "Bloodstained Chivalry"
+        Set: "Noblesse Oblige"
         Main:
-          CR: 0.258
+          CR: 0.232
+        Sub:
+          CD: 0.056
+          ATK: 28
+          EM: 30
+          DEF%: 0.053
 Enemy:
   Level: 88
   Resist:
@@ -289,11 +324,11 @@ Rotation:
     Action: "skill"
     ConditionType: "status"
     ConditionTarget: "Fischl-Oz"
-  #   ConditionBool: false
-  # - CharacterName: "Xiangling"
-  #   Action: "burst"
-  # - CharacterName: "Xiangling"
-  #   Action: "skill"
+    ConditionBool: false
+  - CharacterName: "Xiangling"
+    Action: "burst"
+  - CharacterName: "Xiangling"
+    Action: "skill"
   - CharacterName: "Eula"
     Action: "burst"
     SwapLock: 480

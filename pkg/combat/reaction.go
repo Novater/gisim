@@ -90,6 +90,7 @@ func (s *Sim) applyReactionDamage(ds Snapshot, r ReactionType) float64 {
 	damage := mult * lvlm * (1 + ((6.66 * em) / (1400 + em)) + ds.ReactBonus) * resmod
 	s.Log.Infof("[%v] %v (%v) caused %v, dealt %v damage", s.Frame(), ds.Actor, ds.Abil, r, damage)
 	s.Target.Damage += damage
+	s.Target.HP -= damage
 	s.Stats.DamageByChar[ds.Actor][string(r)] += damage
 
 	return damage
