@@ -122,6 +122,15 @@ func (p *PyroAura) React(ds Snapshot, s *Sim) Aura {
 		return p
 	}
 	switch ds.Element {
+	case Anemo:
+		p.Reduce(0.5*ds.Durability, s)
+		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.ReactionDamageTriggered = true
+		s.GlobalFlags.ReactionType = SwirlPyro
+	case Geo:
+		p.Reduce(0.5*ds.Durability, s)
+		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.ReactionType = Crystallize
 	case Pyro:
 		p.Refresh(ds.Durability, s)
 	case Hydro:
@@ -148,7 +157,7 @@ func (p *PyroAura) React(ds Snapshot, s *Sim) Aura {
 		//electro on pyro, queue overload
 		//reduction in durability is 1:1, no tax on the
 		p.Reduce(ds.Durability, s)
-		s.GlobalFlags.NextAttackOverloadTriggered = true
+		s.GlobalFlags.ReactionDamageTriggered = true
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = Overload
 		//fire gone
@@ -168,6 +177,15 @@ func (h *HydroAura) React(ds Snapshot, s *Sim) Aura {
 		return h
 	}
 	switch ds.Element {
+	case Anemo:
+		h.Reduce(0.5*ds.Durability, s)
+		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.ReactionDamageTriggered = true
+		s.GlobalFlags.ReactionType = SwirlHydro
+	case Geo:
+		h.Reduce(0.5*ds.Durability, s)
+		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.ReactionType = Crystallize
 	case Pyro:
 		//hydro on pyro, x1.5
 		h.Reduce(0.5*ds.Durability, s)
@@ -206,11 +224,20 @@ func (e *ElectroAura) React(ds Snapshot, s *Sim) Aura {
 		return e
 	}
 	switch ds.Element {
+	case Anemo:
+		e.Reduce(0.5*ds.Durability, s)
+		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.ReactionDamageTriggered = true
+		s.GlobalFlags.ReactionType = SwirlElectro
+	case Geo:
+		e.Reduce(0.5*ds.Durability, s)
+		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.ReactionType = Crystallize
 	case Pyro:
 		//electro on pyro, queue overload
 		//reduction in durability is 1:1, no tax on the
 		e.Reduce(ds.Durability, s)
-		s.GlobalFlags.NextAttackOverloadTriggered = true
+		s.GlobalFlags.ReactionDamageTriggered = true
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = Overload
 		//fire gone
@@ -229,7 +256,7 @@ func (e *ElectroAura) React(ds Snapshot, s *Sim) Aura {
 	case Cryo:
 		//superconduct, 1:1
 		e.Reduce(ds.Durability, s)
-		s.GlobalFlags.NextAttackSuperconductTriggered = true
+		s.GlobalFlags.ReactionDamageTriggered = true
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = Superconduct
 		if e.Durability == 0 {
@@ -251,6 +278,15 @@ func (c *CryoAura) React(ds Snapshot, s *Sim) Aura {
 		return c
 	}
 	switch ds.Element {
+	case Anemo:
+		c.Reduce(0.5*ds.Durability, s)
+		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.ReactionDamageTriggered = true
+		s.GlobalFlags.ReactionType = SwirlCryo
+	case Geo:
+		c.Reduce(0.5*ds.Durability, s)
+		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.ReactionType = Crystallize
 	case Pyro:
 		//pyro on cryo, x2
 		c.Reduce(2*ds.Durability, s)
@@ -282,7 +318,7 @@ func (c *CryoAura) React(ds Snapshot, s *Sim) Aura {
 		//electro on cryo, queue on superconduct
 		//reduction in durability is 1:1, no tax on the
 		c.Reduce(ds.Durability, s)
-		s.GlobalFlags.NextAttackSuperconductTriggered = true
+		s.GlobalFlags.ReactionDamageTriggered = true
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = Superconduct
 		if c.Durability == 0 {
@@ -322,7 +358,7 @@ func (f *FreezeAura) React(ds Snapshot, s *Sim) Aura {
 	if ds.IsHeavyAttack {
 		//freeze is done, trigger shatter damage
 		s.GlobalFlags.ReactionDidOccur = true
-		s.GlobalFlags.NextAttackShatterTriggered = true
+		s.GlobalFlags.ReactionDamageTriggered = true
 		s.GlobalFlags.ReactionType = Shatter
 		//check if we have new aura to return
 		if f.NewCryo != nil {
@@ -347,6 +383,11 @@ func (f *FreezeAura) React(ds Snapshot, s *Sim) Aura {
 		return NewNoAura()
 	}
 	switch ds.Element {
+	case Geo:
+		//i think we just get rid of it?? TODO: FIGURE OUT THIS ONE
+		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.ReactionType = Crystallize
+		return NewNoAura()
 	case Pyro:
 		//just melt
 		s.GlobalFlags.ReactionDidOccur = true
@@ -400,6 +441,7 @@ func (f *FreezeAura) React(ds Snapshot, s *Sim) Aura {
 	case Electro:
 		//just superconuct
 		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.ReactionDamageTriggered = true
 		s.GlobalFlags.ReactionType = Superconduct
 		//no residual aura
 		return NewNoAura()
@@ -486,10 +528,21 @@ func (e *ElectroChargeAura) React(ds Snapshot, s *Sim) Aura {
 		return e
 	}
 	switch ds.Element {
+	case Anemo:
+		e.Electro.Reduce(0.5*ds.Durability, s)
+		e.Hydro.Reduce(0.5*ds.Durability, s)
+		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.ReactionDamageTriggered = true
+		s.GlobalFlags.ReactionType = SwirlElectro //BUG: this is probably.. wrong; shoudl be both swirlelectro and swirlhydro
+	case Geo:
+		e.Electro.Reduce(0.5*ds.Durability, s)
+		e.Hydro.Reduce(0.5*ds.Durability, s)
+		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.ReactionType = Crystallize
 	case Pyro:
 		//overload + vaporize
 		s.GlobalFlags.ReactionDidOccur = true
-		s.GlobalFlags.NextAttackOverloadTriggered = true
+		s.GlobalFlags.ReactionDamageTriggered = true
 		s.GlobalFlags.NextAttackMVMult = 1.5
 		s.GlobalFlags.ReactionType = Overload //this here will trigger our super vape
 	case Hydro:
@@ -505,7 +558,7 @@ func (e *ElectroChargeAura) React(ds Snapshot, s *Sim) Aura {
 	case Cryo:
 		//just superconduct
 		s.GlobalFlags.ReactionDidOccur = true
-		s.GlobalFlags.NextAttackSuperconductTriggered = true
+		s.GlobalFlags.ReactionDamageTriggered = true
 		s.GlobalFlags.ReactionType = Superconduct
 	case Electro:
 		e.Electro.Refresh(ds.Durability, s)

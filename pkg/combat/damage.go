@@ -42,24 +42,17 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 		s.Log.Debugf("\t reaction %v occured", s.GlobalFlags.ReactionType)
 	}
 
-	//add superconduct buff if triggered
-	if s.GlobalFlags.NextAttackSuperconductTriggered {
-		s.Target.AddResMod("Superconduct", ResistMod{
-			Duration: 12 * 60,
-			Ele:      Physical,
-			Value:    -0.4,
-		})
-	}
-
 	//apply reaction damage
-	if s.GlobalFlags.NextAttackOverloadTriggered {
-		s.applyReactionDamage(ds, Overload)
-	}
-	if s.GlobalFlags.NextAttackSuperconductTriggered {
-		s.applyReactionDamage(ds, Superconduct)
-	}
-	if s.GlobalFlags.NextAttackShatterTriggered {
-		s.applyReactionDamage(ds, Shatter)
+	if s.GlobalFlags.ReactionDamageTriggered {
+		//add superconduct buff if triggered
+		if s.GlobalFlags.ReactionType == Superconduct {
+			s.Target.AddResMod("Superconduct", ResistMod{
+				Duration: 12 * 60,
+				Ele:      Physical,
+				Value:    -0.4,
+			})
+		}
+		s.applyReactionDamage(ds, s.GlobalFlags.ReactionType)
 	}
 
 	if s.GlobalFlags.ReactionDidOccur {
@@ -76,9 +69,6 @@ func (s *Sim) ResetReactionFlags() {
 	s.GlobalFlags.ReactionDidOccur = false
 	s.GlobalFlags.ReactionType = ""
 	s.GlobalFlags.NextAttackMVMult = 1 // melt vape multiplier
-	s.GlobalFlags.NextAttackOverloadTriggered = false
-	s.GlobalFlags.NextAttackSuperconductTriggered = false
-	s.GlobalFlags.NextAttackShatterTriggered = false
 }
 
 type dmgResult struct {

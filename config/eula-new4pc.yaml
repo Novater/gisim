@@ -276,10 +276,10 @@ Enemy:
     physical: 0.1
 InitialActive: "Eula"
 Rotation:
-  - CharacterName: "Xingqiu"
-    Action: "burst"
-  - CharacterName: "Xingqiu"
-    Action: "skill"
+  # - CharacterName: "Xingqiu"
+  #   Action: "burst"
+  # - CharacterName: "Xingqiu"
+  #   Action: "skill"
   - CharacterName: "Fischl"
     Action: "burst"
     ConditionType: "status"
@@ -289,7 +289,7 @@ Rotation:
     Action: "skill"
     ConditionType: "status"
     ConditionTarget: "Fischl-Oz"
-  #   ConditionBool: false
+    ConditionBool: false
   # - CharacterName: "Xiangling"
   #   Action: "burst"
   # - CharacterName: "Xiangling"
@@ -308,7 +308,9 @@ Rotation:
     Action: "skill"
   - CharacterName: "Eula"
     Action: "attack"
+  # - CharacterName: "Xiangling"
+  #   Action: "attack"
   - CharacterName: "Fischl"
     Action: "attack"
-  - CharacterName: "Xingqiu"
-    Action: "attack"
+  # - CharacterName: "Xingqiu"
+  #   Action: "attack"

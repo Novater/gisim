@@ -54,13 +54,11 @@ type Sim struct {
 }
 
 type Flags struct {
-	ChildeActive                    bool
-	ReactionDidOccur                bool
-	ReactionType                    ReactionType
-	NextAttackMVMult                float64 // melt vape multiplier
-	NextAttackOverloadTriggered     bool
-	NextAttackSuperconductTriggered bool
-	NextAttackShatterTriggered      bool
+	ChildeActive            bool
+	ReactionDidOccur        bool
+	ReactionType            ReactionType
+	NextAttackMVMult        float64 // melt vape multiplier
+	ReactionDamageTriggered bool
 }
 
 type SimStats struct {

@@ -270,14 +270,13 @@ func (e *eula) Burst(p map[string]interface{}) int {
 		s.Log.Infof("\t Eula burst (initial) dealt %.0f damage", damage)
 	}, "Eula-Burst-Initial", 100) //guess frames
 
-	//add blow up after 8 seconds
-	d2 := e.Snapshot("Glacial Illumination (Lightfall)", combat.ActionTypeBurst, combat.Physical, combat.WeakDurability)
-
 	e.S.AddTask(func(s *combat.Sim) {
 		stacks := e.burstCounter
 		if stacks > 30 {
 			stacks = 30
 		}
+		//add blow up after 8 seconds
+		d2 := e.Snapshot("Glacial Illumination (Lightfall)", combat.ActionTypeBurst, combat.Physical, combat.WeakDurability)
 		d2.Mult = burstExplodeBase[lvl] + burstExplodeStack[lvl]*float64(stacks)
 		damage := s.ApplyDamage(d2)
 		s.Log.Infof("\t Eula burst (lightfall) dealt %.0f damage, %v stacks", damage, stacks)
