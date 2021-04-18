@@ -59,8 +59,8 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		d := c.Snapshot("Skyward Spine Proc", rotation.ActionSpecialProc, combat.Physical, combat.WeakDurability)
 		d.Mult = dmg
 		s.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Skyward Spine proc dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Skyward Spine proc dealt %.0f damage [%v]", damage, str)
 		}, fmt.Sprintf("Skyward Spine Proc %v", c.Name()), 1)
 
 		//trigger cd

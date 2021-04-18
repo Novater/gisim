@@ -125,8 +125,8 @@ func (e *eula) Attack(p int) int {
 		d := e.Snapshot("Normal", rotation.ActionAttack, combat.Physical, combat.WeakDurability)
 		d.Mult = mult[e.TalentLvlAttack()]
 		e.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Eula normal %v hit %v dealt %.0f damage", e.NormalCounter, t, damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Eula normal %v hit %v dealt %.0f damage [%v]", e.NormalCounter, t, damage, str)
 		}, fmt.Sprintf("Eula-Normal-%v-%v", e.NormalCounter, t), delay)
 	}
 
@@ -169,8 +169,8 @@ func (e *eula) pressE() {
 	d.Mult = skillPress[e.TalentLvlSkill()]
 
 	e.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Eula skill (press) dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(d)
+		s.Log.Infof("\t Eula skill (press) dealt %.0f damage [%v]", damage, str)
 	}, "Eula-Skill-Press", 35)
 
 	//RANDOM GUESS
@@ -201,8 +201,8 @@ func (e *eula) holdE() {
 	d.Mult = skillHold[lvl]
 
 	e.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Eula skill (hold) dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(d)
+		s.Log.Infof("\t Eula skill (hold) dealt %.0f damage [%v]", damage, str)
 	}, "Eula-Skill-Hold", 108)
 
 	//multiple brand hits
@@ -213,8 +213,8 @@ func (e *eula) holdE() {
 		d.Mult = icewhirl[lvl]
 		t := i + 1
 		e.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Eula skill (ice whirl %v) dealt %.0f damage", t, damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Eula skill (ice whirl %v) dealt %.0f damage [%v]", t, damage, str)
 		}, "Eula-Skill-Hold-Icewhirl", 108)
 	}
 
@@ -223,8 +223,8 @@ func (e *eula) holdE() {
 		d := e.Snapshot("Icetide (Lightfall)", rotation.ActionSkill, combat.Cryo, combat.WeakDurability)
 		d.Mult = burstExplodeBase[e.TalentLvlBurst()] * 0.5
 		e.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Eula A2 on 2 Grimheart stacks dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Eula A2 on 2 Grimheart stacks dealt %.0f damage [%v]", damage, str)
 		}, "Eula-Skill-Hold-A2-Lightfall", 108)
 	}
 	//RANDOM GUESS
@@ -261,8 +261,8 @@ func (e *eula) Burst(p int) int {
 	d.Mult = burstInitial[lvl]
 
 	e.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Eula burst (initial) dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(d)
+		s.Log.Infof("\t Eula burst (initial) dealt %.0f damage [%v]", damage, str)
 	}, "Eula-Burst-Initial", 100) //guess frames
 
 	e.S.AddTask(func(s *combat.Sim) {
@@ -273,8 +273,8 @@ func (e *eula) Burst(p int) int {
 		//add blow up after 8 seconds
 		d2 := e.Snapshot("Glacial Illumination (Lightfall)", rotation.ActionBurst, combat.Physical, combat.WeakDurability)
 		d2.Mult = burstExplodeBase[lvl] + burstExplodeStack[lvl]*float64(stacks)
-		damage := s.ApplyDamage(d2)
-		s.Log.Infof("\t Eula burst (lightfall) dealt %.0f damage, %v stacks", damage, stacks)
+		damage, str := s.ApplyDamage(d2)
+		s.Log.Infof("\t Eula burst (lightfall) dealt %.0f damage, %v stacks [%v]", damage, stacks, str)
 		e.S.Status["Eula Burst"] = e.S.F
 		e.burstCounter = 0
 	}, "Eula-Burst-Lightfall", 8*60+100) //after 8 seconds

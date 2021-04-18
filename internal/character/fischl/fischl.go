@@ -105,8 +105,8 @@ func (f *fischl) a4() {
 			f.ozICD = f.S.F + 300 //add 300 second to skill ICD
 		}
 		f.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Fischl (Oz - A4) dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Fischl (Oz - A4) dealt %.0f damage [%v]", damage, str)
 		}, "Fischl A4", 1)
 		//increment hit counter
 		f.ozAttackCounter++
@@ -130,8 +130,8 @@ func (f *fischl) c1() {
 		d := f.Snapshot("Fischl C1", rotation.ActionSpecialProc, combat.Physical, combat.WeakDurability)
 		d.Mult = 0.22
 		f.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Fischl (Oz - C1) dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Fischl (Oz - C1) dealt %.0f damage [%v]", damage, str)
 		}, "Fischl C1", 1)
 
 		return false
@@ -156,8 +156,8 @@ func (f *fischl) c6() {
 			f.ozICD = f.S.F + 300 //add 300 second to skill ICD
 		}
 		f.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Fischl (Oz - C6) dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Fischl (Oz - C6) dealt %.0f damage [%v]", damage, str)
 		}, "Fischl C6", 1)
 		//increment hit counter
 		f.ozAttackCounter++
@@ -175,8 +175,8 @@ func (f *fischl) ozAttack() {
 	}
 	//so oz is active and ready to shoot, we add damage
 	f.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Fischl (Oz - %v) dealt %.0f damage", f.ozActiveSource, damage)
+		damage, str := s.ApplyDamage(d)
+		s.Log.Infof("\t Fischl (Oz - %v) dealt %.0f damage [%v]", f.ozActiveSource, damage, str)
 	}, "Fischl Oz (Damage)", 1)
 	//put shoot on cd
 	f.ozNextShootReady = f.S.F + 50
@@ -222,8 +222,8 @@ func (f *fischl) Skill(p int) int {
 	}
 	//apply initial damage
 	f.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Fischl (Oz - Skill Initial) dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(d)
+		s.Log.Infof("\t Fischl (Oz - Skill Initial) dealt %.0f damage [%v]", damage, str)
 	}, "Fischl Skill Initial", 1)
 
 	//set on field oz to be this one
@@ -265,8 +265,8 @@ func (f *fischl) Burst(p int) int {
 	d.Mult = burst[f.TalentLvlBurst()]
 	//apply initial damage
 	f.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Fischl (Burst Initial) dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(d)
+		s.Log.Infof("\t Fischl (Burst Initial) dealt %.0f damage [%v]", damage, str)
 	}, "Fischl Burst Initial", 1)
 
 	//check for C4 damage
@@ -274,8 +274,8 @@ func (f *fischl) Burst(p int) int {
 		d1 := f.Snapshot("Midnight Phantasmagoria C4", rotation.ActionSpecialProc, combat.Electro, 0)
 		d1.Mult = 2.22
 		f.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Fischl (Burst C4) dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Fischl (Burst C4) dealt %.0f damage [%v]", damage, str)
 		}, "Fischl Burst C4", 1)
 	}
 

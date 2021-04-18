@@ -42,7 +42,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if s.Rand.Float64() > prob {
 			return false
 		}
-		s.Log.Debugf("\t Sacrificial Sword proc triggered")
+		s.Log.Infof("[%v] sacrificial sword proc'd", s.Frame())
 
 		c.ResetActionCooldown(rotation.ActionSkill)
 

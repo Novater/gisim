@@ -24,7 +24,7 @@ func (s *Sim) collectEnergyParticles() {
 }
 
 func (s *Sim) distributeParticles(p Particle) {
-	s.Log.Debugf("[%v] Distributing particles from %v; num %v ele %v", s.Frame(), p.Source, p.Num, p.Ele)
+	s.Log.Infof("[%v] particles from %v; num %v ele %v", s.Frame(), p.Source, p.Num, p.Ele)
 	l := len(s.Chars)
 	for n, c := range s.Chars {
 		a := s.ActiveIndex == n

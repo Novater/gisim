@@ -249,8 +249,8 @@ func (c *CharacterTemplate) AttackHelperSingle(frames []int, delay []int, mult [
 	x.Mult = mult[c.NormalCounter][c.TalentLvlAttack()]
 
 	c.S.AddTask(func(s *Sim) {
-		damage := s.ApplyDamage(x)
-		s.Log.Infof("\t %v normal %v dealt %.0f damage", c.Base.Name, c.NormalCounter, damage)
+		damage, str := s.ApplyDamage(x)
+		s.Log.Infof("\t %v normal %v dealt %.0f damage [%v]", c.Base.Name, c.NormalCounter, damage, str)
 	}, fmt.Sprintf("%v-Normal-%v", c.Base.Name, c.NormalCounter), delay[c.NormalCounter])
 
 	c.NormalCounter++

@@ -69,15 +69,15 @@ func (g *ganyu) Aimed(p int) int {
 	}
 
 	g.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(f)
-		s.Log.Infof("\t Ganyu frost arrow dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(f)
+		s.Log.Infof("\t Ganyu frost arrow dealt %.0f damage [%v]", damage, str)
 		//apply A2 on hit
 		g.CD["A2"] = g.S.F + 5*60
 	}, "Ganyu-Aimed-FFA", 20+137)
 
 	g.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(b)
-		s.Log.Infof("\t Ganyu frost flake bloom dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(b)
+		s.Log.Infof("\t Ganyu frost flake bloom dealt %.0f damage [%v]", damage, str)
 		//apply A2 on hit
 		g.CD["A2"] = g.S.F + 5*60
 	}, "Ganyu-Aimed-FFB", 20+20+137)
@@ -114,8 +114,8 @@ func (g *ganyu) Skill(p int) int {
 
 	//flower damage is after 6 seconds
 	g.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Ganyu ice lotus dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(d)
+		s.Log.Infof("\t Ganyu ice lotus dealt %.0f damage [%v]", damage, str)
 	}, "Ganyu Flower", 6*60)
 
 	//add cooldown to sim
@@ -141,8 +141,8 @@ func (g *ganyu) Burst(p int) int {
 
 	for delay := 120; delay <= 900; delay += 60 {
 		g.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Ganyu burst (tick) dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Ganyu burst (tick) dealt %.0f damage [%v]", damage, str)
 		}, "Ganyu Burst", delay)
 	}
 

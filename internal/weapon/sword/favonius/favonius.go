@@ -38,7 +38,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if s.Rand.Float64() > p {
 			return false
 		}
-		s.Log.Debugf("\t Favonius Sword proc triggered")
+		s.Log.Infof("[%v] favonius sword proc'd", s.Frame())
 
 		s.AddEnergyParticles("Favonius Sword", 3, combat.NoElement, 150) //90 to generate, 60 to get it
 

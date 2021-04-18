@@ -102,8 +102,8 @@ func (d *diluc) Attack(p int) int {
 	x.Mult = auto[d.NormalCounter][d.TalentLvlAttack()]
 
 	d.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(x)
-		s.Log.Infof("\t Diluc normal %v dealt %.0f damage", d.NormalCounter, damage)
+		damage, str := s.ApplyDamage(x)
+		s.Log.Infof("\t Diluc normal %v dealt %.0f damage [%v]", d.NormalCounter, damage, str)
 	}, fmt.Sprintf("Diluc-Normal-%v", d.NormalCounter), delay)
 
 	d.NormalCounter++
@@ -144,8 +144,8 @@ func (d *diluc) Skill(p int) int {
 	x.Mult = skill[d.eCounter][d.TalentLvlSkill()]
 
 	d.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(x)
-		s.Log.Infof("\t Diluc searing onslaught hit %v dealt %.0f damage", d.eCounter, damage)
+		damage, str := s.ApplyDamage(x)
+		s.Log.Infof("\t Diluc searing onslaught hit %v dealt %.0f damage [%v]", d.eCounter, damage, str)
 	}, fmt.Sprintf("Diluc-Skill-%v", d.eCounter), delay)
 
 	d.eCounter++
@@ -170,8 +170,8 @@ func (d *diluc) Burst(p int) int {
 	x.Mult = burstInitial[d.TalentLvlBurst()]
 
 	d.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(x)
-		s.Log.Infof("\t Diluc burst (initial) dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(x)
+		s.Log.Infof("\t Diluc burst (initial) dealt %.0f damage [%v]", damage, str)
 	}, "Diluc-Burst-Initial", 100) //guess frames
 
 	//no idea how many dot ticks
@@ -179,8 +179,8 @@ func (d *diluc) Burst(p int) int {
 	xFinal := x.Clone()
 	xFinal.Mult = burstExplode[d.TalentLvlBurst()]
 	d.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(xFinal)
-		s.Log.Infof("\t Diluc burst (initial) dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(xFinal)
+		s.Log.Infof("\t Diluc burst (initial) dealt %.0f damage [%v]", damage, str)
 	}, "Diluc-Burst-Initial", 220) //guess frames
 
 	return 120

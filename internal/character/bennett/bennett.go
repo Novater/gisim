@@ -107,8 +107,8 @@ func (b *bennett) Attack(p int) int {
 
 	sb.Write([]byte(strconv.Itoa(n)))
 	b.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Bennett normal %v dealt %.0f damage", n, damage)
+		damage, str := s.ApplyDamage(d)
+		s.Log.Infof("\t Bennett normal %v dealt %.0f damage [%v]", n, damage, str)
 	}, sb.String(), delay)
 
 	//add a 75 frame attackcounter reset
@@ -158,8 +158,8 @@ func (b *bennett) Skill(p int) int {
 		t := i + 1
 		sb.WriteString(strconv.Itoa(t))
 		b.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Bennett skill dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Bennett skill dealt %.0f damage [%v]", damage, str)
 		}, sb.String(), delay[i])
 	}
 
@@ -215,8 +215,8 @@ func (b *bennett) Burst(p int) int {
 	d.Mult = burst[b.TalentLvlBurst()]
 
 	b.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Bennett burst dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(d)
+		s.Log.Infof("\t Bennett burst dealt %.0f damage [%v]", damage, str)
 	}, "Bennett-Burst", 43)
 
 	b.Energy = 0

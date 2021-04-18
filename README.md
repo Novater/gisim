@@ -10,14 +10,14 @@ either `go build` and then run the executable (in command line) or just use `go 
 
 Flags:
 
-| flag | acceptable            | info                                                          |
-| ---- | --------------------- | ------------------------------------------------------------- |
-| d    | `debug` `info` `warn` | level out log output, defaults to `warn`                      |
-| p    | `whatever.yaml`       | config file to use; defaults to `config.yaml`                 |
-| s    | any number            | number representing seconds to run sim for, defaults to `600` |
-| o    | any string            | log file to write to; if blank no log. defaults to no log     |
-| hp | any number | force sim to run in hp mode instead; default runs in time mode. if in hp mode sim will run until the specified damage has been reached |
-| c    | `true/false`          | whether or not print caller function in debug log             |
+| flag | acceptable            | info                                                                                                                                   |
+| ---- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| d    | `debug` `info` `warn` | level out log output, defaults to `warn`                                                                                               |
+| p    | `whatever.yaml`       | config file to use; defaults to `config.yaml`                                                                                          |
+| s    | any number            | number representing seconds to run sim for, defaults to `600`                                                                          |
+| o    | any string            | log file to write to; if blank no log. defaults to no log                                                                              |
+| hp   | any number            | force sim to run in hp mode instead; default runs in time mode. if in hp mode sim will run until the specified damage has been reached |
+| c    | `true/false`          | whether or not print caller function in debug log                                                                                      |
 
 Example `go run main.go -d=debug -s=20`
 

@@ -2,15 +2,18 @@ package combat
 
 import (
 	"math/rand"
+	"strings"
 
 	"go.uber.org/zap"
 )
 
 //ApplyDamage applies damage to the target given a snapshot
-func (s *Sim) ApplyDamage(ds Snapshot) float64 {
+func (s *Sim) ApplyDamage(ds Snapshot) (float64, string) {
+	var sb strings.Builder
 
 	s.Log.Debugf("  [%v] %v - %v triggered dmg", s.Frame(), ds.Actor, ds.Abil)
 	s.Log.Debugw("\t target", "auras", s.TargetAura, "ele applied", ds.Element, "dur applied", ds.Durability)
+	old := s.TargetAura
 
 	//change multiplier if vape or melt
 	if s.GlobalFlags.NextAttackMVMult > 1 {
@@ -27,19 +30,24 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 
 	if dr.isCrit {
 		s.executeSnapshotHooks(OnCritDamage, &ds)
+		sb.WriteString(" crit")
 	}
 	s.executeSnapshotHooks(PostDamageHook, &ds)
 
 	//apply new aura
 	s.TargetAura = s.TargetAura.React(ds, s)
 
-	s.Log.Debugw("\t target", "next aura", s.TargetAura)
+	if old.E() != s.TargetAura.E() {
+		s.Log.Infof("[%v] previous ele <%v>, next ele <%v>", s.Frame(), old.E(), s.TargetAura.E())
+	}
 
 	//check if reaction occured and call hooks
 	if s.GlobalFlags.ReactionDidOccur {
 		s.executeSnapshotHooks(PreReaction, &ds)
 		s.Stats.ReactionsTriggered[s.GlobalFlags.ReactionType]++
 		s.Log.Debugf("\t reaction %v occured", s.GlobalFlags.ReactionType)
+		sb.WriteString(" ")
+		sb.WriteString(string(s.GlobalFlags.ReactionType))
 	}
 
 	//apply reaction damage
@@ -61,8 +69,8 @@ func (s *Sim) ApplyDamage(ds Snapshot) float64 {
 
 	//reset reaction flags
 	s.ResetReactionFlags()
-
-	return dr.damage
+	sb.WriteString(" ")
+	return dr.damage, sb.String()
 }
 
 func (s *Sim) ResetReactionFlags() {

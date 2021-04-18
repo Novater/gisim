@@ -108,7 +108,7 @@ NEXT:
 				s.Log.Debugw("\t adding swap cancel", "target", v.SwapTo, "swapped from", v.Target)
 			}
 		}
-		s.Log.Debugf("adding rotation item %v to queue", i)
+		s.Log.Infof("[%v] queuing rotation item %v; name: %v, target: %v, seq: %v, strict: %v, exec: %v", s.Frame(), i+1, v.Name, v.Target, v.IsSeq, v.IsStrict, v.Exec)
 		return l
 	}
 	return 0 //return now many items added to queue
@@ -121,7 +121,7 @@ func (s *Sim) execQueue() int {
 		if i == 0 {
 			return 0
 		}
-		s.Log.Debugw("new action queue", "len", i, "queue", s.actionQueue)
+		s.Log.Debugw("\t next action queue", "len", i, "queue", s.actionQueue)
 	}
 	var n rotation.ActionItem
 	//otherwise pop first item on queue and execute
@@ -147,7 +147,7 @@ func (s *Sim) execQueue() int {
 		ind := s.charPos[n.Target]
 		s.ActiveChar = n.Target
 		s.ActiveIndex = ind
-		s.Log.Infof("swapped to %v", n.Target)
+		s.Log.Infof("[%v] swapped from %v to %v", s.Frame(), s.ActiveChar, n.Target)
 	case rotation.ActionCancellable:
 	case rotation.ActionDash:
 		f = 30
@@ -158,7 +158,7 @@ func (s *Sim) execQueue() int {
 	s.Stats.AbilUsageCountByChar[c.Name()][n.Typ.String()]++
 
 	// s.Log.Infof("[%v] %v executing %v", s.Frame(), s.ActiveChar, a.Action)
-	s.Log.Infof("[%v] action executed; skip %v swap cd %v", s.Frame(), f, s.SwapCD)
+	s.Log.Infof("[%v] %v executed %v; animation duration %v; swap cd %v", s.Frame(), s.ActiveChar, n.Typ.String(), f, s.SwapCD)
 
 	return f
 }

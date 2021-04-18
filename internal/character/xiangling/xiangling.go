@@ -92,8 +92,8 @@ func (x *xl) Attack(p int) int {
 		d.Mult = hit[x.TalentLvlAttack()]
 		t := i + 1
 		x.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Xiangling normal %v (hit %v) dealt %.0f damage", n, t, damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Xiangling normal %v (hit %v) dealt %.0f damage [%v]", n, t, damage, str)
 		}, fmt.Sprintf("Xiangling-Normal-%v-%v", n, t), 5)
 	}
 	//if n = 5, add explosion for c2
@@ -101,8 +101,8 @@ func (x *xl) Attack(p int) int {
 		c := d.Clone()
 		c.Element = combat.Pyro
 		x.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(c)
-			s.Log.Infof("\t Xiangling C2 explosion dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(c)
+			s.Log.Infof("\t Xiangling C2 explosion dealt %.0f damage [%v]", damage, str)
 		}, "Xiangling-C2-Explosion", 120)
 	}
 	//add a 75 frame attackcounter reset
@@ -123,8 +123,8 @@ func (x *xl) ChargeAttack(p int) int {
 	//no delay for now? realistically the hits should have delay but not sure if it actually makes a diff
 	//since it doesnt apply any elements, only trigger weapon procs
 	x.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Xiangling charge attack dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(d)
+		s.Log.Infof("\t Xiangling charge attack dealt %.0f damage [%v]", damage, str)
 	}, "Xiangling-Charge-Attack", 1)
 
 	x.NormalResetTimer = 0
@@ -149,8 +149,8 @@ func (x *xl) Skill(p int) int {
 
 	for i := 0; i < 4; i++ {
 		x.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Xiangling (Gouba - tick) dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Xiangling (Gouba - tick) dealt %.0f damage [%v]", damage, str)
 			if x.Base.Cons >= 1 {
 				x.c1()
 			}
@@ -183,8 +183,8 @@ func (x *xl) Burst(p int) int {
 		d := x.Snapshot("Pyronado", rotation.ActionBurst, combat.Pyro, combat.WeakDurability)
 		d.Mult = pyronado1[lvl]
 		x.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Xiangling Pyronado initial hit 1 dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Xiangling Pyronado initial hit 1 dealt %.0f damage [%v]", damage, str)
 		}, "Xiangling-Burst-Hit-1", 0)
 	}
 
@@ -192,8 +192,8 @@ func (x *xl) Burst(p int) int {
 		d := x.Snapshot("Pyronado", rotation.ActionBurst, combat.Pyro, combat.WeakDurability)
 		d.Mult = pyronado2[lvl]
 		x.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Xiangling Pyronado initial hit 2 dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Xiangling Pyronado initial hit 2 dealt %.0f damage [%v]", damage, str)
 		}, "Xiangling-Burst-Hit-2", 0)
 	}
 
@@ -201,8 +201,8 @@ func (x *xl) Burst(p int) int {
 		d := x.Snapshot("Pyronado", rotation.ActionBurst, combat.Pyro, combat.WeakDurability)
 		d.Mult = pyronado3[lvl]
 		x.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Xiangling Pyronado initial hit 3 dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Xiangling Pyronado initial hit 3 dealt %.0f damage [%v]", damage, str)
 		}, "Xiangling-Burst-Hit-3", 0)
 	}
 
@@ -220,9 +220,10 @@ func (x *xl) Burst(p int) int {
 
 	for delay := 70; delay <= max; delay += 70 {
 		count++
+		i := count
 		x.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Xiangling (Pyronado - tick #%v) dealt %.0f damage", count, damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Xiangling (Pyronado - tick #%v) dealt %.0f damage [%v]", i, damage, str)
 		}, "Xiangling Pyronado", delay)
 	}
 

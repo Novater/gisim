@@ -77,8 +77,8 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		d := c.Snapshot("Skyward Pride Proc", rotation.ActionSpecialProc, combat.Physical, combat.WeakDurability)
 		d.Mult = dmg
 		s.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Skyward Pride proc dealt %.0f damage", damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Skyward Pride proc dealt %.0f damage [%v]", damage, str)
 		}, fmt.Sprintf("Skyward Pride Proc (hit %v) %v", counter, c.Name()), 1)
 
 		return false

@@ -317,7 +317,6 @@ func (s *Sim) Run(length int) (float64, SimStats) {
 
 		//other wise excute
 		skip = s.execQueue()
-		s.Log.Infof("[%v] action executed; skip %v swap cd %v", s.Frame(), skip, s.SwapCD)
 	}
 
 	return s.Target.Damage, s.Stats
@@ -336,7 +335,7 @@ func (s *Sim) addResonance(count map[EleType]int) {
 		if v >= 2 {
 			switch k {
 			case Pyro:
-				s.Log.Debugf("activing pyro resonance")
+				s.Log.Debugf("activating pyro resonance")
 				s.AddSnapshotHook(func(ds *Snapshot) bool {
 					s.Log.Debugf("\tapplying pyro resonance + 25%% atk")
 					ds.Stats[ATKP] += 0.25
@@ -345,7 +344,7 @@ func (s *Sim) addResonance(count map[EleType]int) {
 			case Hydro:
 				//heal not implemented yet
 			case Cryo:
-				s.Log.Debugf("activing cryo resonance")
+				s.Log.Debugf("activating cryo resonance")
 				s.AddSnapshotHook(func(ds *Snapshot) bool {
 					if s.TargetAura.E() == Cryo {
 						s.Log.Debugf("\tapplying cryo resonance on cryo target")
@@ -367,7 +366,8 @@ func (s *Sim) addResonance(count map[EleType]int) {
 }
 
 func (s *Sim) Frame() string {
-	return strconv.Itoa(int(1000*float64(s.F)/60)) + "ms|" + strconv.Itoa(s.F)
+
+	return strconv.FormatFloat(float64(s.F)/60, 'f', 2, 64) + "s|" + strconv.Itoa(s.F)
 }
 
 type NewCharacterFunc func(s *Sim, p CharacterProfile) (Character, error)

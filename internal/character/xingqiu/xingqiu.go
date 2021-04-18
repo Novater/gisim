@@ -88,8 +88,8 @@ func (x *xingqiu) Attack(p int) int {
 		//add a 20 frame delay; should be 18 and 42 for combo 3 and 5 actual
 		t := i + 1
 		x.S.AddTask(func(s *combat.Sim) {
-			damage := s.ApplyDamage(d)
-			s.Log.Infof("\t Xingqiu normal %v (hit %v) dealt %.0f damage", n, t, damage)
+			damage, str := s.ApplyDamage(d)
+			s.Log.Infof("\t Xingqiu normal %v (hit %v) dealt %.0f damage [%v]", n, t, damage, str)
 		}, fmt.Sprintf("Xingqiu-Normal-%v-%v", n, i), 20)
 	}
 
@@ -122,13 +122,13 @@ func (x *xingqiu) Skill(p int) int {
 	d2.Mult = rainscreen[1][x.TalentLvlSkill()]
 
 	x.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(d)
-		s.Log.Infof("\t Xingqiu skill hit 1 dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(d)
+		s.Log.Infof("\t Xingqiu skill hit 1 dealt %.0f damage [%v]", damage, str)
 	}, "Xingqiu-Skill-1", 19) //first hit 19 frames
 
 	x.S.AddTask(func(s *combat.Sim) {
-		damage := s.ApplyDamage(d2)
-		s.Log.Infof("\t Xingqiu skill hit 2 dealt %.0f damage", damage)
+		damage, str := s.ApplyDamage(d2)
+		s.Log.Infof("\t Xingqiu skill hit 2 dealt %.0f damage [%v]", damage, str)
 	}, "Xingqiu-Skill-2", 39) //second hit 39 frames
 
 	x.S.AddEnergyParticles("Xingqiu", 5, combat.Hydro, 100)
@@ -167,8 +167,8 @@ func (x *xingqiu) burstHook() {
 			t := i + 1
 
 			x.S.AddTask(func(s *combat.Sim) {
-				damage := s.ApplyDamage(d)
-				s.Log.Infof("\t Xingqiu burst proc hit %v dealt %.0f damage", t, damage)
+				damage, str := s.ApplyDamage(d)
+				s.Log.Infof("\t Xingqiu burst proc hit %v dealt %.0f damage [%v]", t, damage, str)
 				if x.Base.Cons >= 2 {
 					x.c2()
 				}
