@@ -48,21 +48,25 @@ To save the log to file (easier to read) `go run main.go -d=debug -o=out.log`
 action list example
 
 ```
-actions+=/burst,char=diluc
-
-#reset attack chain if E goes on CD
-actions+=/restart_sequence,name=attackp,if=diluc.cd.skill>0
-actions+=/restart_sequence,name=attack,if=diluc.cd.skill>0
-
-#execute full chain if skill is not yet used and burst buff (pyro) is on
-actions+=/sequence_strict,name=attackp,char=diluc,auto:skill:auto:skill:auto:skill:auto,if=diluc.buff.burst=1&diluc.status.skill_count=0
-
-#otherwise just execute through the chain like normal
-actions+=/sequence,name=attack,char=diluc,auto:skill:auto:skill:auto:skill:auto
-
-#autoattack as filler
-actions+=/attack,char=diluc
+actions+=sequence_strict target=xingqiu exec=skill,burst lock=100;
+actions+=skill target=xingqiu if=.status.xingqiu.energy<80 lock=100;
+actions+=burst target=xingqiu;
+actions+=burst target=bennett;
+actions+=sequence_strict target=xiangling exec=skill,burst;
+actions+=skill target=xiangling active=xiangling;
+actions+=burst target=fischl if=.status.xiangling.energy<70&&.tags.fischl.oz==0 swap=xiangling;
+actions+=skill target=fischl if=.status.xiangling.energy<70&&.tags.fischl.oz==0 swap=xiangling;
+actions+=burst target=fischl if=.tags.fischl.oz==0;
+actions+=skill target=fischl if=.tags.fischl.oz==0;
+actions+=skill target=bennett if=.status.xiangling.energy<40 swap=xiangling;
+actions+=skill target=bennett;
+actions+=attack target=xiangling;
+actions+=attack target=xingqiu active=xingqiu;
+actions+=attack target=bennett active=bennett;
+actions+=attack target=fischl active=fischl;
 ```
+
+`sequence` and `sequence_rest` not yet properly implemented
 
 ## optimizations
 
