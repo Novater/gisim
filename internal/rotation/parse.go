@@ -45,12 +45,36 @@ const (
 	ActionCharge
 	ActionHighPlunge
 	ActionLowPlunge
+	ActionSpecialProc
 	ActionAim
 	ActionSwap
 	ActionCancellable // delim cancellable action
 	ActionDash
 	ActionJump
 )
+
+var astr = []string{
+	"sequence",
+	"sequence_strict",
+	"",
+	"reset_sequence",
+	"skill",
+	"burst",
+	"attack",
+	"charge",
+	"high_plunge",
+	"low_lunge",
+	"proc",
+	"aim",
+	"swap",
+	"",
+	"dash",
+	"jump",
+}
+
+func (a ActionType) String() string {
+	return astr[a]
+}
 
 var actionKeys = map[string]ActionType{
 	"sequence":        ActionSequence,
@@ -104,7 +128,7 @@ func New(name, input string) *Parser {
 	return p
 }
 
-func (p *Parser) parse() ([]Action, error) {
+func (p *Parser) Parse() ([]Action, error) {
 	var err error
 	var r []Action
 	state := 0
@@ -227,11 +251,11 @@ func (p *Parser) parseStringIdent() (string, error) {
 	r := ""
 	n := p.next()
 	if n.typ != itemAssign {
-		return r, fmt.Errorf("bad token at line %v - %v: %v", n.line, n.pos, n)
+		return r, fmt.Errorf("<string - assign> bad token at line %v - %v: %v", n.line, n.pos, n)
 	}
 	n = p.next()
 	if n.typ != itemIdentifier {
-		return r, fmt.Errorf("bad token at line %v - %v: %v", n.line, n.pos, n)
+		return r, fmt.Errorf("<string - id> bad token at line %v - %v: %v %v", n.line, n.pos, n, n.typ)
 	}
 	r = n.val
 
@@ -242,18 +266,18 @@ func (p *Parser) parsePostAction() (ActionType, error) {
 	var t ActionType
 	n := p.next()
 	if n.typ != itemAssign {
-		return t, fmt.Errorf("bad token at line %v - %v: %v", n.line, n.pos, n)
+		return t, fmt.Errorf("<post - assign> bad token at line %v - %v: %v", n.line, n.pos, n)
 	}
 	n = p.next()
 	if n.typ != itemIdentifier {
-		return t, fmt.Errorf("bad token at line %v - %v: %v", n.line, n.pos, n)
+		return t, fmt.Errorf("<post - id> bad token at line %v - %v: %v", n.line, n.pos, n)
 	}
 	t, ok := actionKeys[n.val]
 	if !ok {
-		return t, fmt.Errorf("bad token at line %v - %v: %v", n.line, n.pos, n)
+		return t, fmt.Errorf("<post - val id> bad token at line %v - %v: %v", n.line, n.pos, n)
 	}
 	if t <= ActionCancellable {
-		return t, fmt.Errorf("invalid post action at line %v - %v: %v", n.line, n.pos, n)
+		return t, fmt.Errorf("<post - cancel> invalid post action at line %v - %v: %v", n.line, n.pos, n)
 	}
 	return t, nil
 }
@@ -415,7 +439,7 @@ LOOP:
 	//convert this into a tree
 	for _, v := range queue {
 		if v.Op != "" {
-			fmt.Printf("%v ", v.Op)
+			// fmt.Printf("%v ", v.Op)
 			//pop 2 nodes from tree
 			if len(ts) < 2 {
 				panic("tree stack less than 2 before operator")
@@ -424,11 +448,11 @@ LOOP:
 			v.Right, ts = ts[len(ts)-1], ts[:len(ts)-1]
 			ts = append(ts, v)
 		} else {
-			fmt.Printf("%v ", v.Expr)
+			// fmt.Printf("%v ", v.Expr)
 			ts = append(ts, v)
 		}
 	}
-	fmt.Printf("\n")
+	// fmt.Printf("\n")
 
 	root = ts[0]
 	return root, nil
@@ -442,7 +466,7 @@ LOOP:
 		//look for a field
 		n = p.next()
 		if n.typ != itemField {
-			return c, fmt.Errorf("<if> bad token at line %v - %v: %v", n.line, n.pos, n)
+			return c, fmt.Errorf("<if - field> bad token at line %v - %v: %v", n.line, n.pos, n)
 		}
 		c.Fields = append(c.Fields, n.val)
 		//see if any more fields
@@ -455,17 +479,17 @@ LOOP:
 	//scan for comparison op
 	n = p.next()
 	if n.typ <= itemCompareOp || n.typ >= itemKeyword {
-		return c, fmt.Errorf("<if> bad token at line %v - %v: %v", n.line, n.pos, n)
+		return c, fmt.Errorf("<if - comp> bad token at line %v - %v: %v", n.line, n.pos, n)
 	}
 	c.Op = n
 	//scan for value
 	n = p.next()
 	if n.typ != itemNumber {
-		return c, fmt.Errorf("<if> bad token at line %v - %v: %v", n.line, n.pos, n)
+		return c, fmt.Errorf("<if - num> bad token at line %v - %v: %v", n.line, n.pos, n)
 	}
 	val, err := strconv.ParseInt(n.val, 10, 64)
 	if err != nil {
-		return c, fmt.Errorf("<if> bad token at line %v - %v: %v", n.line, n.pos, n)
+		return c, fmt.Errorf("<if - strconv> bad token at line %v - %v: %v", n.line, n.pos, n)
 	}
 	c.Value = int(val)
 	return c, nil

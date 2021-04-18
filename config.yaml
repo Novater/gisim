@@ -1,7 +1,7 @@
 Label: "Test"
 Characters:
   - Base:
-      Name: Bennett
+      Name: bennett
       Level: 70
       Element: "pyro"
       BaseHP: 10129
@@ -74,7 +74,7 @@ Characters:
           CR: 0.031
           ATK: 35
   - Base:
-      Name: Xiangling
+      Name: xiangling
       Level: 80
       Element: "pyro"
       BaseHP: 9638
@@ -148,7 +148,7 @@ Characters:
           EM: 30
           DEF%: 0.053
   - Base:
-      Name: Fischl
+      Name: fischl
       Level: 70
       Element: "electro"
       BaseHP: 7508
@@ -226,7 +226,7 @@ Characters:
           ER%: 0.058
           HP: 568
   - Base:
-      Name: Xingqiu
+      Name: xingqiu
       Level: 70
       Element: "hydro"
       BaseHP: 8352
@@ -314,38 +314,21 @@ Enemy: #blazing axe mitachurl
     geo: 0.1
     anemo: 0.1
     physical: 0.3
-InitialActive: "Fischl"
-Rotation:
-  - CharacterName: "Xiangling"
-    Action: "skill"
-  - CharacterName: "Xiangling"
-    Action: "burst"
-  - CharacterName: "Xingqiu"
-    Action: "skill"
-    SwapLock: 100
-  - CharacterName: "Xingqiu"
-    Action: "burst"
-  - CharacterName: "Bennett"
-    Action: "burst"
-  - CharacterName: "Bennett"
-    Action: "skill"
-    ConditionType: "energy lt"
-    ConditionFloat: 5
-  - CharacterName: "Fischl"
-    Action: "burst"
-    ConditionType: "status"
-    ConditionTarget: "Fischl-Oz"
-    ConditionBool: false
-  - CharacterName: "Fischl"
-    Action: "skill"
-    ConditionType: "status"
-    ConditionTarget: "Fischl-Oz"
-    ConditionBool: false
-  - CharacterName: "Xiangling"
-    Action: "attack"
-  - CharacterName: "Xingqiu"
-    Action: "attack"
-  - CharacterName: "Bennett"
-    Action: "attack"
-  - CharacterName: "Fischl"
-    Action: "attack"
+InitialActive: "xingqiu"
+Rotation: >
+  actions+=sequence_strict target=xingqiu exec=skill,burst lock=100;
+  actions+=skill target=xingqiu if=.status.xingqiu.energy<80 lock=100;
+  actions+=burst target=xingqiu;
+  actions+=burst target=bennett;
+  actions+=sequence_strict target=xiangling exec=skill,burst;
+  actions+=skill target=xiangling active=xiangling;
+  actions+=burst target=fischl if=.status.xiangling.energy<70&&.tags.fischl.oz==0 swap=xiangling;
+  actions+=skill target=fischl if=.status.xiangling.energy<70&&.tags.fischl.oz==0 swap=xiangling;
+  actions+=burst target=fischl if=.tags.fischl.oz==0;
+  actions+=skill target=fischl if=.tags.fischl.oz==0;
+  actions+=skill target=bennett if=.status.xiangling.energy<40 swap=xiangling;
+  actions+=skill target=bennett;
+  actions+=attack target=xiangling;
+  actions+=attack target=xingqiu active=xingqiu;
+  actions+=attack target=bennett active=bennett;
+  actions+=attack target=fischl active=fischl;

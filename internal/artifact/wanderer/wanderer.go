@@ -1,6 +1,9 @@
 package wanderer
 
-import "github.com/srliao/gisim/pkg/combat"
+import (
+	"github.com/srliao/gisim/internal/rotation"
+	"github.com/srliao/gisim/pkg/combat"
+)
 
 func init() {
 	combat.RegisterSetFunc("Wanderer's Troupe", set)
@@ -16,7 +19,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 		//NOT YET IMPLEMENTED
 		//we now need a weapon type flag....
 		s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-			if ds.AbilType != combat.ActionTypeChargedAttack {
+			if ds.AbilType != rotation.ActionCharge {
 				return false
 			}
 			if ds.WeaponClass != combat.WeaponClassCatalyst && ds.WeaponClass != combat.WeaponClassBow {

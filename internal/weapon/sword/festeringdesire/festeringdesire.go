@@ -1,6 +1,9 @@
 package festeringdesire
 
-import "github.com/srliao/gisim/pkg/combat"
+import (
+	"github.com/srliao/gisim/internal/rotation"
+	"github.com/srliao/gisim/pkg/combat"
+)
 
 func init() {
 	combat.RegisterWeaponFunc("Festering Desire", weapon)
@@ -29,7 +32,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if ds.Actor != c.Name() {
 			return false
 		}
-		if ds.AbilType == combat.ActionTypeSkill {
+		if ds.AbilType == rotation.ActionSkill {
 			s.Log.Debugf("\t Festering desire adding %v dmg %v crit", dmg, crit)
 			ds.Stats[combat.CR] += crit
 			ds.DmgBonus += dmg

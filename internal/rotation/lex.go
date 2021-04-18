@@ -237,7 +237,13 @@ func lexText(l *lexer) stateFn {
 	case r == '#':
 		return lexComment
 	case r == '=':
-		l.emit(itemAssign)
+		n := l.next()
+		if n == '=' {
+			l.emit(OpEqual)
+		} else {
+			l.backup()
+			l.emit(itemAssign)
+		}
 	case r == ':':
 		if l.next() != '=' {
 			return l.errorf("expected :=")

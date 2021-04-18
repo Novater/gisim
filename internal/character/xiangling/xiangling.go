@@ -3,11 +3,12 @@ package xiangling
 import (
 	"fmt"
 
+	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
 func init() {
-	combat.RegisterCharFunc("Xiangling", NewChar)
+	combat.RegisterCharFunc("xiangling", NewChar)
 }
 
 type xl struct {
@@ -22,8 +23,8 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		return nil, err
 	}
 	x.CharacterTemplate = t
-	x.Energy = 60
-	x.MaxEnergy = 60
+	x.Energy = 80
+	x.MaxEnergy = 80
 	x.Weapon.Class = combat.WeaponClassSpear
 	x.delayedFunc = make(map[int]func())
 
@@ -54,7 +55,7 @@ func (x *xl) c6() {
 func (x *xl) Attack(p int) int {
 	//register action depending on number in chain
 	//3 and 4 need to be registered as multi action
-	d := x.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical, combat.WeakDurability)
+	d := x.Snapshot("Normal", rotation.ActionAttack, combat.Physical, combat.WeakDurability)
 	//figure out which hit it is
 	var hits [][]float64
 	reset := false
@@ -116,7 +117,7 @@ func (x *xl) Attack(p int) int {
 }
 
 func (x *xl) ChargeAttack(p int) int {
-	d := x.Snapshot("Charge Attack", combat.ActionTypeChargedAttack, combat.Physical, combat.WeakDurability)
+	d := x.Snapshot("Charge Attack", rotation.ActionCharge, combat.Physical, combat.WeakDurability)
 	d.Mult = nc[x.TalentLvlAttack()]
 
 	//no delay for now? realistically the hits should have delay but not sure if it actually makes a diff
@@ -142,7 +143,7 @@ func (x *xl) Skill(p int) int {
 		return 0
 	}
 
-	d := x.Snapshot("Guoba", combat.ActionTypeSkill, combat.Pyro, combat.WeakDurability)
+	d := x.Snapshot("Guoba", rotation.ActionSkill, combat.Pyro, combat.WeakDurability)
 	d.Mult = guoba[x.TalentLvlSkill()]
 	delay := 120
 
@@ -179,7 +180,7 @@ func (x *xl) Burst(p int) int {
 	lvl := x.TalentLvlBurst()
 	//initial 3 hits are delayed and snapshotted at execution instead of at cast... no idea why...
 	x.delayedFunc[x.S.F+20] = func() {
-		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
+		d := x.Snapshot("Pyronado", rotation.ActionBurst, combat.Pyro, combat.WeakDurability)
 		d.Mult = pyronado1[lvl]
 		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
@@ -188,7 +189,7 @@ func (x *xl) Burst(p int) int {
 	}
 
 	x.delayedFunc[x.S.F+50] = func() {
-		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
+		d := x.Snapshot("Pyronado", rotation.ActionBurst, combat.Pyro, combat.WeakDurability)
 		d.Mult = pyronado2[lvl]
 		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
@@ -197,7 +198,7 @@ func (x *xl) Burst(p int) int {
 	}
 
 	x.delayedFunc[x.S.F+75] = func() {
-		d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
+		d := x.Snapshot("Pyronado", rotation.ActionBurst, combat.Pyro, combat.WeakDurability)
 		d.Mult = pyronado3[lvl]
 		x.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
@@ -206,7 +207,7 @@ func (x *xl) Burst(p int) int {
 	}
 
 	//spin to win; snapshot on cast
-	d := x.Snapshot("Pyronado", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
+	d := x.Snapshot("Pyronado", rotation.ActionBurst, combat.Pyro, combat.WeakDurability)
 	d.Mult = pyronadoSpin[lvl]
 
 	//ok for now we assume it's 80 (or 70??) frames per cycle, that gives us roughly 10s uptime

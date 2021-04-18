@@ -1,167 +1,115 @@
 package combat
 
 import (
-	"errors"
-	"log"
+	"strings"
 
 	"github.com/srliao/gisim/internal/rotation"
 )
 
-func FindNextAction(s *Sim) (ActionItem, error) {
-	for _, a := range s.actions {
-		if s.isAbilityReady(a) && s.abilityConditionsOk(a) {
-			return a, nil
-		}
-	}
-	return ActionItem{}, errors.New("no ability available")
-}
-
-func (s *Sim) abilityConditionsOk(a ActionItem) bool {
-
-	switch a.ConditionType {
-	case "status":
-		s.Log.Debugw("\t current status", "map", s.Status)
-		return s.StatusActive(a.ConditionTarget) == a.ConditionBool
-	case "energy lt":
-		//check if target energy < threshold
-		t := s.Chars[a.index].CurrentEnergy()
-		if t > a.ConditionFloat {
-			return false
-		}
-	case "cd":
-		return s.Chars[a.index].ActionReady(ActionType(a.ConditionTarget)) == a.ConditionBool
-	case "tags":
-		t := s.Chars[a.index].Tag(a.ConditionTarget)
-		s.Log.Debugw("\t checking for tags", "want", a.ConditionInt, "got", t, "action", a)
-		if t != a.ConditionInt {
-			return false
-		}
-	}
-	return true
-}
-
-func (s *Sim) isAbilityReady(a ActionItem) bool {
-	//check if character is active
-	if a.CharacterName != s.ActiveChar && s.SwapCD > 0 {
-		return false
-	}
-	//ask the char if the ability is off cooldown
-	ready := s.Chars[a.index].ActionReady(a.Action)
-	if ready {
-		// s.Log.Infof("[%v]\t\t action %v is ready", s.Frame(), a)
-		//check stam cost
-		if a.Action == ActionTypeChargedAttack {
-			cost := s.Chars[a.index].ChargeAttackStam()
-			if cost > s.Stam {
-				return false
-			}
-		}
-	}
-	return ready
-}
-
-func (s *Sim) executeAbilityQueue(a ActionItem) int {
-
-	c := s.Chars[s.ActiveIndex]
-
-	s.Log.Infof("[%v] %v executing %v", s.Frame(), s.ActiveChar, a.Action)
-	f := 0
-	switch a.Action {
-	case ActionTypeDash:
-		f = 30
-	case ActionTypeJump:
-		f = 30
-	case ActionTypeAttack:
-		f = c.Attack(a.Params)
-	case ActionTypeChargedAttack:
-		f = c.ChargeAttack(a.Params)
-	case ActionTypeAimedShot:
-		f = c.Aimed(a.Params)
-	case ActionTypeBurst:
-		s.executeEventHook(PreBurstHook)
-		f = c.Burst(a.Params)
-		s.executeEventHook(PostBurstHook)
-	case ActionTypeSkill:
-		f = c.Skill(a.Params)
-	}
-
-	if a.SwapLock > 0 {
-		s.SwapCD += a.SwapLock
-		s.Log.Debugw("\t locking swap", "swaplock", a.SwapLock, "new cd", s.SwapCD)
-	}
-
-	s.Stats.AbilUsageCountByChar[c.Name()][string(a.Action)]++
-
-	return f
-}
-
-//ActionItem ...
-type ActionItem struct {
-	CharacterName   string     `yaml:"CharacterName"`
-	Action          ActionType `yaml:"Action"`
-	Params          int        `yaml:"Params"`
-	ConditionType   string     `yaml:"ConditionType"`   //for now either a status or aura
-	ConditionTarget string     `yaml:"ConditionTarget"` //which status or aura
-	ConditionBool   bool       `yaml:"ConditionBool"`   //true or false
-	ConditionFloat  float64    `yaml:"ConditionFloat"`
-	ConditionInt    int        `yaml:"ConditionInt"`
-	SwapLock        int        `yaml:"SwapLock"`      //number of frames the sim is restricted from swapping after executing this ability
-	CancelAbility   ActionType `yaml:"CancelAbility"` //ability to execute to cancel this action
-	index           int
-}
-
-type ActionType string
-
-//ActionType constants
-const (
-	//motions
-	ActionTypeSwap ActionType = "swap"
-	ActionTypeDash ActionType = "dash"
-	ActionTypeJump ActionType = "jump"
-	//main actions
-	ActionTypeAttack    ActionType = "attack"
-	ActionTypeAimedShot ActionType = "aimed"
-	ActionTypeSkill     ActionType = "skill"
-	ActionTypeBurst     ActionType = "burst"
-	//derivative actions
-	ActionTypeChargedAttack ActionType = "charge"
-	ActionTypePlungeAttack  ActionType = "plunge"
-	//procs
-	ActionTypeSpecialProc ActionType = "proc"
-	//xiao special
-	ActionTypeXiaoLowJump  ActionType = "xiao-low-jump"
-	ActionTypeXiaoHighJump ActionType = "xiao-high-jump"
-)
-
 func (s *Sim) queueNext() int {
 NEXT:
-	for _, v := range s.prio {
+	for i, v := range s.prio {
+		ind, ok := s.charPos[v.Target]
+		if !ok {
+			continue NEXT
+		}
 		//check active char
 		if v.ActiveCond != "" {
 			if v.ActiveCond != s.ActiveChar {
 				continue NEXT
 			}
 		}
-		var next rotation.ActionItem
-		if v.IsSeq {
-			//if strict every action in sequence has to be ready
-			if v.IsStrict {
-				for _, a := range v.Exec {
-					log.Println("check if is ready", a)
-				}
-			} else {
-				//otherwise just the current abil in sequence has to bready
-				next = v.Exec[v.Pos]
+		//check if we need to swap for this, and if so is swapcd = 0
+		if v.Target != s.ActiveChar {
+			if s.SwapCD > 0 {
+				continue NEXT
 			}
-		} else {
-			//otherwise just one abil
-			next = v.Exec[0]
 		}
-		log.Println("check if is ready", next)
+
+		char := s.Chars[ind]
+		ready := false
+
+		switch {
+		case v.IsSeq && v.IsStrict:
+			ready = true
+			for _, a := range v.Exec {
+				ready = ready && char.ActionReady(a.Typ)
+			}
+		case v.IsSeq:
+			if v.Pos >= len(v.Exec) {
+				ready = false
+			} else {
+				ready = char.ActionReady(v.Exec[v.Pos].Typ)
+			}
+		default:
+			ready = char.ActionReady(v.Exec[0].Typ)
+		}
+
+		if !ready {
+			continue NEXT
+		}
 
 		//walk the tree
+		if v.Conditions != nil {
+			if !s.evalTree(v.Conditions) {
+				continue NEXT
+			}
+		}
 
-		//add post actions, swap, swap to, lock
+		//add this point ability is ready and we can queue
+		//if active char is not current, then add swap first to queue
+		if s.ActiveChar != v.Target {
+			s.actionQueue = append(s.actionQueue, rotation.ActionItem{
+				Target: v.Target,
+				Typ:    rotation.ActionSwap,
+			})
+		}
+		//queue up the abilities
+		l := 1
+		switch {
+		case v.IsSeq && v.IsStrict:
+			s.actionQueue = append(s.actionQueue, v.Exec...)
+			l = len(v.Exec)
+		case v.IsSeq:
+			s.actionQueue = append(s.actionQueue, v.Exec[v.Pos])
+			v.Pos++
+		default:
+			s.actionQueue = append(s.actionQueue, v.Exec[0])
+		}
+
+		//check for swap lock
+		if v.SwapLock > 0 {
+			s.SwapCD += v.SwapLock
+			s.Log.Debugw("\t locking swap", "swaplock", v.SwapLock, "new cd", s.SwapCD)
+		}
+		//check for any cancel actions
+		switch v.PostAction {
+		case rotation.ActionDash:
+			s.actionQueue = append(s.actionQueue, rotation.ActionItem{
+				Typ: rotation.ActionDash,
+			})
+			l++
+			s.Log.Debugf("\t queueing dash cancel")
+		case rotation.ActionJump:
+			s.actionQueue = append(s.actionQueue, rotation.ActionItem{
+				Typ: rotation.ActionJump,
+			})
+			l++
+			s.Log.Debugf("\t queueing jump cancel")
+		}
+		//check for any force swaps at the end
+		if v.SwapTo != "" {
+			if _, ok := s.charPos[v.SwapTo]; ok {
+				s.actionQueue = append(s.actionQueue, rotation.ActionItem{
+					Target: v.SwapTo,
+					Typ:    rotation.ActionSwap,
+				})
+				l++
+				s.Log.Debugw("\t adding swap cancel", "target", v.SwapTo, "swapped from", v.Target)
+			}
+		}
+		s.Log.Debugf("adding rotation item %v to queue", i)
+		return l
 	}
 	return 0 //return now many items added to queue
 }
@@ -173,28 +121,33 @@ func (s *Sim) execQueue() int {
 		if i == 0 {
 			return 0
 		}
+		s.Log.Debugw("new action queue", "len", i, "queue", s.actionQueue)
 	}
 	var n rotation.ActionItem
 	//otherwise pop first item on queue and execute
-	n, s.actionQueue = s.actionQueue[len(s.actionQueue)-1], s.actionQueue[:len(s.actionQueue)-1]
+	n, s.actionQueue = s.actionQueue[0], s.actionQueue[1:]
 	c := s.Chars[s.ActiveIndex]
 	f := 0
 	switch n.Typ {
 	case rotation.ActionSkill:
-		c.Skill(n.Param)
+		f = c.Skill(n.Param)
 	case rotation.ActionBurst:
-		c.Burst(n.Param)
+		f = c.Burst(n.Param)
 	case rotation.ActionAttack:
-		c.Attack(n.Param)
+		f = c.Attack(n.Param)
 	case rotation.ActionCharge:
-		c.ChargeAttack(n.Param)
+		f = c.ChargeAttack(n.Param)
 	case rotation.ActionHighPlunge:
 	case rotation.ActionLowPlunge:
 	case rotation.ActionAim:
-		c.Aimed(n.Param)
+		f = c.Aimed(n.Param)
 	case rotation.ActionSwap:
 		f = 20
 		s.SwapCD = 150
+		ind := s.charPos[n.Target]
+		s.ActiveChar = n.Target
+		s.ActiveIndex = ind
+		s.Log.Infof("swapped to %v", n.Target)
 	case rotation.ActionCancellable:
 	case rotation.ActionDash:
 		f = 30
@@ -202,13 +155,34 @@ func (s *Sim) execQueue() int {
 		f = 30
 	}
 
+	s.Stats.AbilUsageCountByChar[c.Name()][n.Typ.String()]++
+
 	// s.Log.Infof("[%v] %v executing %v", s.Frame(), s.ActiveChar, a.Action)
+	s.Log.Infof("[%v] action executed; skip %v swap cd %v", s.Frame(), f, s.SwapCD)
 
 	return f
 }
 
-func (s *Sim) evalTree() bool {
-	return true
+func (s *Sim) evalTree(node *rotation.ExprTreeNode) bool {
+	//recursively evaluate tree nodes
+	if node.IsLeaf {
+		return s.evalCond(node.Expr)
+	}
+	//so this is a node, then we want to evalute the left and right
+	//and then apply operator on both and return that
+	left := s.evalTree(node.Left)
+	right := s.evalTree(node.Right)
+	s.Log.Debugw("evaluating tree node", "left val", left, "right val", right, "node", node)
+	switch node.Op {
+	case "||":
+		return left || right
+	case "&&":
+		return left && right
+	default:
+		//if unrecognized op then return false
+		return false
+	}
+
 }
 
 func (s *Sim) evalCond(c rotation.Condition) bool {
@@ -216,9 +190,103 @@ func (s *Sim) evalCond(c rotation.Condition) bool {
 		panic("unexpected short field")
 	}
 	switch c.Fields[0] {
-	case "buff":
-	case "debuff":
-	case "cd":
+	case ".buff":
+
+	case ".debuff":
+	case ".cd":
+		return s.evalCD(c)
+	case ".status":
+		return s.evalStatus(c)
+	case ".tags":
+		return s.evalTags(c)
 	}
-	return true
+	return false
+}
+
+func (s *Sim) evalCD(c rotation.Condition) bool {
+	//check target is valid
+	name := strings.TrimPrefix(c.Fields[1], ".")
+	ci, ok := s.charPos[name]
+	if !ok {
+		return false
+	}
+	x := s.Chars[ci]
+	cd := -1 // -1 if cd does not exist
+	switch c.Fields[2] {
+	case ".skill":
+		cd = x.Cooldown(rotation.ActionSkill)
+	case ".burst":
+		cd = x.Cooldown(rotation.ActionBurst)
+	}
+	if cd == -1 {
+		return false
+	}
+	//check vs the conditions
+	return compInt(c.Op.String(), cd, c.Value)
+}
+
+func (s *Sim) evalStatus(c rotation.Condition) bool {
+	//check target is valid
+	name := strings.TrimPrefix(c.Fields[1], ".")
+	ci, ok := s.charPos[name]
+	if !ok {
+		return false
+	}
+	x := s.Chars[ci]
+	switch c.Fields[2] {
+	case ".energy":
+		e := x.CurrentEnergy()
+		return compFloat(c.Op.String(), e, float64(c.Value))
+	default:
+		return false
+	}
+}
+
+func (s *Sim) evalTags(c rotation.Condition) bool {
+	//check target is valid
+	name := strings.TrimPrefix(c.Fields[1], ".")
+	ci, ok := s.charPos[name]
+	if !ok {
+		return false
+	}
+	x := s.Chars[ci]
+	v := x.Tag(c.Fields[2])
+	s.Log.Debugw("evaluating tags", "char", x.Name(), "targ", c.Fields[2], "val", v)
+	return compInt(c.Op.String(), v, c.Value)
+}
+
+func compFloat(op string, a, b float64) bool {
+	switch op {
+	case "==":
+		return a == b
+	case "!=":
+		return a != b
+	case ">":
+		return a > b
+	case ">=":
+		return a >= b
+	case "<":
+		return a < b
+	case "<=":
+		return a <= b
+	}
+	return false
+}
+
+func compInt(op string, a, b int) bool {
+	switch op {
+	case "==":
+		return a == b
+	case "!=":
+		return a != b
+	case ">":
+		return a > b
+	case ">=":
+		return a >= b
+	case "<":
+		return a < b
+	case "<=":
+		return a <= b
+	}
+	return false
 }

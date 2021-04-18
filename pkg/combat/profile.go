@@ -5,7 +5,7 @@ type Profile struct {
 	Enemy         EnemyProfile       `yaml:"Enemy"`
 	InitialActive string             `yaml:"InitialActive"`
 	Characters    []CharacterProfile `yaml:"Characters"`
-	Rotation      []ActionItem       `yaml:"Rotation"`
+	Rotation      string             `yaml:"Rotation"`
 	LogConfig     LogConfig
 }
 

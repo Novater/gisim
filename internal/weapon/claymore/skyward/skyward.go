@@ -3,6 +3,7 @@ package skyward
 import (
 	"fmt"
 
+	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -58,7 +59,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 			return false
 		}
 		//check if this is normal or charged
-		if ds.AbilType != combat.ActionTypeAttack && ds.AbilType != combat.ActionTypeChargedAttack {
+		if ds.AbilType != rotation.ActionAttack && ds.AbilType != rotation.ActionCharge {
 			return false
 		}
 
@@ -73,7 +74,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 
 		counter++
 		//add a new action that deals % dmg immediately
-		d := c.Snapshot("Skyward Pride Proc", combat.ActionTypeSpecialProc, combat.Physical, combat.WeakDurability)
+		d := c.Snapshot("Skyward Pride Proc", rotation.ActionSpecialProc, combat.Physical, combat.WeakDurability)
 		d.Mult = dmg
 		s.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)

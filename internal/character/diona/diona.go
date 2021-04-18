@@ -5,7 +5,7 @@ import (
 )
 
 func init() {
-	combat.RegisterCharFunc("Diona", NewChar)
+	combat.RegisterCharFunc("diona", NewChar)
 }
 
 type diona struct {

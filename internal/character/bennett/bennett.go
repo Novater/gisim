@@ -4,11 +4,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
 func init() {
-	combat.RegisterCharFunc("Bennett", NewChar)
+	combat.RegisterCharFunc("bennett", NewChar)
 }
 
 type bennett struct {
@@ -44,7 +45,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		b.S.Log.Debugf("\t applying Bennet burst buff; adding %v", atk)
 		ds.Stats[combat.ATK] += atk
 		if b.Base.Cons == 6 {
-			ok := ds.AbilType == combat.ActionTypeAttack || ds.AbilType == combat.ActionTypeChargedAttack
+			ok := ds.AbilType == rotation.ActionAttack || ds.AbilType == rotation.ActionCharge
 			ok = ok && (ds.WeaponClass == combat.WeaponClassSpear || ds.WeaponClass == combat.WeaponClassSword || ds.WeaponClass == combat.WeaponClassClaymore)
 			if ok {
 				ds.Element = combat.Pyro
@@ -60,7 +61,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 func (b *bennett) Attack(p int) int {
 	//register action depending on number in chain
 	//3 and 4 need to be registered as multi action
-	d := b.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical, combat.MedDurability)
+	d := b.Snapshot("Normal", rotation.ActionAttack, combat.Physical, combat.MedDurability)
 	//figure out which hit it is
 	var hits []float64
 	reset := false
@@ -152,7 +153,7 @@ func (b *bennett) Skill(p int) int {
 	sb.WriteString("-Hit-")
 
 	for i, s := range hits {
-		d := b.Snapshot("Passion Overload", combat.ActionTypeSkill, combat.Pyro, combat.MedDurability)
+		d := b.Snapshot("Passion Overload", rotation.ActionSkill, combat.Pyro, combat.MedDurability)
 		d.Mult = s[b.TalentLvlBurst()]
 		t := i + 1
 		sb.WriteString(strconv.Itoa(t))
@@ -210,7 +211,7 @@ func (b *bennett) Burst(p int) int {
 
 	//hook for buffs; active right away after cast
 
-	d := b.Snapshot("Fantastic Voyage", combat.ActionTypeBurst, combat.Pyro, combat.MedDurability)
+	d := b.Snapshot("Fantastic Voyage", rotation.ActionBurst, combat.Pyro, combat.MedDurability)
 	d.Mult = burst[b.TalentLvlBurst()]
 
 	b.S.AddTask(func(s *combat.Sim) {

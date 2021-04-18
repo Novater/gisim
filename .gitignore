@@ -5,3 +5,4 @@ graph.csv
 *.pdf
 gisim
 *.pprof
+.DS_Store

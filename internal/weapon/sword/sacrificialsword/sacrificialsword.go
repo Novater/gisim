@@ -1,6 +1,7 @@
 package sacrificialsword
 
 import (
+	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -32,7 +33,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if snap.Actor != c.Name() {
 			return false
 		}
-		if snap.AbilType != combat.ActionTypeSkill {
+		if snap.AbilType != rotation.ActionSkill {
 			return false
 		}
 		if s.StatusActive("Sacrificial Sword Proc") {
@@ -43,7 +44,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		}
 		s.Log.Debugf("\t Sacrificial Sword proc triggered")
 
-		c.ResetActionCooldown(combat.ActionTypeSkill)
+		c.ResetActionCooldown(rotation.ActionSkill)
 
 		s.Status["Sacrificial Sword Proc"] = s.F + cd
 		return false

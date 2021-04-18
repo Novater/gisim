@@ -1,6 +1,9 @@
 package blacksword
 
-import "github.com/srliao/gisim/pkg/combat"
+import (
+	"github.com/srliao/gisim/internal/rotation"
+	"github.com/srliao/gisim/pkg/combat"
+)
 
 func init() {
 	combat.RegisterWeaponFunc("Black Sword", weapon)
@@ -20,7 +23,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 	}
 	//add on hit effect to sim?
 	s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-		if ds.AbilType == combat.ActionTypeAttack || ds.AbilType == combat.ActionTypeChargedAttack {
+		if ds.AbilType == rotation.ActionAttack || ds.AbilType == rotation.ActionCharge {
 			s.Log.Debugf("\t\tBlack sword adding %v dmg", dmg)
 			ds.DmgBonus += dmg
 		}

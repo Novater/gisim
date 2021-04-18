@@ -1,6 +1,7 @@
 package skyward
 
 import (
+	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -27,7 +28,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if ds.Actor != c.Name() {
 			return false
 		}
-		if ds.AbilType != combat.ActionTypeAttack && ds.AbilType != combat.ActionTypeChargedAttack {
+		if ds.AbilType != rotation.ActionAttack && ds.AbilType != rotation.ActionCharge {
 			return false
 		}
 		if lock > 0 {

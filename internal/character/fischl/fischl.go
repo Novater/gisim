@@ -1,11 +1,12 @@
 package fischl
 
 import (
+	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
 func init() {
-	combat.RegisterCharFunc("Fischl", NewChar)
+	combat.RegisterCharFunc("fischl", NewChar)
 }
 
 type fischl struct {
@@ -56,7 +57,7 @@ func (f *fischl) turbo() {
 		if f.ozActiveUntil < f.S.F {
 			return false
 		}
-		if ds.AbilType != combat.ActionTypeSkill {
+		if ds.AbilType != rotation.ActionSkill {
 			return false
 		}
 		if f.S.GlobalFlags.ReactionType != combat.Overload && f.S.GlobalFlags.ReactionType != combat.Superconduct {
@@ -96,7 +97,7 @@ func (f *fischl) a4() {
 			return false
 		}
 
-		d := f.Snapshot("Fischl A4", combat.ActionTypeSpecialProc, combat.Electro, 0)
+		d := f.Snapshot("Fischl A4", rotation.ActionSpecialProc, combat.Electro, 0)
 		d.Mult = 0.8
 		if f.ozAttackCounter%4 == 0 {
 			//apply aura, add to timer
@@ -123,10 +124,10 @@ func (f *fischl) c1() {
 		if ds.Actor != "Fischl" {
 			return false
 		}
-		if ds.AbilType != combat.ActionTypeAttack {
+		if ds.AbilType != rotation.ActionAttack {
 			return false
 		}
-		d := f.Snapshot("Fischl C1", combat.ActionTypeSpecialProc, combat.Physical, combat.WeakDurability)
+		d := f.Snapshot("Fischl C1", rotation.ActionSpecialProc, combat.Physical, combat.WeakDurability)
 		d.Mult = 0.22
 		f.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
@@ -143,11 +144,11 @@ func (f *fischl) c6() {
 		if f.ozActiveUntil < f.S.F {
 			return false
 		}
-		if ds.AbilType != combat.ActionTypeAttack {
+		if ds.AbilType != rotation.ActionAttack {
 			return false
 		}
 
-		d := f.Snapshot("Fischl C6", combat.ActionTypeSpecialProc, combat.Electro, 0)
+		d := f.Snapshot("Fischl C6", rotation.ActionSpecialProc, combat.Electro, 0)
 		d.Mult = 0.3
 		if f.ozAttackCounter%4 == 0 {
 			//apply aura, add to timer
@@ -214,7 +215,7 @@ func (f *fischl) Skill(p int) int {
 	f.S.Status["Fischl-Oz"] = f.S.F + 600 + c6extend
 
 	//always trigger electro no ICD on initial summon
-	d := f.Snapshot("Oz", combat.ActionTypeSkill, combat.Electro, combat.WeakDurability)
+	d := f.Snapshot("Oz", rotation.ActionSkill, combat.Electro, combat.WeakDurability)
 	d.Mult = birdSum[f.TalentLvlSkill()]
 	if f.Base.Cons >= 2 {
 		d.Mult += 2
@@ -226,7 +227,7 @@ func (f *fischl) Skill(p int) int {
 	}, "Fischl Skill Initial", 1)
 
 	//set on field oz to be this one
-	f.ozSnapshot = f.Snapshot("Oz", combat.ActionTypeSkill, combat.Electro, 0)
+	f.ozSnapshot = f.Snapshot("Oz", rotation.ActionSkill, combat.Electro, 0)
 	f.ozSnapshot.Mult = birdAtk[f.TalentLvlSkill()]
 
 	f.CD[combat.SkillCD] = f.S.F + 25*60
@@ -260,7 +261,7 @@ func (f *fischl) Burst(p int) int {
 	f.S.Status["Fischl-Oz"] = f.S.F + 600 + c6extend
 
 	//initial damage; part of the burst tag
-	d := f.Snapshot("Midnight Phantasmagoria", combat.ActionTypeBurst, combat.Electro, combat.WeakDurability)
+	d := f.Snapshot("Midnight Phantasmagoria", rotation.ActionBurst, combat.Electro, combat.WeakDurability)
 	d.Mult = burst[f.TalentLvlBurst()]
 	//apply initial damage
 	f.S.AddTask(func(s *combat.Sim) {
@@ -270,7 +271,7 @@ func (f *fischl) Burst(p int) int {
 
 	//check for C4 damage
 	if f.Base.Cons >= 4 {
-		d1 := f.Snapshot("Midnight Phantasmagoria C4", combat.ActionTypeSpecialProc, combat.Electro, 0)
+		d1 := f.Snapshot("Midnight Phantasmagoria C4", rotation.ActionSpecialProc, combat.Electro, 0)
 		d1.Mult = 2.22
 		f.S.AddTask(func(s *combat.Sim) {
 			damage := s.ApplyDamage(d)
@@ -279,7 +280,7 @@ func (f *fischl) Burst(p int) int {
 	}
 
 	//snapshot for Oz
-	f.ozSnapshot = f.Snapshot("Midnight Phantasmagoria (Oz)", combat.ActionTypeSkill, combat.Electro, 0)
+	f.ozSnapshot = f.Snapshot("Midnight Phantasmagoria (Oz)", rotation.ActionSkill, combat.Electro, 0)
 	f.ozSnapshot.Mult = birdAtk[f.TalentLvlSkill()]
 
 	f.Energy = 0
@@ -292,6 +293,7 @@ func (f *fischl) Tick() {
 
 	//check if oz is active
 	if f.ozActiveUntil > f.S.F {
+		f.Tags["oz"] = 1
 		//check if icd is reset
 		if f.ozICD < f.S.F {
 			f.ozAttackCounter = 0
@@ -301,6 +303,8 @@ func (f *fischl) Tick() {
 			//ok now we should shoot
 			f.ozAttack()
 		}
+	} else {
+		f.Tags["oz"] = 0
 	}
 
 }

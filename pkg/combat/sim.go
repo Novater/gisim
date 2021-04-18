@@ -35,8 +35,6 @@ type Sim struct {
 	Stats       SimStats
 	//reaction related
 	TargetAura Aura
-	//overwritable functions
-	FindNextAction func(s *Sim) (ActionItem, error)
 
 	Rand        *rand.Rand
 	particles   map[int][]Particle
@@ -51,7 +49,6 @@ type Sim struct {
 	eventHooks    map[eventHookType]map[string]eventHookFunc
 
 	//action actions list
-	actions     []ActionItem
 	prio        []rotation.Action
 	actionQueue []rotation.ActionItem
 }
@@ -77,7 +74,6 @@ type SimStats struct {
 //New creates new sim from given profile
 func New(p Profile) (*Sim, error) {
 	s := &Sim{}
-	s.FindNextAction = FindNextAction
 	s.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	u := &Enemy{}
@@ -100,15 +96,28 @@ func New(p Profile) (*Sim, error) {
 		return nil, err
 	}
 
-	for i, v := range p.Rotation {
-		//make sure char exists
-		pos, ok := s.charPos[v.CharacterName]
-		if !ok {
-			return nil, fmt.Errorf("invalid character %v in rotation list", v.CharacterName)
-		}
-		p.Rotation[i].index = pos
+	parser := rotation.New("sim", p.Rotation)
+	rotation, err := parser.Parse()
+	if err != nil {
+		return nil, err
 	}
-	s.actions = p.Rotation
+	//double check names
+	cust := make(map[string]int)
+	for i, v := range rotation {
+		if v.Name != "" {
+			cust[v.Name] = i
+		}
+		// log.Println(v.Conditions)
+	}
+	for _, v := range rotation {
+		_, ok := cust[v.Target]
+		_, ck := s.charPos[v.Target]
+		if !ok && !ck {
+			return nil, fmt.Errorf("invalid char in rotation %v", v.Target)
+		}
+	}
+
+	s.prio = rotation
 
 	//add other hooks
 	return s, nil
@@ -264,27 +273,8 @@ func (s *Sim) RunHPMode(hp float64) (float64, SimStats) {
 			continue
 		}
 
-		next, err := s.FindNextAction(s)
-		s.Log.Infof("[%v] off skip, next action: %v swap cd %v", s.Frame(), next, s.SwapCD)
-		if err != nil {
-			s.Log.Infof("[%v] no action found (%v)", s.Frame(), next)
-			//skip this round
-			continue
-		}
-
-		if s.ActiveChar != next.CharacterName {
-			//swap
-			s.Log.Infof("[%v] swapping from %v to %v; cd: %v action %v", s.Frame(), s.ActiveChar, next.CharacterName, s.SwapCD, next)
-			s.SwapCD = 150
-			skip = 20
-			s.ActiveChar = next.CharacterName
-			s.ActiveIndex = next.index
-			continue
-		}
-
 		//other wise excute
-		skip = s.executeAbilityQueue(next)
-		s.Log.Infof("[%v] action executed; skip %v swap cd %v", s.Frame(), skip, s.SwapCD)
+		skip = s.execQueue()
 	}
 
 	return s.Target.Damage, s.Stats
@@ -325,26 +315,8 @@ func (s *Sim) Run(length int) (float64, SimStats) {
 			continue
 		}
 
-		next, err := s.FindNextAction(s)
-		s.Log.Infof("[%v] off skip, next action: %v swap cd %v", s.Frame(), next, s.SwapCD)
-		if err != nil {
-			s.Log.Infof("[%v] no action found (%v)", s.Frame(), next)
-			//skip this round
-			continue
-		}
-
-		if s.ActiveChar != next.CharacterName {
-			//swap
-			s.Log.Infof("[%v] swapping from %v to %v; cd: %v action %v", s.Frame(), s.ActiveChar, next.CharacterName, s.SwapCD, next)
-			s.SwapCD = 150
-			skip = 20
-			s.ActiveChar = next.CharacterName
-			s.ActiveIndex = next.index
-			continue
-		}
-
 		//other wise excute
-		skip = s.executeAbilityQueue(next)
+		skip = s.execQueue()
 		s.Log.Infof("[%v] action executed; skip %v swap cd %v", s.Frame(), skip, s.SwapCD)
 	}
 

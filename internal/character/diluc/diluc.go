@@ -3,11 +3,12 @@ package diluc
 import (
 	"fmt"
 
+	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
 func init() {
-	combat.RegisterCharFunc("Diluc", NewChar)
+	combat.RegisterCharFunc("diluc", NewChar)
 }
 
 type diluc struct {
@@ -62,7 +63,7 @@ func (d *diluc) burstHook() {
 		if ds.Actor != d.Base.Name {
 			return false
 		}
-		if ds.AbilType != combat.ActionTypeAttack {
+		if ds.AbilType != rotation.ActionAttack {
 			return false
 		}
 		if _, ok := d.S.Status["Diluc Burst"]; !ok {
@@ -97,7 +98,7 @@ func (d *diluc) Attack(p int) int {
 	//apply attack speed
 	frames = int(float64(frames) / (1 + d.Stats[combat.AtkSpd]))
 
-	x := d.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical, combat.WeakDurability)
+	x := d.Snapshot("Normal", rotation.ActionAttack, combat.Physical, combat.WeakDurability)
 	x.Mult = auto[d.NormalCounter][d.TalentLvlAttack()]
 
 	d.S.AddTask(func(s *combat.Sim) {
@@ -139,7 +140,7 @@ func (d *diluc) Skill(p int) int {
 	//apply attack speed
 	frames = int(float64(frames) / (1 + d.Stats[combat.AtkSpd]))
 
-	x := d.Snapshot("Searing Onslaught", combat.ActionTypeSkill, combat.Pyro, combat.WeakDurability)
+	x := d.Snapshot("Searing Onslaught", rotation.ActionSkill, combat.Pyro, combat.WeakDurability)
 	x.Mult = skill[d.eCounter][d.TalentLvlSkill()]
 
 	d.S.AddTask(func(s *combat.Sim) {
@@ -165,7 +166,7 @@ func (d *diluc) Burst(p int) int {
 	d.S.Status["Diluc Burst"] = 12 * 60
 
 	//add initial damage
-	x := d.Snapshot("Dawn (Initial)", combat.ActionTypeBurst, combat.Pyro, combat.WeakDurability)
+	x := d.Snapshot("Dawn (Initial)", rotation.ActionBurst, combat.Pyro, combat.WeakDurability)
 	x.Mult = burstInitial[d.TalentLvlBurst()]
 
 	d.S.AddTask(func(s *combat.Sim) {

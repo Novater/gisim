@@ -1,6 +1,9 @@
 package gladiator
 
-import "github.com/srliao/gisim/pkg/combat"
+import (
+	"github.com/srliao/gisim/internal/rotation"
+	"github.com/srliao/gisim/pkg/combat"
+)
 
 func init() {
 	combat.RegisterSetFunc("Gladiator's Finale", set)
@@ -14,7 +17,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 	}
 	if count >= 4 {
 		s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-			if ds.AbilType != combat.ActionTypeAttack {
+			if ds.AbilType != rotation.ActionAttack {
 				return false
 			}
 			if ds.WeaponClass != combat.WeaponClassSpear && ds.WeaponClass != combat.WeaponClassSword && ds.WeaponClass != combat.WeaponClassClaymore {

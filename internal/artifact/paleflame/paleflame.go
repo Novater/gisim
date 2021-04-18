@@ -1,6 +1,9 @@
 package paleflame
 
-import "github.com/srliao/gisim/pkg/combat"
+import (
+	"github.com/srliao/gisim/internal/rotation"
+	"github.com/srliao/gisim/pkg/combat"
+)
 
 func init() {
 	combat.RegisterSetFunc("Pale Flame", set)
@@ -36,7 +39,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			if ds.Actor != c.Name() {
 				return false
 			}
-			if ds.AbilType != combat.ActionTypeSkill {
+			if ds.AbilType != rotation.ActionSkill {
 				return false
 			}
 			if lock > 0 {
