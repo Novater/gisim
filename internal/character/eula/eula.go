@@ -59,12 +59,13 @@ func (e *eula) a4() {
 			return false
 		}
 		//reset CD, add 1 stack
-		v := e.Tags["Grimheart"]
+		v := e.Tags["grimheart"]
 		if v < 2 {
 			v++
 		}
-		e.Tags["Grimheart"] = v
+		e.Tags["grimheart"] = v
 
+		s.Log.Debugf("\t Eula A4 resetting skill CD, new cd %v", s.F-1)
 		e.CD[combat.SkillCD] = s.F - 1
 
 		return false
@@ -181,11 +182,11 @@ func (e *eula) pressE() {
 	e.S.AddEnergyParticles("Eula", n, combat.Cryo, 100)
 
 	//add 1 stack to Grimheart
-	v := e.Tags["Grimheart"]
+	v := e.Tags["grimheart"]
 	if v < 2 {
 		v++
 	}
-	e.Tags["Grimheart"] = v
+	e.Tags["grimheart"] = v
 	e.S.Log.Debugf("\t Eula Grimheart stacks %v", v)
 	e.grimheartReset = 18 * 60
 
@@ -206,7 +207,7 @@ func (e *eula) holdE() {
 	}, "Eula-Skill-Hold", 108)
 
 	//multiple brand hits
-	v := e.Tags["Grimheart"]
+	v := e.Tags["grimheart"]
 
 	for i := 0; i < v; i++ {
 		d := e.Snapshot("Icetide (Icewhirl)", rotation.ActionSkill, combat.Cryo, combat.WeakDurability)
@@ -246,7 +247,7 @@ func (e *eula) holdE() {
 		Duration: 7 * v * 60,
 	})
 
-	e.Tags["Grimheart"] = 0
+	e.Tags["grimheart"] = 0
 	e.CD[combat.SkillCD] = e.S.F + 10*60 + 62
 }
 
@@ -288,7 +289,7 @@ func (e *eula) Tick() {
 	e.CharacterTemplate.Tick()
 	e.grimheartReset--
 	if e.grimheartReset == 0 {
-		e.Tags["Grimheart"] = 0
+		e.Tags["grimheart"] = 0
 	}
 }
 

@@ -138,7 +138,7 @@ func (p *Parser) Parse() ([]Action, error) {
 		case 0:
 			//the next keyword needs to be action, other wise we have an error
 			if n.typ != itemAction {
-				return r, fmt.Errorf("<action> bad token at line %v: %v", n.line, n)
+				return r, fmt.Errorf("<action start> bad token at line %v: %v", n.line, n)
 			}
 			next = Action{}
 			next.sourceLine = n.line
@@ -198,11 +198,13 @@ func (p *Parser) Parse() ([]Action, error) {
 
 func (p *Parser) parseActionItem(next *Action) error {
 	n := p.next()
+	// log.Println(n)
 	if n.typ != itemAddToList {
 		return fmt.Errorf("<action> bad token at line %v: %v", n.line, n)
 	}
 	//next should be a keyword
 	n = p.next()
+	// log.Println(n)
 	if n.typ != itemIdentifier {
 		return fmt.Errorf("<action> bad token at line %v: %v", n.line, n)
 	}
@@ -226,8 +228,10 @@ func (p *Parser) parseActionItem(next *Action) error {
 			next.Exec = append(next.Exec, a)
 			return nil
 		}
+		// log.Println(n)
 		//next should be numbers
 		n = p.next()
+		// log.Println(n)
 		if n.typ != itemNumber {
 			return fmt.Errorf("<action> invalid number at line %v: %v", n.line, n)
 		}
@@ -241,6 +245,8 @@ func (p *Parser) parseActionItem(next *Action) error {
 		if n.typ != itemRightSquareParen {
 			return fmt.Errorf("<action> bad token at line %v: %v", n.line, n)
 		}
+		// log.Println(n)
+		next.Exec = append(next.Exec, a)
 
 	}
 
@@ -312,7 +318,7 @@ LOOP:
 			//next should be numbers
 			n = p.next()
 			if n.typ != itemNumber {
-				return nil, fmt.Errorf("<action> invalid number at line %v: %v", n.line, n)
+				return nil, fmt.Errorf("<exec - num> invalid number at line %v: %v", n.line, n)
 			}
 			x, err := strconv.ParseInt(n.val, 10, 64)
 			if err != nil {
@@ -323,7 +329,7 @@ LOOP:
 			//then we have close bracket
 			n = p.next()
 			if n.typ != itemRightSquareParen {
-				return nil, fmt.Errorf("<action> bad token at line %v: %v", n.line, n)
+				return nil, fmt.Errorf("<exec - right paren> bad token at line %v: %v", n.line, n)
 			}
 		} else {
 			p.backup()

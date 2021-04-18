@@ -5,33 +5,21 @@ import (
 	"testing"
 )
 
-var s = `#chain skill into burst if both skill and burst are ready, stay for at least 100 frames
-actions+=sequence_strict 
-	target=Xingqiu 
-	exec=skill[1],burst[2]
-	lock=100
-	if=.cd.Xingqiu.burst<>0;
-
-actions+=sequence_strict 
-	target=Xingqiu 
-	exec=skill[2],burst[1]
-	lock=100
-	if=.cd.Xingqiu.burst<>0&&(.cd.Xingqiu.burst<>0||.cd.Xingqiu.burst<>0);
-
-actions+=sequence_strict target=xingqiu exec=skill,burst lock=100;
-actions+=skill target=xingqiu if=.status.xingqiu.energy<80;
-actions+=burst target=xingqiu;
-actions+=burst target=bennett;
-actions+=sequence_strict target=xiangling exec=skill,burst;
-actions+=skill target=xiangling active=xiangling;
-actions+=skill target=bennett if=.status.xiangling.energy<70&&.cd.xiangling.burst<120 swap=xiangling;
-actions+=burst target=fischl if=.status.xiangling.energy<70&&.buff.fischl.oz==0 swap=xiangling;
-actions+=skill target=fischl if=.status.xiangling.energy<70&&.buff.fischl.oz==0 swap=xiangling;
-actions+=burst target=fischl if=.buff.fischl.oz==0;
-actions+=skill target=fischl if=.buff.fischl.oz==0;
-actions+=attack target=xingqiu active=xingqiu;
-actions+=attack target=xiangling active=xiangling;
-actions+=attack target=bennett active=bennett;
+var s = `
+actions+=burst target=fischl if=.tags.fischl.oz==0;
+actions+=skill target=fischl if=.tags.fischl.oz==0;
+actions+=sequence_strict
+  target=eula
+  exec=skill,burst,skill[1],attack,attack,attack,attack,dash,attack,attack,attack,attack;
+#use hold E, but only if burst is not coming off cd in 10s
+actions+=skill[1]
+  target=eula
+  if=.cd.eula.burst>600&&.tags.eula.grimheart==2;
+#use e, but only if burst is not coming off cd in 4 seconds
+actions+=skill
+  target=eula
+  if=.cd.eula.burst>240;
+actions+=attack target=eula;
 actions+=attack target=fischl active=fischl;
 `
 

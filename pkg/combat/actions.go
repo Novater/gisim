@@ -132,7 +132,9 @@ func (s *Sim) execQueue() int {
 	case rotation.ActionSkill:
 		f = c.Skill(n.Param)
 	case rotation.ActionBurst:
+		s.executeEventHook(PreBurstHook)
 		f = c.Burst(n.Param)
+		s.executeEventHook(PostBurstHook)
 	case rotation.ActionAttack:
 		f = c.Attack(n.Param)
 	case rotation.ActionCharge:
@@ -148,10 +150,11 @@ func (s *Sim) execQueue() int {
 			f += s.SwapCD
 		}
 		s.SwapCD = 150
+		s.Log.Infof("[%v] swapped from %v to %v", s.Frame(), s.ActiveChar, n.Target)
 		ind := s.charPos[n.Target]
 		s.ActiveChar = n.Target
 		s.ActiveIndex = ind
-		s.Log.Infof("[%v] swapped from %v to %v", s.Frame(), s.ActiveChar, n.Target)
+
 	case rotation.ActionCancellable:
 	case rotation.ActionDash:
 		f = 30
@@ -254,7 +257,8 @@ func (s *Sim) evalTags(c rotation.Condition) bool {
 		return false
 	}
 	x := s.Chars[ci]
-	v := x.Tag(c.Fields[2])
+	tag := strings.TrimPrefix(c.Fields[2], ".")
+	v := x.Tag(tag)
 	s.Log.Debugw("evaluating tags", "char", x.Name(), "targ", c.Fields[2], "val", v)
 	return compInt(c.Op.String(), v, c.Value)
 }

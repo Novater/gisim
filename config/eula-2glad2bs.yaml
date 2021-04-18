@@ -1,7 +1,7 @@
-Label: "Test"
+Label: "Eula 2 glad 2 bloodstained"
 Characters:
   - Base:
-      Name: Eula
+      Name: eula
       Level: 90
       Element: "cryo"
       BaseHP: 13226
@@ -69,7 +69,7 @@ Characters:
         Main:
           CR: 0.311
   - Base:
-      Name: Fischl
+      Name: fischl
       Level: 70
       Element: "electro"
       BaseHP: 7508
@@ -147,7 +147,7 @@ Characters:
           ER%: 0.058
           HP: 568
   - Base:
-      Name: Xingqiu
+      Name: xingqiu
       Level: 70
       Element: "hydro"
       BaseHP: 8352
@@ -225,7 +225,7 @@ Characters:
           DEF: 42
           CD: 0.14
   - Base:
-      Name: Diona
+      Name: diona
       Level: 70
       Element: "cryo"
       BaseHP: 8352
@@ -286,7 +286,12 @@ Enemy:
     geo: 0.1
     anemo: 0.1
     physical: 0.1
-InitialActive: "Eula"
+InitialActive: "fischl"
 Rotation: >
   actions+=burst target=fischl if=.tags.fischl.oz==0;
   actions+=skill target=fischl if=.tags.fischl.oz==0;
+  actions+=sequence_strict target=eula exec=skill,burst,skill,attack,attack,attack,attack,dash,attack,attack,skill[1],attack,attack;
+  actions+=skill[1] target=eula if=.tags.eula.grimheart==2;
+  actions+=skill target=eula;
+  actions+=attack target=eula;
+  actions+=attack target=fischl active=fischl;
