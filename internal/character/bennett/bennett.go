@@ -57,7 +57,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	return &b, nil
 }
 
-func (b *bennett) Attack(p map[string]interface{}) int {
+func (b *bennett) Attack(p int) int {
 	//register action depending on number in chain
 	//3 and 4 need to be registered as multi action
 	d := b.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical, combat.MedDurability)
@@ -125,19 +125,13 @@ func (b *bennett) ChargeAttackStam() float64 {
 	return 20
 }
 
-func (b *bennett) Skill(p map[string]interface{}) int {
+func (b *bennett) Skill(p int) int {
 	cd := b.CD[combat.SkillCD]
 	if cd > b.S.F {
 		b.S.Log.Debugf("\tBennett skill still on CD; skipping")
 		return 0
 	}
-	hold := 0
-	if v, ok := p["Hold"]; ok {
-		h, n := v.(int)
-		if n {
-			hold = h
-		}
-	}
+	hold := p
 	var sb strings.Builder
 	sb.WriteString("Bennett-Skill-Hold-")
 	var hits [][]float64
@@ -197,7 +191,7 @@ func (b *bennett) Skill(p map[string]interface{}) int {
 	return 52
 }
 
-func (b *bennett) Burst(p map[string]interface{}) int {
+func (b *bennett) Burst(p int) int {
 	cd := b.CD[combat.BurstCD]
 	if cd > b.S.F {
 		b.S.Log.Debugf("\tBennett burst still on CD; skipping")

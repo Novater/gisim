@@ -187,14 +187,14 @@ func (f *fischl) ozAttack() {
 	}
 }
 
-func (f *fischl) Attack(p map[string]interface{}) int {
+func (f *fischl) Attack(p int) int {
 
 	frames := []int{29, 21, 40, 45, 31}
 	delay := []int{40, 40, 40, 40, 40}
 	return f.CharacterTemplate.AttackHelperSingle(frames, delay, auto)
 }
 
-func (f *fischl) Skill(p map[string]interface{}) int {
+func (f *fischl) Skill(p int) int {
 	cd := f.CD[combat.SkillCD]
 	if cd > f.S.F {
 		f.S.Log.Debugf("\tFischl skill still on CD; skipping")
@@ -234,7 +234,7 @@ func (f *fischl) Skill(p map[string]interface{}) int {
 	return 40
 }
 
-func (f *fischl) Burst(p map[string]interface{}) int {
+func (f *fischl) Burst(p int) int {
 	cd := f.CD[combat.BurstCD]
 	if cd > f.S.F {
 		f.S.Log.Debugf("\t Fischl burst still on CD; skipping")

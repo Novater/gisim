@@ -26,7 +26,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	return &n, nil
 }
 
-func (n *ningguang) Attack(p map[string]interface{}) int {
+func (n *ningguang) Attack(p int) int {
 
 	return 0
 }

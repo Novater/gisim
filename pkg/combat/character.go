@@ -10,12 +10,12 @@ type Character interface {
 	TalentLvlAttack() int
 	TalentLvlBurst() int
 	//affect the unit
-	Attack(p map[string]interface{}) int
-	Aimed(p map[string]interface{}) int
-	ChargeAttack(p map[string]interface{}) int
-	PlungeAttack(p map[string]interface{}) int
-	Skill(p map[string]interface{}) int
-	Burst(p map[string]interface{}) int
+	Attack(p int) int
+	Aimed(p int) int
+	ChargeAttack(p int) int
+	PlungeAttack(p int) int
+	Skill(p int) int
+	Burst(p int) int
 	Tick() //function to be called every frame
 	//special char mods
 	AddMod(key string, val map[StatType]float64)
@@ -227,7 +227,7 @@ func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType, d flo
 	return ds
 }
 
-func (c *CharacterTemplate) Attack(p map[string]interface{}) int {
+func (c *CharacterTemplate) Attack(p int) int {
 	return 0
 }
 
@@ -259,11 +259,11 @@ func (c *CharacterTemplate) AttackHelperSingle(frames []int, delay []int, mult [
 	return f
 }
 
-func (c *CharacterTemplate) Aimed(p map[string]interface{}) int {
+func (c *CharacterTemplate) Aimed(p int) int {
 	return 0
 }
 
-func (c *CharacterTemplate) ChargeAttack(p map[string]interface{}) int {
+func (c *CharacterTemplate) ChargeAttack(p int) int {
 	return 0
 }
 
@@ -271,15 +271,15 @@ func (c *CharacterTemplate) ChargeAttackStam() float64 {
 	return 0
 }
 
-func (c *CharacterTemplate) PlungeAttack(p map[string]interface{}) int {
+func (c *CharacterTemplate) PlungeAttack(p int) int {
 	return 0
 }
 
-func (c *CharacterTemplate) Skill(p map[string]interface{}) int {
+func (c *CharacterTemplate) Skill(p int) int {
 	return 0
 }
 
-func (c *CharacterTemplate) Burst(p map[string]interface{}) int {
+func (c *CharacterTemplate) Burst(p int) int {
 	return 0
 }
 

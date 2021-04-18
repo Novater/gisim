@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/srliao/gisim/internal/rotation"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -50,7 +51,9 @@ type Sim struct {
 	eventHooks    map[eventHookType]map[string]eventHookFunc
 
 	//action actions list
-	actions []ActionItem
+	actions     []ActionItem
+	prio        []rotation.Action
+	actionQueue []rotation.ActionItem
 }
 
 type Flags struct {
@@ -191,6 +194,8 @@ func (s *Sim) initMaps() {
 	s.Stats.CharActiveTime = make(map[string]int)
 	s.Stats.AbilUsageCountByChar = make(map[string]map[string]int)
 	s.Stats.ReactionsTriggered = make(map[ReactionType]int)
+
+	s.actionQueue = make([]rotation.ActionItem, 0, 10)
 }
 
 func (s *Sim) initLogs(p LogConfig) error {

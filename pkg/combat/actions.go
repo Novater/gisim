@@ -1,6 +1,11 @@
 package combat
 
-import "errors"
+import (
+	"errors"
+	"log"
+
+	"github.com/srliao/gisim/internal/rotation"
+)
 
 func FindNextAction(s *Sim) (ActionItem, error) {
 	for _, a := range s.actions {
@@ -92,16 +97,16 @@ func (s *Sim) executeAbilityQueue(a ActionItem) int {
 
 //ActionItem ...
 type ActionItem struct {
-	CharacterName   string                 `yaml:"CharacterName"`
-	Action          ActionType             `yaml:"Action"`
-	Params          map[string]interface{} `yaml:"Params"`
-	ConditionType   string                 `yaml:"ConditionType"`   //for now either a status or aura
-	ConditionTarget string                 `yaml:"ConditionTarget"` //which status or aura
-	ConditionBool   bool                   `yaml:"ConditionBool"`   //true or false
-	ConditionFloat  float64                `yaml:"ConditionFloat"`
-	ConditionInt    int                    `yaml:"ConditionInt"`
-	SwapLock        int                    `yaml:"SwapLock"`      //number of frames the sim is restricted from swapping after executing this ability
-	CancelAbility   ActionType             `yaml:"CancelAbility"` //ability to execute to cancel this action
+	CharacterName   string     `yaml:"CharacterName"`
+	Action          ActionType `yaml:"Action"`
+	Params          int        `yaml:"Params"`
+	ConditionType   string     `yaml:"ConditionType"`   //for now either a status or aura
+	ConditionTarget string     `yaml:"ConditionTarget"` //which status or aura
+	ConditionBool   bool       `yaml:"ConditionBool"`   //true or false
+	ConditionFloat  float64    `yaml:"ConditionFloat"`
+	ConditionInt    int        `yaml:"ConditionInt"`
+	SwapLock        int        `yaml:"SwapLock"`      //number of frames the sim is restricted from swapping after executing this ability
+	CancelAbility   ActionType `yaml:"CancelAbility"` //ability to execute to cancel this action
 	index           int
 }
 
@@ -127,3 +132,93 @@ const (
 	ActionTypeXiaoLowJump  ActionType = "xiao-low-jump"
 	ActionTypeXiaoHighJump ActionType = "xiao-high-jump"
 )
+
+func (s *Sim) queueNext() int {
+NEXT:
+	for _, v := range s.prio {
+		//check active char
+		if v.ActiveCond != "" {
+			if v.ActiveCond != s.ActiveChar {
+				continue NEXT
+			}
+		}
+		var next rotation.ActionItem
+		if v.IsSeq {
+			//if strict every action in sequence has to be ready
+			if v.IsStrict {
+				for _, a := range v.Exec {
+					log.Println("check if is ready", a)
+				}
+			} else {
+				//otherwise just the current abil in sequence has to bready
+				next = v.Exec[v.Pos]
+			}
+		} else {
+			//otherwise just one abil
+			next = v.Exec[0]
+		}
+		log.Println("check if is ready", next)
+
+		//walk the tree
+
+		//add post actions, swap, swap to, lock
+	}
+	return 0 //return now many items added to queue
+}
+
+func (s *Sim) execQueue() int {
+	//if length of q is 0, search for next
+	if len(s.actionQueue) == 0 {
+		i := s.queueNext()
+		if i == 0 {
+			return 0
+		}
+	}
+	var n rotation.ActionItem
+	//otherwise pop first item on queue and execute
+	n, s.actionQueue = s.actionQueue[len(s.actionQueue)-1], s.actionQueue[:len(s.actionQueue)-1]
+	c := s.Chars[s.ActiveIndex]
+	f := 0
+	switch n.Typ {
+	case rotation.ActionSkill:
+		c.Skill(n.Param)
+	case rotation.ActionBurst:
+		c.Burst(n.Param)
+	case rotation.ActionAttack:
+		c.Attack(n.Param)
+	case rotation.ActionCharge:
+		c.ChargeAttack(n.Param)
+	case rotation.ActionHighPlunge:
+	case rotation.ActionLowPlunge:
+	case rotation.ActionAim:
+		c.Aimed(n.Param)
+	case rotation.ActionSwap:
+		f = 20
+		s.SwapCD = 150
+	case rotation.ActionCancellable:
+	case rotation.ActionDash:
+		f = 30
+	case rotation.ActionJump:
+		f = 30
+	}
+
+	// s.Log.Infof("[%v] %v executing %v", s.Frame(), s.ActiveChar, a.Action)
+
+	return f
+}
+
+func (s *Sim) evalTree() bool {
+	return true
+}
+
+func (s *Sim) evalCond(c rotation.Condition) bool {
+	if len(c.Fields) < 3 {
+		panic("unexpected short field")
+	}
+	switch c.Fields[0] {
+	case "buff":
+	case "debuff":
+	case "cd":
+	}
+	return true
+}

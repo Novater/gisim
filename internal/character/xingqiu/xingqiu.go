@@ -48,7 +48,7 @@ func (x *xingqiu) c2() {
 	})
 }
 
-func (x *xingqiu) Attack(p map[string]interface{}) int {
+func (x *xingqiu) Attack(p int) int {
 	//register action depending on number in chain
 	//3 and 4 need to be registered as multi action
 	//figure out which hit it is
@@ -103,7 +103,7 @@ func (x *xingqiu) Attack(p map[string]interface{}) int {
 	return frames
 }
 
-func (x *xingqiu) Skill(p map[string]interface{}) int {
+func (x *xingqiu) Skill(p int) int {
 	//applies wet to self 30 frame after cast
 	if x.CD[combat.SkillCD] > x.S.F {
 		x.S.Log.Debugf("\tXingqiu skill still on CD; skipping")
@@ -203,7 +203,7 @@ func (x *xingqiu) burstHook() {
 	}, "Xingqiu-Burst", combat.PostDamageHook)
 }
 
-func (x *xingqiu) Burst(p map[string]interface{}) int {
+func (x *xingqiu) Burst(p int) int {
 	//apply hydro every 3rd hit
 	//triggered on normal attack
 	//not sure what ICD is

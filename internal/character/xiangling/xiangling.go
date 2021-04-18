@@ -51,7 +51,7 @@ func (x *xl) c6() {
 	}, "Xiangling C6", combat.PostSnapshot)
 }
 
-func (x *xl) Attack(p map[string]interface{}) int {
+func (x *xl) Attack(p int) int {
 	//register action depending on number in chain
 	//3 and 4 need to be registered as multi action
 	d := x.Snapshot("Normal", combat.ActionTypeAttack, combat.Physical, combat.WeakDurability)
@@ -115,7 +115,7 @@ func (x *xl) Attack(p map[string]interface{}) int {
 	return frames
 }
 
-func (x *xl) ChargeAttack(p map[string]interface{}) int {
+func (x *xl) ChargeAttack(p int) int {
 	d := x.Snapshot("Charge Attack", combat.ActionTypeChargedAttack, combat.Physical, combat.WeakDurability)
 	d.Mult = nc[x.TalentLvlAttack()]
 
@@ -135,7 +135,7 @@ func (x *xl) ChargeAttackStam() float64 {
 	return 25
 }
 
-func (x *xl) Skill(p map[string]interface{}) int {
+func (x *xl) Skill(p int) int {
 	//check if on cd first
 	if x.CD[combat.SkillCD] > x.S.F {
 		x.S.Log.Debugf("\tXiangling skill still on CD; skipping")
@@ -165,7 +165,7 @@ func (x *xl) Skill(p map[string]interface{}) int {
 	return 26
 }
 
-func (x *xl) Burst(p map[string]interface{}) int {
+func (x *xl) Burst(p int) int {
 	//check if on cd first
 	if x.CD[combat.BurstCD] > x.S.F {
 		x.S.Log.Debugf("\tXiangling skill still on CD; skipping")

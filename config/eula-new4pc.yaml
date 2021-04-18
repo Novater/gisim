@@ -299,8 +299,7 @@ Rotation:
     SwapLock: 480
   - CharacterName: "Eula"
     Action: "skill"
-    Params:
-      Hold: 1
+    Params: 1
     ConditionType: "tags"
     ConditionTarget: "Grimheart"
     ConditionInt: 2

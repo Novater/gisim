@@ -26,7 +26,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	return &d, nil
 }
 
-func (d *diona) Attack(p map[string]interface{}) int {
+func (d *diona) Attack(p int) int {
 
 	frames := []int{29, 21, 40, 45, 31}
 	delay := []int{40, 40, 40, 40, 40}

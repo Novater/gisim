@@ -1,0 +1,42 @@
+#chain skill into burst if both skill and burst are ready, stay for at least 100 frames
+actions+=sequence_strict,char=xingqiu,skill:burst,lock=100
+#use skill only if energy < 80
+actions+=skill,char=xingqiu,if=.energy.xingqiu<80
+#use burst
+actions+=burst,char=xingqiu
+
+actions+=burst,char=bennett
+
+#use guoba + burst if both ready
+actions+=sequence_strict,char=xiangling,skill:burst
+#use guoba only if already on xiangling, don't swap to xiangling just for this
+actions+=skill,char=xiangling,if=.active.xiangling==1
+
+#bennet e to funnel into xiangling if xiangling Q almost up and not full energy
+actions+=skill,char=bennett,if=.energy.xiangling<70&&.cd.xiangling.burst<120,swap=xiangling
+
+#fischl to funnel into xiangling if xiangling energy not full
+#use burst first
+actions+=burst,char=fischl,if=.energy.xiangling<80&&.buff.fischl.oz==0,swap=xiangling
+#then skill
+actions+=skill,char=fischl,if=.energy.xiangling<80&&.buff.fischl.oz==0,swap=xiangling
+
+#if xiangling doesn't need funnel then just cast it like normal
+actions+=burst,char=fischl,if=.buff.fischl.oz==0
+actions+=skill,char=fischl,if=.buff.fischl.oz==0
+
+actions+=attack,char=xingqiu,if=.active.xingqiu==1
+actions+=attack,char=xiangling,if=.active.xiangling==1
+actions+=attack,char=bennett,if=.active.bennett==1
+actions+=attack,char=fischl,if=.active.fischl==1
+
+
+##next action will queue up a bunch of actions, and if the queue is empty, it gets called again
+
+
+so i guess u would have soemthing that looks liek this then? 
+```
+actions+=skill,char=bennett,if=energy.xiangling<80&&cd.childe.burst>0
+actions+=skill,char=sucrose,if=aura==hydro&&buff.vv<=0&&cd.childe.burst>0
+actions+=charge,char=childe,if=cd.childe.burst>0
+```

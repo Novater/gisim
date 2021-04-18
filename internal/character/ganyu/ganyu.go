@@ -53,7 +53,7 @@ func (g *ganyu) c1() {
 	}, "ganyu-c1", combat.PostDamageHook)
 }
 
-func (g *ganyu) Aimed(p map[string]interface{}) int {
+func (g *ganyu) Aimed(p int) int {
 	f := g.Snapshot("Frost Flake Arrow", combat.ActionTypeAimedShot, combat.Cryo, combat.WeakDurability)
 	f.HitWeakPoint = true
 	f.Mult = ffa[g.TalentLvlAttack()]
@@ -84,7 +84,7 @@ func (g *ganyu) Aimed(p map[string]interface{}) int {
 	return 137
 }
 
-func (g *ganyu) Skill(p map[string]interface{}) int {
+func (g *ganyu) Skill(p int) int {
 	//if c2, check if either cd is cooldown
 	charge := ""
 	c2onCD := g.CD["skill-cd-2"] > g.S.F
@@ -123,7 +123,7 @@ func (g *ganyu) Skill(p map[string]interface{}) int {
 	return 30
 }
 
-func (g *ganyu) Burst(p map[string]interface{}) int {
+func (g *ganyu) Burst(p int) int {
 	//check if on cd first
 	if g.CD[combat.BurstCD] > g.S.F {
 		g.S.Log.Debugf("\tGanyu burst still on CD; skipping")

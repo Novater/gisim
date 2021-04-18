@@ -93,7 +93,7 @@ func (e *eula) a4Old() {
 	}, "eula-a4", combat.OnCritDamage)
 }
 
-func (e *eula) Attack(p map[string]interface{}) int {
+func (e *eula) Attack(p int) int {
 	//register action depending on number in chain
 	//3 and 4 need to be registered as multi action
 
@@ -143,19 +143,13 @@ func (e *eula) Attack(p map[string]interface{}) int {
 	return frames
 }
 
-func (e *eula) Skill(p map[string]interface{}) int {
+func (e *eula) Skill(p int) int {
 	cd := e.CD[combat.SkillCD]
 	if cd >= e.S.F {
 		e.S.Log.Debugf("\t Eula skill still on CD; skipping")
 		return 0
 	}
-	hold := 0
-	if v, ok := p["Hold"]; ok {
-		h, n := v.(int)
-		if n {
-			hold = h
-		}
-	}
+	hold := p
 	switch hold {
 	default:
 		e.pressE()
@@ -257,7 +251,7 @@ func (e *eula) holdE() {
 
 //ult 365 to 415, 60fps = 120
 //looks like ult charges for 8 seconds
-func (e *eula) Burst(p map[string]interface{}) int {
+func (e *eula) Burst(p int) int {
 	e.S.Status["Eula Burst"] = e.S.F + 8*60
 	e.burstCounter = 0
 	lvl := e.TalentLvlBurst()

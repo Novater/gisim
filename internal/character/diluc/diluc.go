@@ -74,7 +74,7 @@ func (d *diluc) burstHook() {
 	}, "diluc-burst-infuse", combat.PostSnapshot)
 }
 
-func (d *diluc) Attack(p map[string]interface{}) int {
+func (d *diluc) Attack(p int) int {
 	reset := false
 	frames := 32 //first hit = 13 at 25fps
 	delay := 10  //frames between execution and damage
@@ -119,7 +119,7 @@ func (d *diluc) Attack(p map[string]interface{}) int {
 	return frames
 }
 
-func (d *diluc) Skill(p map[string]interface{}) int {
+func (d *diluc) Skill(p int) int {
 	reset := false
 	frames := 32 //first hit = 13 at 25fps
 	delay := 10  //frames between execution and damage
@@ -161,7 +161,7 @@ func (d *diluc) Skill(p map[string]interface{}) int {
 	return frames
 }
 
-func (d *diluc) Burst(p map[string]interface{}) int {
+func (d *diluc) Burst(p int) int {
 	d.S.Status["Diluc Burst"] = 12 * 60
 
 	//add initial damage
