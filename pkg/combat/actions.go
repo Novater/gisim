@@ -131,18 +131,22 @@ func (s *Sim) execQueue() int {
 	switch n.Typ {
 	case rotation.ActionSkill:
 		f = c.Skill(n.Param)
+		s.ResetAllNormalCounter()
 	case rotation.ActionBurst:
 		s.executeEventHook(PreBurstHook)
 		f = c.Burst(n.Param)
 		s.executeEventHook(PostBurstHook)
+		s.ResetAllNormalCounter()
 	case rotation.ActionAttack:
 		f = c.Attack(n.Param)
 	case rotation.ActionCharge:
 		f = c.ChargeAttack(n.Param)
+		s.ResetAllNormalCounter()
 	case rotation.ActionHighPlunge:
 	case rotation.ActionLowPlunge:
 	case rotation.ActionAim:
 		f = c.Aimed(n.Param)
+		s.ResetAllNormalCounter()
 	case rotation.ActionSwap:
 		f = 20
 		//if we're still in cd then forcefully wait up the cd
@@ -154,12 +158,14 @@ func (s *Sim) execQueue() int {
 		ind := s.charPos[n.Target]
 		s.ActiveChar = n.Target
 		s.ActiveIndex = ind
-
+		s.ResetAllNormalCounter()
 	case rotation.ActionCancellable:
 	case rotation.ActionDash:
-		f = 30
+		f = 24
+		s.ResetAllNormalCounter()
 	case rotation.ActionJump:
-		f = 30
+		f = 35
+		s.ResetAllNormalCounter()
 	}
 
 	s.Stats.AbilUsageCountByChar[c.Name()][n.Typ.String()]++
@@ -168,6 +174,12 @@ func (s *Sim) execQueue() int {
 	s.Log.Infof("[%v] %v executed %v; animation duration %v; swap cd %v", s.Frame(), s.ActiveChar, n.Typ.String(), f, s.SwapCD)
 
 	return f
+}
+
+func (s *Sim) ResetAllNormalCounter() {
+	for _, c := range s.Chars {
+		c.ResetNormalCounter()
+	}
 }
 
 func (s *Sim) evalTree(node *rotation.ExprTreeNode) bool {

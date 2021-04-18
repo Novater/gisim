@@ -239,7 +239,7 @@ func runIter(n, w int, src []byte, hp float64, dur int) {
 		}
 	}()
 
-	fmt.Print("\tProgress: 0")
+	fmt.Print("Progress: 0")
 
 	for count > 0 {
 		val := <-resp

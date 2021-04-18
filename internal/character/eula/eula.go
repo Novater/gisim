@@ -46,6 +46,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		}
 		//add to counter
 		e.burstCounter++
+		s.Log.Debugf("\t Eula burst adding 1 stack, current count %v", e.burstCounter)
 		e.S.Status["Eula Burst ICD"] = e.S.F + 6
 		return false
 	}, "Eula Burst", combat.PostDamageHook)
@@ -100,21 +101,21 @@ func (e *eula) Attack(p int) int {
 	//3 and 4 need to be registered as multi action
 
 	reset := false
-	frames := 28 //first hit = 13 at 25fps
-	delay := 10  //frames between execution and damage
+	frames := 29       //first hit = 13 at 25fps
+	delay := []int{11} //frames between execution and damage
 	switch e.NormalCounter {
 	case 1:
 		frames = 25 //47 - 35
-		delay = 10
+		delay = []int{25}
 	case 2:
 		frames = 65 //69
-		delay = 15
+		delay = []int{36, 49}
 	case 3:
 		frames = 33 //79
-		delay = 20
+		delay = []int{33}
 	case 4:
 		frames = 88 //118
-		delay = 66
+		delay = []int{45, 63}
 		reset = true
 	}
 
@@ -128,7 +129,7 @@ func (e *eula) Attack(p int) int {
 		e.S.AddTask(func(s *combat.Sim) {
 			damage, str := s.ApplyDamage(d)
 			s.Log.Infof("\t Eula normal %v hit %v dealt %.0f damage [%v]", e.NormalCounter, t, damage, str)
-		}, fmt.Sprintf("Eula-Normal-%v-%v", e.NormalCounter, t), delay)
+		}, fmt.Sprintf("Eula-Normal-%v-%v", e.NormalCounter, t), delay[i])
 	}
 
 	e.NormalCounter++
@@ -158,7 +159,7 @@ func (e *eula) Skill(p int) int {
 		return 34
 	case 1:
 		e.holdE()
-		return 70
+		return 80
 	}
 
 }
@@ -204,7 +205,7 @@ func (e *eula) holdE() {
 	e.S.AddTask(func(s *combat.Sim) {
 		damage, str := s.ApplyDamage(d)
 		s.Log.Infof("\t Eula skill (hold) dealt %.0f damage [%v]", damage, str)
-	}, "Eula-Skill-Hold", 108)
+	}, "Eula-Skill-Hold", 80)
 
 	//multiple brand hits
 	v := e.Tags["grimheart"]
@@ -216,7 +217,7 @@ func (e *eula) holdE() {
 		e.S.AddTask(func(s *combat.Sim) {
 			damage, str := s.ApplyDamage(d)
 			s.Log.Infof("\t Eula skill (ice whirl %v) dealt %.0f damage [%v]", t, damage, str)
-		}, "Eula-Skill-Hold-Icewhirl", 108)
+		}, "Eula-Skill-Hold-Icewhirl", 90+i*7) //we're basically forcing it so we get 3 stacks
 	}
 
 	//A2
@@ -226,7 +227,7 @@ func (e *eula) holdE() {
 		e.S.AddTask(func(s *combat.Sim) {
 			damage, str := s.ApplyDamage(d)
 			s.Log.Infof("\t Eula A2 on 2 Grimheart stacks dealt %.0f damage [%v]", damage, str)
-		}, "Eula-Skill-Hold-A2-Lightfall", 108)
+		}, "Eula-Skill-Hold-A2-Lightfall", 108) //we're basically forcing it so we get 3 stacks
 	}
 	//RANDOM GUESS
 	n := 3
@@ -254,7 +255,7 @@ func (e *eula) holdE() {
 //ult 365 to 415, 60fps = 120
 //looks like ult charges for 8 seconds
 func (e *eula) Burst(p int) int {
-	e.S.Status["Eula Burst"] = e.S.F + 8*60
+	e.S.Status["Eula Burst"] = e.S.F + 7*60 + 115 //add animation time
 	e.burstCounter = 0
 	lvl := e.TalentLvlBurst()
 	//add initial damage
@@ -264,7 +265,7 @@ func (e *eula) Burst(p int) int {
 	e.S.AddTask(func(s *combat.Sim) {
 		damage, str := s.ApplyDamage(d)
 		s.Log.Infof("\t Eula burst (initial) dealt %.0f damage [%v]", damage, str)
-	}, "Eula-Burst-Initial", 100) //guess frames
+	}, "Eula-Burst-Initial", 116) //guess frames
 
 	e.S.AddTask(func(s *combat.Sim) {
 		stacks := e.burstCounter
@@ -278,11 +279,11 @@ func (e *eula) Burst(p int) int {
 		s.Log.Infof("\t Eula burst (lightfall) dealt %.0f damage, %v stacks [%v]", damage, stacks, str)
 		e.S.Status["Eula Burst"] = e.S.F
 		e.burstCounter = 0
-	}, "Eula-Burst-Lightfall", 8*60+100) //after 8 seconds
+	}, "Eula-Burst-Lightfall", 7*60+116) //after 8 seconds
 
 	e.CD[combat.BurstCD] = e.S.F + 20*60
 	e.Energy = 0
-	return 112
+	return 116
 }
 
 func (e *eula) Tick() {
