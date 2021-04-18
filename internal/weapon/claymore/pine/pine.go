@@ -1,4 +1,4 @@
-package skyward
+package pine
 
 import (
 	"github.com/srliao/gisim/internal/rotation"

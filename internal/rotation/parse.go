@@ -63,7 +63,7 @@ var astr = []string{
 	"attack",
 	"charge",
 	"high_plunge",
-	"low_lunge",
+	"low_plunge",
 	"proc",
 	"aim",
 	"swap",

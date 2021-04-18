@@ -143,6 +143,10 @@ func (s *Sim) execQueue() int {
 		f = c.Aimed(n.Param)
 	case rotation.ActionSwap:
 		f = 20
+		//if we're still in cd then forcefully wait up the cd
+		if s.SwapCD > 0 {
+			f += s.SwapCD
+		}
 		s.SwapCD = 150
 		ind := s.charPos[n.Target]
 		s.ActiveChar = n.Target
