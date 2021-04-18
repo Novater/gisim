@@ -287,41 +287,6 @@ Enemy:
     anemo: 0.1
     physical: 0.1
 InitialActive: "Eula"
-Rotation:
-  # - CharacterName: "Xingqiu"
-  #   Action: "burst"
-  # - CharacterName: "Xingqiu"
-  #   Action: "skill"
-  - CharacterName: "Fischl"
-    Action: "burst"
-    ConditionType: "status"
-    ConditionTarget: "Fischl-Oz"
-    ConditionBool: false
-  - CharacterName: "Fischl"
-    Action: "skill"
-    ConditionType: "status"
-    ConditionTarget: "Fischl-Oz"
-    ConditionBool: false
-  # - CharacterName: "Xiangling"
-  #   Action: "burst"
-  # - CharacterName: "Xiangling"
-  #   Action: "skill"
-  - CharacterName: "Eula"
-    Action: "burst"
-    SwapLock: 480
-  - CharacterName: "Eula"
-    Action: "skill"
-    Params: 1
-    ConditionType: "tags"
-    ConditionTarget: "Grimheart"
-    ConditionInt: 2
-  - CharacterName: "Eula"
-    Action: "skill"
-  - CharacterName: "Eula"
-    Action: "attack"
-  # - CharacterName: "Xiangling"
-  #   Action: "attack"
-  - CharacterName: "Fischl"
-    Action: "attack"
-  # - CharacterName: "Xingqiu"
-  #   Action: "attack"
+Rotation: >
+  actions+=burst target=fischl if=.tags.fischl.oz==0;
+  actions+=skill target=fischl if=.tags.fischl.oz==0;
