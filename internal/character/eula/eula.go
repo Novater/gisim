@@ -217,7 +217,7 @@ func (e *eula) holdE() {
 		e.S.AddTask(func(s *combat.Sim) {
 			damage, str := s.ApplyDamage(d)
 			s.Log.Infof("\t Eula skill (ice whirl %v) dealt %.0f damage [%v]", t, damage, str)
-		}, "Eula-Skill-Hold-Icewhirl", 90+i*7) //we're basically forcing it so we get 3 stacks
+		}, "Eula-Skill-Hold-Icewhirl", 90) //we're basically forcing it so we get 3 stacks
 	}
 
 	//A2

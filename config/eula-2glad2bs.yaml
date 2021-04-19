@@ -17,17 +17,17 @@ Characters:
       skill: 6
       burst: 9
     Weapon:
-      WeaponName: "Skyward Pride"
-      WeaponRefinement: 1
-      WeaponBaseAtk: 674
-    WeaponSecondaryStat:
-      ER: 0.368
-    # Weapon:
-    #   WeaponName: "Song of Broken Pines"
+    #   WeaponName: "Skyward Pride"
     #   WeaponRefinement: 1
-    #   WeaponBaseAtk: 741
+    #   WeaponBaseAtk: 674
     # WeaponSecondaryStat:
-    #   Phys%: .207
+    #   ER: 0.368
+    Weapon:
+      WeaponName: "Song of Broken Pines"
+      WeaponRefinement: 1
+      WeaponBaseAtk: 741
+    WeaponSecondaryStat:
+      Phys%: .207
     # Weapon:
     #   WeaponName: "Wolf's Gravestone"
     #   WeaponRefinement: 1
@@ -47,25 +47,25 @@ Characters:
       Feather:
         Level: 20
         Type: "Feather"
-        Set: "Gladiator's Finale"
+        Set: "Pale Flame"
         Main:
           ATK: 311
       Sands:
         Level: 20
         Type: "Sands"
-        Set: "Gladiator's Finale"
+        Set: "Pale Flame"
         Main:
           ATK%: 0.466
       Goblet:
         Level: 20
         Type: "Goblet"
-        Set: "Bloodstained Chivalry"
+        Set: "Pale Flame"
         Main:
           Phys%: 0.466
       Circlet:
         Level: 20
         Type: "Circlet"
-        Set: "Bloodstained Chivalry"
+        Set: "Pale Flame"
         Main:
           CR: 0.311
   - Base:
@@ -288,10 +288,14 @@ Enemy:
     physical: 0.1
 InitialActive: "fischl"
 Rotation: >
+  actions+=sequence_strict target=xingqiu exec=skill,burst lock=100;
+  actions+=skill target=xingqiu if=.status.xingqiu.energy<80 lock=100;
+  actions+=burst target=xingqiu;
   actions+=burst target=fischl if=.tags.fischl.oz==0;
   actions+=skill target=fischl if=.tags.fischl.oz==0;
-  actions+=sequence_strict target=eula exec=skill,burst,skill,attack,attack,attack,attack,dash,attack,attack,skill[1],attack,attack;
+  actions+=sequence_strict target=eula exec=attack,attack,skill,burst,skill,attack,attack,attack,attack,dash,attack,attack,skill[1],attack,attack;
   actions+=skill[1] target=eula if=.tags.eula.grimheart==2;
   actions+=skill target=eula;
   actions+=attack target=eula;
   actions+=attack target=fischl active=fischl;
+  actions+=attack target=xingqiu active=xingqiu;

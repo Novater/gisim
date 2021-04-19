@@ -45,11 +45,11 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			if lock > 0 {
 				return false
 			}
-			//every exectuion, add 1 stack, to a max of 3, reset cd to 10 seconds
+			//every exectuion, add 1 stack, to a max of 2, reset cd to 10 seconds
 			stacks++
 			s.Log.Debugf("\t Pale Flame 4 adding stacks: %v", stacks)
-			if stacks > 3 {
-				stacks = 3
+			if stacks > 2 {
+				stacks = 2
 			}
 			dur = 420 //7 seconds
 			lock = 18 // can only trigger once every 18 frames
@@ -61,11 +61,11 @@ func set(c combat.Character, s *combat.Sim, count int) {
 				return false
 			}
 
-			atk := 0.06 * float64(stacks)
+			atk := 0.09 * float64(stacks)
 			snap.Stats[combat.ATKP] += atk
 			s.Log.Debugf("\t Pale Flame 4 adding attack: %v", atk)
 
-			if stacks == 3 {
+			if stacks == 2 {
 				snap.Stats[combat.PhyP] += 0.25 //double the phys bonus
 				s.Log.Debugf("\t Pale Flame 4 adding bonus phy %")
 			}

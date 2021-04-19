@@ -187,7 +187,7 @@ func runSingle(cfg combat.Profile, hp float64, dur int) {
 	}
 	for _, k := range ck {
 		v := stats.CharActiveTime[k]
-		fmt.Printf("%v active for %v (%v seconds - %.0f%%)\n", k, v, v/60, 100*float64(v)/float64(stats.SimDuration))
+		fmt.Printf("%v active for %v (%v seconds - %.0f%%)\n", k, v, v/60, 100*float64(v)/float64(dur*60))
 	}
 	fmt.Println("------------------------------------------")
 	tk := make([]combat.EleType, 0, len(stats.AuraUptime))
@@ -196,7 +196,7 @@ func runSingle(cfg combat.Profile, hp float64, dur int) {
 	}
 	for _, k := range tk {
 		v := stats.AuraUptime[k]
-		fmt.Printf("%v active for %v (%v seconds - %.0f%%)\n", k, v, v/60, 100*float64(v)/float64(stats.SimDuration))
+		fmt.Printf("%v active for %v (%v seconds - %.0f%%)\n", k, v, v/60, 100*float64(v)/float64(dur*60))
 	}
 	fmt.Println("------------------------------------------")
 	rk := make([]combat.ReactionType, 0, len(stats.ReactionsTriggered))
