@@ -1,4 +1,4 @@
-package sacrificialsword
+package sacrificial
 
 import (
 	"github.com/srliao/gisim/internal/rotation"
@@ -6,7 +6,7 @@ import (
 )
 
 func init() {
-	combat.RegisterWeaponFunc("Sacrificial Sword", weapon)
+	combat.RegisterWeaponFunc("Sacrificial Greatsword", weapon)
 }
 
 func weapon(c combat.Character, s *combat.Sim, r int) {
@@ -22,17 +22,17 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if snap.AbilType != rotation.ActionSkill {
 			return false
 		}
-		if s.StatusActive("Sacrificial Sword Proc") {
+		if s.StatusActive("Sacrificial Greatsword Proc") {
 			return false
 		}
 		if s.Rand.Float64() > prob {
 			return false
 		}
-		s.Log.Infof("[%v] sacrificial sword proc'd", s.Frame())
+		s.Log.Infof("[%v] sacrificial greatsword proc'd", s.Frame())
 
 		c.ResetActionCooldown(rotation.ActionSkill)
 
-		s.Status["Sacrificial Sword Proc"] = s.F + cd
+		s.Status["Sacrificial Greatsword Proc"] = s.F + cd
 		return false
-	}, "sacrificial-sword-proc", combat.PostDamageHook)
+	}, "sacrificial-greatsword-proc", combat.PostDamageHook)
 }

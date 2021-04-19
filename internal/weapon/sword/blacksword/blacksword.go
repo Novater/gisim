@@ -6,21 +6,11 @@ import (
 )
 
 func init() {
-	combat.RegisterWeaponFunc("Black Sword", weapon)
+	combat.RegisterWeaponFunc("The Black Sword", weapon)
 }
 
 func weapon(c combat.Character, s *combat.Sim, r int) {
-	dmg := 0.2
-	switch r {
-	case 2:
-		dmg = .25
-	case 3:
-		dmg = .3
-	case 4:
-		dmg = .35
-	case 5:
-		dmg = .4
-	}
+	dmg := 0.15 + float64(r)*0.05
 	//add on hit effect to sim?
 	s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		if ds.AbilType == rotation.ActionAttack || ds.AbilType == rotation.ActionCharge {
@@ -28,6 +18,6 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 			ds.DmgBonus += dmg
 		}
 		return false
-	}, "Black Sword", combat.PreDamageHook)
+	}, "The Black Sword", combat.PreDamageHook)
 
 }

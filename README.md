@@ -10,6 +10,8 @@ CPU profilling is enabled by default for optimization purposes. If you wish to c
 
 ## todo priority list
 
+- [ ] add params to weapons
+- [ ] add shield status to sim
 - [ ] play test xl/xq/ben/fish w/ basic weapons
 - [ ] change normal reset to a frame number and if s.F = frame, then reset
 - [ ] rand artifact code is bugged
