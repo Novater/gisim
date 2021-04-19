@@ -1,4 +1,4 @@
-package blizzard
+package crimson
 
 import (
 	"github.com/srliao/gisim/internal/rotation"

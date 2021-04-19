@@ -17,7 +17,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 	}
 	if count >= 4 {
 		s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
-			if ds.AbilType != rotation.ActionAttack {
+			if ds.AbilType != rotation.ActionAttack && ds.AbilType != rotation.ActionCharge {
 				return false
 			}
 			if ds.WeaponClass != combat.WeaponClassSpear && ds.WeaponClass != combat.WeaponClassSword && ds.WeaponClass != combat.WeaponClassClaymore {

@@ -130,7 +130,9 @@ func (s *Sim) execQueue() int {
 	f := 0
 	switch n.Typ {
 	case rotation.ActionSkill:
+		s.executeEventHook(PreSkillHook)
 		f = c.Skill(n.Param)
+		s.executeEventHook(PostSkillHook)
 		s.ResetAllNormalCounter()
 	case rotation.ActionBurst:
 		s.executeEventHook(PreBurstHook)

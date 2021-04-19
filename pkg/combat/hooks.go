@@ -15,7 +15,9 @@ type eventHookType string
 
 const (
 	PreBurstHook  eventHookType = "PRE_BURST_HOOK"
-	PostBurstHook eventHookType = "POSt_BURST_HOOK"
+	PostBurstHook eventHookType = "POST_BURST_HOOK"
+	PreSkillHook  eventHookType = "PRE_SKILL_HOOK"
+	PostSkillHook eventHookType = "POST_SKILL_HOOK"
 )
 
 type snapshotHookFunc func(s *Snapshot) bool

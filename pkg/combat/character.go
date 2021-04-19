@@ -39,6 +39,7 @@ type Character interface {
 	ReceiveParticle(p Particle, isActive bool, partyCount int)
 	Snapshot(name string, t rotation.ActionType, e EleType, d float64) Snapshot
 	ResetActionCooldown(a rotation.ActionType)
+	ReduceActionCooldown(a rotation.ActionType, v int)
 	ResetNormalCounter()
 }
 
@@ -357,6 +358,15 @@ func (c *CharacterTemplate) ResetActionCooldown(a rotation.ActionType) {
 		delete(c.CD, BurstCD)
 	case rotation.ActionSkill:
 		delete(c.CD, SkillCD)
+	}
+}
+
+func (c *CharacterTemplate) ReduceActionCooldown(a rotation.ActionType, v int) {
+	switch a {
+	case rotation.ActionBurst:
+		c.CD[BurstCD] -= v
+	case rotation.ActionSkill:
+		c.CD[SkillCD] -= v
 	}
 }
 

@@ -196,6 +196,4 @@ func (d *diluc) Tick() {
 			d.eCounter = 0
 		}
 	}
-	d.Tags["Normal"] = d.NormalCounter
-	d.Tags["Skill"] = d.eCounter
 }
