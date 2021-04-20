@@ -84,7 +84,6 @@ func (d *diluc) Attack(p int) int {
 	reset := false
 	frames := 38
 	delay := 23 //frames between execution and damage
-	x.Durability = 25
 	switch d.NormalCounter {
 	case 1:
 		frames = 52 //90-38
@@ -152,7 +151,6 @@ func (d *diluc) Skill(p int) int {
 
 	x := d.Snapshot("Searing Onslaught", rotation.ActionSkill, combat.Pyro, combat.WeakDurability)
 	x.Mult = skill[d.eCounter][d.TalentLvlSkill()]
-	x.Durability = 25
 
 	d.S.AddTask(func(s *combat.Sim) {
 		damage, str := s.ApplyDamage(x)
@@ -179,11 +177,10 @@ func (d *diluc) Burst(p int) int {
 	d.S.Status["Diluc Burst"] = 12 * 60
 
 	//add initial damage
-	x := d.Snapshot("Dawn (Initial)", rotation.ActionBurst, combat.Pyro, combat.WeakDurability)
+	x := d.Snapshot("Dawn (Initial)", rotation.ActionBurst, combat.Pyro, combat.StrongDurability)
 	x.Mult = burstInitial[d.TalentLvlBurst()]
 
 	d.S.AddTask(func(s *combat.Sim) {
-		x.Durability = 50
 		damage, str := s.ApplyDamage(x)
 		s.Log.Infof("\t Diluc burst (initial) dealt %.0f damage [%v]", damage, str)
 	}, "Diluc-Burst-Initial", 100) //roughly 100
@@ -192,10 +189,11 @@ func (d *diluc) Burst(p int) int {
 	//first tick did 50 dur as well?
 	for i := 1; i <= 7; i++ {
 		xd := x.Clone()
+		xd.Durability = 0
 		xd.Mult = burstDOT[d.TalentLvlBurst()]
 		//hit 5 applies pyro again, no idea why 5
 		if i == 5 {
-			xd.Durability = 50
+			xd.Durability = combat.MedDurability
 		}
 		hit := i
 
