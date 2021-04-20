@@ -74,6 +74,9 @@ type CharacterTemplate struct {
 
 	Energy    float64
 	MaxEnergy float64
+
+	//Tasks specific to the character to be executed at set frames
+	Tasks map[int][]CharTask
 	//counters
 	NormalCounter    int
 	NormalResetTimer int
@@ -293,21 +296,6 @@ func (c *CharacterTemplate) Burst(p int) int {
 	return 0
 }
 
-func (c *CharacterTemplate) Tick() {
-
-	//check normal reset
-	if c.NormalResetTimer == 0 {
-		if c.NRTChanged {
-			c.S.Log.Infof("[%v] character normal reset", c.S.Frame())
-			c.NRTChanged = false
-		}
-		c.NormalCounter = 0
-	} else {
-		c.NRTChanged = true
-		c.NormalResetTimer--
-	}
-}
-
 func (c *CharacterTemplate) AddMod(key string, val map[StatType]float64) {
 	c.Mods[key] = val
 }
@@ -372,4 +360,42 @@ func (c *CharacterTemplate) ReduceActionCooldown(a rotation.ActionType, v int) {
 
 func (c *CharacterTemplate) ResetNormalCounter() {
 	c.NormalResetTimer = 0
+}
+
+func (c *CharacterTemplate) Tick() {
+
+	//check normal reset
+	if c.NormalResetTimer == 0 {
+		if c.NRTChanged {
+			c.S.Log.Infof("[%v] character normal reset", c.S.Frame())
+			c.NRTChanged = false
+		}
+		c.NormalCounter = 0
+	} else {
+		c.NRTChanged = true
+		c.NormalResetTimer--
+	}
+
+	//run tasks
+	for _, t := range c.Tasks[c.S.F] {
+		t.F()
+	}
+
+	delete(c.Tasks, c.S.F)
+}
+
+type CharTask struct {
+	Name        string
+	F           func()
+	Delay       int
+	originFrame int
+}
+
+func (c *CharacterTemplate) AddTask(f func(), name string, delay int) {
+	c.Tasks[c.S.F+delay] = append(c.Tasks[c.S.F+delay], CharTask{
+		Name:        name,
+		F:           f,
+		Delay:       delay,
+		originFrame: c.S.F,
+	})
 }
