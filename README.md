@@ -4,6 +4,10 @@
 
 See [wiki](https://github.com/srliao/gisim/wiki)
 
+## change log
+
+- 04/19/2021: Diluc implemented (not tested)
+
 ## cpu profiling
 
 CPU profilling is enabled by default for optimization purposes. If you wish to check it out, run ` go tool pprof -pdf cpu.pprof >| file.pdf` after running the sim (best run the sim for a longer period of time to generate useful cpu profile)
