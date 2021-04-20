@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/pkg/profile"
+	"github.com/srliao/gisim/internal/parse"
 	"github.com/srliao/gisim/pkg/combat"
 
 	//characters
@@ -82,6 +83,12 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		parser := parse.New("single", cfg.RotationString)
+		rot, err := parser.Parse()
+		if err != nil {
+			log.Fatal(err)
+		}
+		cfg.Rotation = rot
 
 		cfg.LogConfig.LogLevel = *debug
 		cfg.LogConfig.LogFile = *f
@@ -290,6 +297,12 @@ func worker(src []byte, hp float64, dur int, resp chan float64, req chan bool, d
 			if err != nil {
 				log.Fatal(err)
 			}
+			parser := parse.New("single", cfg.RotationString)
+			rot, err := parser.Parse()
+			if err != nil {
+				log.Fatal(err)
+			}
+			cfg.Rotation = rot
 			cfg.LogConfig.LogLevel = "error"
 			cfg.LogConfig.LogFile = ""
 			cfg.LogConfig.LogShowCaller = false

@@ -1,7 +1,6 @@
 package noblesse
 
 import (
-	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -16,7 +15,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			if ds.Actor != c.Name() {
 				return false
 			}
-			if ds.AbilType != rotation.ActionBurst {
+			if ds.AbilType != combat.ActionBurst {
 				return false
 			}
 			s.Log.Debugf("\t Noblesse 2 pc adding %v damage; pre buff %v", 0.2, ds.DmgBonus)

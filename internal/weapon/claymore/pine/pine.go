@@ -1,7 +1,6 @@
 package pine
 
 import (
-	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -28,7 +27,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if ds.Actor != c.Name() {
 			return false
 		}
-		if ds.AbilType != rotation.ActionAttack && ds.AbilType != rotation.ActionCharge {
+		if ds.AbilType != combat.ActionAttack && ds.AbilType != combat.ActionCharge {
 			return false
 		}
 		if lock > 0 {

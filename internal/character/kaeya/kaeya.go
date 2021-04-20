@@ -3,7 +3,6 @@ package kaeya
 import (
 	"fmt"
 
-	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -43,7 +42,7 @@ func (c *char) c1() {
 		if ds.Actor != c.Name() {
 			return false
 		}
-		if ds.AbilType != rotation.ActionAttack && ds.AbilType != rotation.ActionCharge {
+		if ds.AbilType != combat.ActionAttack && ds.AbilType != combat.ActionCharge {
 			return false
 		}
 		if c.S.TargetAura.E() != combat.Cryo && c.S.TargetAura.E() != combat.Frozen {
@@ -100,7 +99,7 @@ func (c *char) Skill(p int) int {
 		c.S.Log.Debugf("\t Kaeya skill still on CD; skipping")
 		return 0
 	}
-	d := c.Snapshot("Frostgnaw", rotation.ActionSkill, combat.Cryo, combat.MedDurability)
+	d := c.Snapshot("Frostgnaw", combat.ActionSkill, combat.Cryo, combat.MedDurability)
 	d.Mult = 1 //TODO: multiplier
 
 	c.S.AddTask(func(s *combat.Sim) {
@@ -117,7 +116,7 @@ func (c *char) Skill(p int) int {
 
 func (c *char) Burst(p int) int {
 
-	d := c.Snapshot("Frostgnaw", rotation.ActionSkill, combat.Cryo, combat.MedDurability)
+	d := c.Snapshot("Frostgnaw", combat.ActionSkill, combat.Cryo, combat.MedDurability)
 	d.Mult = 1 //TODO: multiplier
 
 	max := 5 //TODO: number of hits, also C2 ignored

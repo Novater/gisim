@@ -1,7 +1,6 @@
 package thunderingfury
 
 import (
-	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -39,7 +38,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 
 			snap.ReactBonus += 0.4
 			icd = s.F + 48
-			c.ReduceActionCooldown(rotation.ActionSkill, 60)
+			c.ReduceActionCooldown(combat.ActionSkill, 60)
 
 			return false
 		}, "thundering fury 4pc", combat.PreReaction)

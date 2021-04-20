@@ -1,7 +1,6 @@
 package ganyu
 
 import (
-	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -55,11 +54,11 @@ func (g *ganyu) c1() {
 }
 
 func (g *ganyu) Aimed(p int) int {
-	f := g.Snapshot("Frost Flake Arrow", rotation.ActionAim, combat.Cryo, combat.WeakDurability)
+	f := g.Snapshot("Frost Flake Arrow", combat.ActionAim, combat.Cryo, combat.WeakDurability)
 	f.HitWeakPoint = true
 	f.Mult = ffa[g.TalentLvlAttack()]
 
-	b := g.Snapshot("Frost Flake Bloom", rotation.ActionAim, combat.Cryo, combat.WeakDurability)
+	b := g.Snapshot("Frost Flake Bloom", combat.ActionAim, combat.Cryo, combat.WeakDurability)
 	b.Mult = ffb[g.TalentLvlAttack()]
 
 	a2 := g.CD["A2"]
@@ -106,7 +105,7 @@ func (g *ganyu) Skill(p int) int {
 	}
 
 	//snap shot stats at cast time here
-	d := g.Snapshot("Ice Lotus", rotation.ActionSkill, combat.Cryo, combat.WeakDurability)
+	d := g.Snapshot("Ice Lotus", combat.ActionSkill, combat.Cryo, combat.WeakDurability)
 	d.Mult = lotus[g.TalentLvlSkill()]
 
 	//we get the orbs right away
@@ -136,7 +135,7 @@ func (g *ganyu) Burst(p int) int {
 		return 0
 	}
 	//snap shot stats at cast time here
-	d := g.Snapshot("Celestial Shower", rotation.ActionBurst, combat.Cryo, combat.WeakDurability)
+	d := g.Snapshot("Celestial Shower", combat.ActionBurst, combat.Cryo, combat.WeakDurability)
 	d.Mult = shower[g.TalentLvlBurst()]
 
 	for delay := 120; delay <= 900; delay += 60 {
@@ -154,14 +153,14 @@ func (g *ganyu) Burst(p int) int {
 	return 122
 }
 
-func (g *ganyu) ActionReady(a rotation.ActionType) bool {
+func (g *ganyu) ActionReady(a combat.ActionType) bool {
 	switch a {
-	case rotation.ActionBurst:
+	case combat.ActionBurst:
 		if g.Energy != g.MaxEnergy {
 			return false
 		}
 		return g.CD[combat.BurstCD] <= g.S.F
-	case rotation.ActionSkill:
+	case combat.ActionSkill:
 		skillReady := g.CD[combat.SkillCD] <= g.S.F
 		//if skill ready return true regardless of c2
 		if skillReady {

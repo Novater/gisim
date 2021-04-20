@@ -1,117 +1,27 @@
-package rotation
+package parse
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
-	"strings"
+
+	"github.com/srliao/gisim/pkg/combat"
 )
 
-type Action struct {
-	Name   string
-	Target string //either character or a sequence name
-
-	Exec     []ActionItem //if len > 1 then it's a sequence
-	IsSeq    bool         // is this a sequence
-	IsStrict bool         //strict sequence?
-	Pos      int          //current position in execution, default 0
-
-	ActiveCond string
-	SwapTo     string
-	SwapLock   int
-	PostAction ActionType
-
-	Conditions *ExprTreeNode //conditions to be met
-
-	//fields used by parser only
-	sourceLine int
-}
-
-type ActionItem struct {
-	Typ    ActionType
-	Param  int
-	Target string
-}
-
-type ActionType int
-
-const (
-	ActionSequence ActionType = iota
-	ActionSequenceStrict
-	ActionDelimiter
-	ActionSequenceReset
-	ActionSkill
-	ActionBurst
-	ActionAttack
-	ActionCharge
-	ActionHighPlunge
-	ActionLowPlunge
-	ActionSpecialProc
-	ActionAim
-	ActionSwap
-	ActionCancellable // delim cancellable action
-	ActionDash
-	ActionJump
-)
-
-var astr = []string{
-	"sequence",
-	"sequence_strict",
-	"",
-	"reset_sequence",
-	"skill",
-	"burst",
-	"attack",
-	"charge",
-	"high_plunge",
-	"low_plunge",
-	"proc",
-	"aim",
-	"swap",
-	"",
-	"dash",
-	"jump",
-}
-
-func (a ActionType) String() string {
-	return astr[a]
-}
-
-var actionKeys = map[string]ActionType{
-	"sequence":        ActionSequence,
-	"sequence_strict": ActionSequenceStrict,
-	"reset_sequence":  ActionSequenceReset,
-	"skill":           ActionSkill,
-	"burst":           ActionBurst,
-	"attack":          ActionAttack,
-	"charge":          ActionCharge,
-	"high_plunge":     ActionHighPlunge,
-	"low_lunge":       ActionLowPlunge,
-	"aim":             ActionAim,
-	"dash":            ActionDash,
-	"jump":            ActionJump,
-	"swap":            ActionSwap,
-}
-
-type ExprTreeNode struct {
-	Left   *ExprTreeNode
-	Right  *ExprTreeNode
-	IsLeaf bool
-	Op     string //&& || ( )
-	Expr   Condition
-}
-
-type Condition struct {
-	Fields []string
-	Op     item
-	Value  int
-}
-
-func (c Condition) String() {
-	var sb strings.Builder
-	for _, v := range c.Fields {
-		sb.WriteString(v)
-	}
-	sb.WriteString(c.Op.String())
+var actionKeys = map[string]combat.ActionType{
+	"sequence":        combat.ActionSequence,
+	"sequence_strict": combat.ActionSequenceStrict,
+	"reset_sequence":  combat.ActionSequenceReset,
+	"skill":           combat.ActionSkill,
+	"burst":           combat.ActionBurst,
+	"attack":          combat.ActionAttack,
+	"charge":          combat.ActionCharge,
+	"high_plunge":     combat.ActionHighPlunge,
+	"low_lunge":       combat.ActionLowPlunge,
+	"aim":             combat.ActionAim,
+	"dash":            combat.ActionDash,
+	"jump":            combat.ActionJump,
+	"swap":            combat.ActionSwap,
 }
 
 type Parser struct {
@@ -128,11 +38,11 @@ func New(name, input string) *Parser {
 	return p
 }
 
-func (p *Parser) Parse() ([]Action, error) {
+func (p *Parser) Parse() ([]combat.Action, error) {
 	var err error
-	var r []Action
+	var r []combat.Action
 	state := 0
-	var next Action
+	var next combat.Action
 	for n := p.next(); n.typ != itemEOF; n = p.next() {
 		switch state {
 		case 0:
@@ -140,8 +50,7 @@ func (p *Parser) Parse() ([]Action, error) {
 			if n.typ != itemAction {
 				return r, fmt.Errorf("<action start> bad token at line %v: %v", n.line, n)
 			}
-			next = Action{}
-			next.sourceLine = n.line
+			next = combat.Action{}
 			err = p.parseActionItem(&next)
 			if err != nil {
 				return r, err
@@ -186,6 +95,9 @@ func (p *Parser) Parse() ([]Action, error) {
 					return r, err
 				}
 			case itemTerminateLine:
+				if err := isActionValid(next); err != nil {
+					return r, fmt.Errorf("bad action: %v", err)
+				}
 				r = append(r, next)
 				state = 0
 			default:
@@ -196,7 +108,7 @@ func (p *Parser) Parse() ([]Action, error) {
 	return r, nil
 }
 
-func (p *Parser) parseActionItem(next *Action) error {
+func (p *Parser) parseActionItem(next *combat.Action) error {
 	n := p.next()
 	// log.Println(n)
 	if n.typ != itemAddToList {
@@ -212,14 +124,14 @@ func (p *Parser) parseActionItem(next *Action) error {
 	if !ok {
 		return fmt.Errorf("<action> invalid identifier at line %v: %v", n.line, n)
 	}
-	a := ActionItem{}
+	a := combat.ActionItem{}
 	switch {
-	case t == ActionSequence:
+	case t == combat.ActionSequence:
 		next.IsSeq = true
-	case t == ActionSequenceStrict:
+	case t == combat.ActionSequenceStrict:
 		next.IsSeq = true
 		next.IsStrict = true
-	case t > ActionDelimiter:
+	case t > combat.ActionDelimiter:
 		a.Typ = t
 		//check for params
 		n = p.next()
@@ -268,8 +180,8 @@ func (p *Parser) parseStringIdent() (string, error) {
 	return r, nil
 }
 
-func (p *Parser) parsePostAction() (ActionType, error) {
-	var t ActionType
+func (p *Parser) parsePostAction() (combat.ActionType, error) {
+	var t combat.ActionType
 	n := p.next()
 	if n.typ != itemAssign {
 		return t, fmt.Errorf("<post - assign> bad token at line %v - %v: %v", n.line, n.pos, n)
@@ -282,14 +194,14 @@ func (p *Parser) parsePostAction() (ActionType, error) {
 	if !ok {
 		return t, fmt.Errorf("<post - val id> bad token at line %v - %v: %v", n.line, n.pos, n)
 	}
-	if t <= ActionCancellable {
+	if t <= combat.ActionCancellable {
 		return t, fmt.Errorf("<post - cancel> invalid post action at line %v - %v: %v", n.line, n.pos, n)
 	}
 	return t, nil
 }
 
-func (p *Parser) parseExec() ([]ActionItem, error) {
-	var r []ActionItem
+func (p *Parser) parseExec() ([]combat.ActionItem, error) {
+	var r []combat.ActionItem
 	n := p.next()
 	if n.typ != itemAssign {
 		return nil, fmt.Errorf("<exec> bad token at line %v - %v: %v", n.line, n.pos, n)
@@ -305,11 +217,11 @@ LOOP:
 		if !ok {
 			return nil, fmt.Errorf("<exec> bad token at line %v - %v: %v", n.line, n.pos, n)
 		}
-		if t <= ActionDelimiter {
+		if t <= combat.ActionDelimiter {
 			return nil, fmt.Errorf("<exec> bad token at line %v - %v: %v", n.line, n.pos, n)
 		}
 
-		a := ActionItem{}
+		a := combat.ActionItem{}
 		a.Typ = t
 		//check for params
 		n = p.next()
@@ -346,16 +258,16 @@ LOOP:
 	return r, nil
 }
 
-func (p *Parser) parseIf() (*ExprTreeNode, error) {
+func (p *Parser) parseIf() (*combat.ExprTreeNode, error) {
 	n := p.next()
 	if n.typ != itemAssign {
 		return nil, fmt.Errorf("<if> bad token at line %v - %v: %v", n.line, n.pos, n)
 	}
 	parenDepth := 0
-	var queue []*ExprTreeNode
-	var stack []*ExprTreeNode
-	var x *ExprTreeNode
-	var root *ExprTreeNode
+	var queue []*combat.ExprTreeNode
+	var stack []*combat.ExprTreeNode
+	var x *combat.ExprTreeNode
+	var root *combat.ExprTreeNode
 
 	//operands are conditions
 	//operators are &&, ||, (, )
@@ -366,7 +278,7 @@ LOOP:
 		switch {
 		case n.typ == itemLeftParen:
 			parenDepth++
-			stack = append(stack, &ExprTreeNode{
+			stack = append(stack, &combat.ExprTreeNode{
 				Op: "(",
 			})
 			//expecting a condition after a paren
@@ -374,7 +286,7 @@ LOOP:
 			if err != nil {
 				return nil, err
 			}
-			queue = append(queue, &ExprTreeNode{
+			queue = append(queue, &combat.ExprTreeNode{
 				Expr:   c,
 				IsLeaf: true,
 			})
@@ -405,7 +317,7 @@ LOOP:
 			if err != nil {
 				return nil, err
 			}
-			queue = append(queue, &ExprTreeNode{
+			queue = append(queue, &combat.ExprTreeNode{
 				Expr:   c,
 				IsLeaf: true,
 			})
@@ -422,7 +334,7 @@ LOOP:
 				queue = append(queue, x)
 			}
 			//append current operator to stack
-			stack = append(stack, &ExprTreeNode{
+			stack = append(stack, &combat.ExprTreeNode{
 				Op: n.val,
 			})
 		case n.typ == itemRightParen:
@@ -441,7 +353,7 @@ LOOP:
 		queue = append(queue, stack[i])
 	}
 
-	var ts []*ExprTreeNode
+	var ts []*combat.ExprTreeNode
 	//convert this into a tree
 	for _, v := range queue {
 		if v.Op != "" {
@@ -464,8 +376,8 @@ LOOP:
 	return root, nil
 }
 
-func (p *Parser) parseCondition() (Condition, error) {
-	var c Condition
+func (p *Parser) parseCondition() (combat.Condition, error) {
+	var c combat.Condition
 	var n item
 LOOP:
 	for {
@@ -487,7 +399,7 @@ LOOP:
 	if n.typ <= itemCompareOp || n.typ >= itemKeyword {
 		return c, fmt.Errorf("<if - comp> bad token at line %v - %v: %v", n.line, n.pos, n)
 	}
-	c.Op = n
+	c.Op = n.val
 	//scan for value
 	n = p.next()
 	if n.typ != itemNumber {
@@ -517,14 +429,14 @@ func (p *Parser) parseLock() (int, error) {
 	return int(r), nil
 }
 
-func isActionValid(a Action) bool {
+func isActionValid(a combat.Action) error {
 	if a.Target == "" {
-		return false
+		return errors.New("missing target")
 	}
 	if len(a.Exec) == 0 {
-		return false
+		return errors.New("missing actions")
 	}
-	return true
+	return nil
 }
 
 func (p *Parser) next() item {

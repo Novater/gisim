@@ -1,7 +1,6 @@
 package paleflame
 
 import (
-	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -39,7 +38,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			if ds.Actor != c.Name() {
 				return false
 			}
-			if ds.AbilType != rotation.ActionSkill {
+			if ds.AbilType != combat.ActionSkill {
 				return false
 			}
 			if lock > 0 {

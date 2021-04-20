@@ -3,7 +3,6 @@ package xingqiu
 import (
 	"fmt"
 
-	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -83,7 +82,7 @@ func (x *xingqiu) Attack(p int) int {
 	frames = int(float64(frames) / (1 + x.Stats[combat.AtkSpd]))
 
 	for i, hit := range hits {
-		d := x.Snapshot("Normal", rotation.ActionAttack, combat.Physical, combat.WeakDurability)
+		d := x.Snapshot("Normal", combat.ActionAttack, combat.Physical, combat.WeakDurability)
 		d.Mult = hit[x.TalentLvlAttack()]
 		//add a 20 frame delay; should be 18 and 42 for combo 3 and 5 actual
 		t := i + 1
@@ -110,7 +109,7 @@ func (x *xingqiu) Skill(p int) int {
 		x.S.Log.Debugf("\tXingqiu skill still on CD; skipping")
 		return 0
 	}
-	d := x.Snapshot("Guhua Sword: Fatal Rainscreen", rotation.ActionSkill, combat.Hydro, combat.WeakDurability)
+	d := x.Snapshot("Guhua Sword: Fatal Rainscreen", combat.ActionSkill, combat.Hydro, combat.WeakDurability)
 	if x.Base.Cons >= 4 {
 		//check if ult is up, if so increase multiplier
 		if x.S.StatusActive("Xingqiu-Burst") {
@@ -149,14 +148,14 @@ func (x *xingqiu) burstHook() {
 			return false
 		}
 		//check if normal attack
-		if ds.AbilType != rotation.ActionAttack && ds.AbilType != rotation.ActionCharge {
+		if ds.AbilType != combat.ActionAttack && ds.AbilType != combat.ActionCharge {
 			return false
 		}
 
 		//trigger swords, only first sword applies hydro
 		for i := 0; i < x.numSwords; i++ {
 
-			d := x.Snapshot("Guhua Sword: Raincutter", rotation.ActionBurst, combat.Hydro, 0)
+			d := x.Snapshot("Guhua Sword: Raincutter", combat.ActionBurst, combat.Hydro, 0)
 			d.Mult = burst[x.TalentLvlBurst()]
 
 			//apply aura every 3rd hit -> hit 0, 3, 6, etc...
@@ -213,7 +212,7 @@ func (x *xingqiu) Burst(p int) int {
 		return 0
 	}
 	//also applies hydro on cast
-	d := x.Snapshot("Xingqiu Burst", rotation.ActionBurst, combat.Hydro, 25)
+	d := x.Snapshot("Xingqiu Burst", combat.ActionBurst, combat.Hydro, 25)
 	d.Mult = 0
 	x.S.AddTask(func(s *combat.Sim) {
 		s.ApplyDamage(d)

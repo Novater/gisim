@@ -3,7 +3,6 @@ package eula
 import (
 	"fmt"
 
-	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -38,7 +37,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		if ds.Actor != e.Base.Name {
 			return false
 		}
-		if ds.AbilType != rotation.ActionBurst && ds.AbilType != rotation.ActionAttack && ds.AbilType != rotation.ActionSkill {
+		if ds.AbilType != combat.ActionBurst && ds.AbilType != combat.ActionAttack && ds.AbilType != combat.ActionSkill {
 			return false
 		}
 		if e.S.StatusActive("Eula Burst ICD") {
@@ -78,7 +77,7 @@ func (e *eula) a4Old() {
 		if ds.Actor != e.Base.Name {
 			return false
 		}
-		if ds.AbilType != rotation.ActionAttack {
+		if ds.AbilType != combat.ActionAttack {
 			return false
 		}
 		//check icd
@@ -124,7 +123,7 @@ func (e *eula) Attack(p int) int {
 
 	for i, mult := range auto[e.NormalCounter] {
 		t := i + 1
-		d := e.Snapshot("Normal", rotation.ActionAttack, combat.Physical, combat.WeakDurability)
+		d := e.Snapshot("Normal", combat.ActionAttack, combat.Physical, combat.WeakDurability)
 		d.Mult = mult[e.TalentLvlAttack()]
 		e.S.AddTask(func(s *combat.Sim) {
 			damage, str := s.ApplyDamage(d)
@@ -167,7 +166,7 @@ func (e *eula) Skill(p int) int {
 func (e *eula) pressE() {
 	//press e (60fps vid)
 	//starts 343 cancel 378
-	d := e.Snapshot("Icetide (Press)", rotation.ActionSkill, combat.Cryo, combat.WeakDurability)
+	d := e.Snapshot("Icetide (Press)", combat.ActionSkill, combat.Cryo, combat.WeakDurability)
 	d.Mult = skillPress[e.TalentLvlSkill()]
 
 	e.S.AddTask(func(s *combat.Sim) {
@@ -199,7 +198,7 @@ func (e *eula) holdE() {
 	//296 to 341, but cd starts at 322
 	//60 fps = 108 frames cast, cd starts 62 frames in so need to + 62 frames to cd
 	lvl := e.TalentLvlSkill()
-	d := e.Snapshot("Icetide (Hold)", rotation.ActionSkill, combat.Cryo, combat.WeakDurability)
+	d := e.Snapshot("Icetide (Hold)", combat.ActionSkill, combat.Cryo, combat.WeakDurability)
 	d.Mult = skillHold[lvl]
 
 	e.S.AddTask(func(s *combat.Sim) {
@@ -211,7 +210,7 @@ func (e *eula) holdE() {
 	v := e.Tags["grimheart"]
 
 	for i := 0; i < v; i++ {
-		d := e.Snapshot("Icetide (Icewhirl)", rotation.ActionSkill, combat.Cryo, combat.WeakDurability)
+		d := e.Snapshot("Icetide (Icewhirl)", combat.ActionSkill, combat.Cryo, combat.WeakDurability)
 		d.Mult = icewhirl[lvl]
 		t := i + 1
 		e.S.AddTask(func(s *combat.Sim) {
@@ -222,7 +221,7 @@ func (e *eula) holdE() {
 
 	//A2
 	if v == 2 {
-		d := e.Snapshot("Icetide (Lightfall)", rotation.ActionSkill, combat.Cryo, combat.WeakDurability)
+		d := e.Snapshot("Icetide (Lightfall)", combat.ActionSkill, combat.Cryo, combat.WeakDurability)
 		d.Mult = burstExplodeBase[e.TalentLvlBurst()] * 0.5
 		e.S.AddTask(func(s *combat.Sim) {
 			damage, str := s.ApplyDamage(d)
@@ -259,7 +258,7 @@ func (e *eula) Burst(p int) int {
 	e.burstCounter = 0
 	lvl := e.TalentLvlBurst()
 	//add initial damage
-	d := e.Snapshot("Glacial Illumination", rotation.ActionBurst, combat.Cryo, combat.WeakDurability)
+	d := e.Snapshot("Glacial Illumination", combat.ActionBurst, combat.Cryo, combat.WeakDurability)
 	d.Mult = burstInitial[lvl]
 
 	e.S.AddTask(func(s *combat.Sim) {
@@ -273,7 +272,7 @@ func (e *eula) Burst(p int) int {
 			stacks = 30
 		}
 		//add blow up after 8 seconds
-		d2 := e.Snapshot("Glacial Illumination (Lightfall)", rotation.ActionBurst, combat.Physical, combat.WeakDurability)
+		d2 := e.Snapshot("Glacial Illumination (Lightfall)", combat.ActionBurst, combat.Physical, combat.WeakDurability)
 		d2.Mult = burstExplodeBase[lvl] + burstExplodeStack[lvl]*float64(stacks)
 		damage, str := s.ApplyDamage(d2)
 		s.Log.Infof("\t Eula burst (lightfall) dealt %.0f damage, %v stacks [%v]", damage, stacks, str)
@@ -294,7 +293,7 @@ func (e *eula) Tick() {
 	}
 }
 
-func (e *eula) Snapshot(name string, t rotation.ActionType, x combat.EleType, d float64) combat.Snapshot {
+func (e *eula) Snapshot(name string, t combat.ActionType, x combat.EleType, d float64) combat.Snapshot {
 	s := e.CharacterTemplate.Snapshot(name, t, x, d)
 	s.IsHeavyAttack = true
 	return s

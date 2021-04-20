@@ -1,14 +1,12 @@
 package combat
 
-import "github.com/srliao/gisim/internal/rotation"
-
 type Snapshot struct {
 	CharLvl int64
 	Actor   string //name of the character triggering the damage
 
-	Abil        string              //name of ability triggering the damage
-	AbilType    rotation.ActionType //type of ability triggering the damage
-	WeaponClass WeaponClass         //b.c. Gladiators...
+	Abil        string      //name of ability triggering the damage
+	AbilType    ActionType  //type of ability triggering the damage
+	WeaponClass WeaponClass //b.c. Gladiators...
 
 	HitWeakPoint  bool
 	IsHeavyAttack bool

@@ -1,12 +1,13 @@
 package combat
 
 type Profile struct {
-	Label         string             `yaml:"Label"`
-	Enemy         EnemyProfile       `yaml:"Enemy"`
-	InitialActive string             `yaml:"InitialActive"`
-	Characters    []CharacterProfile `yaml:"Characters"`
-	Rotation      string             `yaml:"Rotation"`
-	LogConfig     LogConfig
+	Label          string             `yaml:"Label"`
+	Enemy          EnemyProfile       `yaml:"Enemy"`
+	InitialActive  string             `yaml:"InitialActive"`
+	Characters     []CharacterProfile `yaml:"Characters"`
+	RotationString string             `yaml:"Rotation"`
+	Rotation       []Action
+	LogConfig      LogConfig
 }
 
 type LogConfig struct {

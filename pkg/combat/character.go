@@ -2,8 +2,6 @@ package combat
 
 import (
 	"fmt"
-
-	"github.com/srliao/gisim/internal/rotation"
 )
 
 type Character interface {
@@ -26,20 +24,20 @@ type Character interface {
 	RemoveMod(key string)
 	//info methods
 	HasMod(key string) bool
-	ActionReady(a rotation.ActionType) bool
+	ActionReady(a ActionType) bool
 	ChargeAttackStam() float64
 
 	//other actions
 	UnsafeSetStats(stats []float64)
 
 	//status stuff
-	Cooldown(a rotation.ActionType) int
+	Cooldown(a ActionType) int
 	Tag(key string) int
 
 	ReceiveParticle(p Particle, isActive bool, partyCount int)
-	Snapshot(name string, t rotation.ActionType, e EleType, d float64) Snapshot
-	ResetActionCooldown(a rotation.ActionType)
-	ReduceActionCooldown(a rotation.ActionType, v int)
+	Snapshot(name string, t ActionType, e EleType, d float64) Snapshot
+	ResetActionCooldown(a ActionType)
+	ReduceActionCooldown(a ActionType, v int)
 	ResetNormalCounter()
 }
 
@@ -210,7 +208,7 @@ func (c *CharacterTemplate) ReceiveParticle(p Particle, isActive bool, partyCoun
 	c.S.Log.Debugw("\t\t orb", "energy rec'd", amt, "next energy", c.Energy, "ER", er)
 }
 
-func (c *CharacterTemplate) Snapshot(name string, t rotation.ActionType, e EleType, d float64) Snapshot {
+func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType, d float64) Snapshot {
 	ds := Snapshot{}
 	ds.Stats = make([]float64, len(c.Stats))
 	copy(ds.Stats, c.Stats)
@@ -250,7 +248,7 @@ func (c *CharacterTemplate) AttackHelperSingle(frames []int, delay []int, mult [
 	//apply attack speed
 	f := int(float64(frames[c.NormalCounter]) / (1 + c.Stats[AtkSpd]))
 
-	x := c.Snapshot("Normal", rotation.ActionAttack, Physical, WeakDurability)
+	x := c.Snapshot("Normal", ActionAttack, Physical, WeakDurability)
 	x.Mult = mult[c.NormalCounter][c.TalentLvlAttack()]
 
 	c.S.AddTask(func(s *Sim) {
@@ -310,26 +308,26 @@ func (c *CharacterTemplate) HasMod(key string) bool {
 	return ok
 }
 
-func (c *CharacterTemplate) ActionReady(a rotation.ActionType) bool {
+func (c *CharacterTemplate) ActionReady(a ActionType) bool {
 	switch a {
-	case rotation.ActionBurst:
+	case ActionBurst:
 		if c.Energy != c.MaxEnergy {
 			return false
 		}
 		return c.CD[BurstCD] <= c.S.F
 
-	case rotation.ActionSkill:
+	case ActionSkill:
 		return c.CD[SkillCD] <= c.S.F
 	}
 	return true
 }
 
-func (c *CharacterTemplate) Cooldown(a rotation.ActionType) int {
+func (c *CharacterTemplate) Cooldown(a ActionType) int {
 	cd := 0
 	switch a {
-	case rotation.ActionBurst:
+	case ActionBurst:
 		cd = c.CD[BurstCD] - c.S.F
-	case rotation.ActionSkill:
+	case ActionSkill:
 		cd = c.CD[SkillCD] - c.S.F
 	default:
 		return -1
@@ -340,20 +338,20 @@ func (c *CharacterTemplate) Cooldown(a rotation.ActionType) int {
 	return cd
 }
 
-func (c *CharacterTemplate) ResetActionCooldown(a rotation.ActionType) {
+func (c *CharacterTemplate) ResetActionCooldown(a ActionType) {
 	switch a {
-	case rotation.ActionBurst:
+	case ActionBurst:
 		delete(c.CD, BurstCD)
-	case rotation.ActionSkill:
+	case ActionSkill:
 		delete(c.CD, SkillCD)
 	}
 }
 
-func (c *CharacterTemplate) ReduceActionCooldown(a rotation.ActionType, v int) {
+func (c *CharacterTemplate) ReduceActionCooldown(a ActionType, v int) {
 	switch a {
-	case rotation.ActionBurst:
+	case ActionBurst:
 		c.CD[BurstCD] -= v
-	case rotation.ActionSkill:
+	case ActionSkill:
 		c.CD[SkillCD] -= v
 	}
 }

@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/srliao/gisim/internal/rotation"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -49,8 +48,8 @@ type Sim struct {
 	eventHooks    map[eventHookType]map[string]eventHookFunc
 
 	//action actions list
-	prio        []rotation.Action
-	actionQueue []rotation.ActionItem
+	prio        []Action
+	actionQueue []ActionItem
 }
 
 type Flags struct {
@@ -96,20 +95,21 @@ func New(p Profile) (*Sim, error) {
 		return nil, err
 	}
 
-	parser := rotation.New("sim", p.Rotation)
-	rotation, err := parser.Parse()
-	if err != nil {
-		return nil, err
-	}
+	// parser := rotation.New("sim", p.Rotation)
+	// rotation, err := parser.Parse()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// p.Rotation
 	//double check names
 	cust := make(map[string]int)
-	for i, v := range rotation {
+	for i, v := range p.Rotation {
 		if v.Name != "" {
 			cust[v.Name] = i
 		}
 		// log.Println(v.Conditions)
 	}
-	for _, v := range rotation {
+	for _, v := range p.Rotation {
 		_, ok := cust[v.Target]
 		_, ck := s.charPos[v.Target]
 		if !ok && !ck {
@@ -117,7 +117,7 @@ func New(p Profile) (*Sim, error) {
 		}
 	}
 
-	s.prio = rotation
+	s.prio = p.Rotation
 
 	//add other hooks
 	return s, nil
@@ -204,7 +204,7 @@ func (s *Sim) initMaps() {
 	s.Stats.AbilUsageCountByChar = make(map[string]map[string]int)
 	s.Stats.ReactionsTriggered = make(map[ReactionType]int)
 
-	s.actionQueue = make([]rotation.ActionItem, 0, 10)
+	s.actionQueue = make([]ActionItem, 0, 10)
 }
 
 func (s *Sim) initLogs(p LogConfig) error {

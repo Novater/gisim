@@ -1,7 +1,6 @@
 package crimson
 
 import (
-	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -37,7 +36,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			if ds.Actor != c.Name() {
 				return false
 			}
-			if ds.AbilType != rotation.ActionSkill {
+			if ds.AbilType != combat.ActionSkill {
 				return false
 			}
 			//every exectuion, add 1 stack, to a max of 3, reset cd to 10 seconds

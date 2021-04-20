@@ -1,7 +1,6 @@
 package heartofdepth
 
 import (
-	"github.com/srliao/gisim/internal/rotation"
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -31,7 +30,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 				return false
 			}
 			//only affect normal and charge
-			if ds.AbilType != rotation.ActionAttack && ds.AbilType != rotation.ActionCharge {
+			if ds.AbilType != combat.ActionAttack && ds.AbilType != combat.ActionCharge {
 				return false
 			}
 			ds.DmgBonus += 0.30
