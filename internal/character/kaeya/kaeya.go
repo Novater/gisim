@@ -84,10 +84,7 @@ func (c *char) a4() {
 		if ds.Abil != "Frostgnaw" {
 			return false
 		}
-		if !c.S.GlobalFlags.ReactionDidOccur {
-			return false
-		}
-		if c.S.GlobalFlags.ReactionType != combat.Freeze {
+		if c.S.TargetAura.E() != combat.Frozen {
 			return false
 		}
 
@@ -95,7 +92,7 @@ func (c *char) a4() {
 		c.S.AddEnergyParticles("Kaeya", 2, combat.Cryo, 100)
 
 		return false
-	}, "kaeya-a4", combat.PreReaction)
+	}, "kaeya-a4", combat.PreDamageHook)
 }
 
 func (c *char) Skill(p int) int {
