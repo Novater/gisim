@@ -14,6 +14,7 @@ CPU profilling is enabled by default for optimization purposes. If you wish to c
 
 ## todo priority list
 
+- [ ] on initial freeze app, both hydro + cryo durability should be reduced = min(remaining dur, new app dur); this should always result in only one "old" aura left; this "old" aura is the one that shows up when shattered
 - [ ] add params to weapons
 - [ ] add shield status to sim
 - [ ] play test xl/xq/ben/fish w/ basic weapons
