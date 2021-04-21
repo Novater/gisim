@@ -128,6 +128,7 @@ func (c *char) Burst(p int) int {
 		}, fmt.Sprintf("Kaeya-Burst-Hit-%v", t), i*5) //TODO: frames
 	}
 
-	c.CD[combat.SkillCD] = c.S.F + 900
+	c.Energy = 0
+	c.CD[combat.BurstCD] = c.S.F + 900
 	return 1 //TODO: frames
 }

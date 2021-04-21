@@ -161,7 +161,7 @@ func (d *diluc) Skill(p int) int {
 		//ability can go on cd now
 		cd := 600 - (d.S.F - d.eStartFrame)
 		d.S.Log.Debugf("\t Diluc skill going on cd for %v", cd)
-		d.CD[combat.BurstCD] = d.S.F + cd
+		d.CD[combat.SkillCD] = d.S.F + cd
 		d.eStarted = false
 		d.eStartFrame = -1
 		d.eLastUse = -1
@@ -209,6 +209,8 @@ func (d *diluc) Burst(p int) int {
 		s.Log.Infof("\t Diluc burst (explode) dealt %.0f damage [%v]", damage, str)
 	}, "Diluc-Burst-Initial", 210)
 
+	d.Energy = 0
+	d.CD[combat.SkillCD] = d.S.F + 900
 	return 170
 }
 
@@ -221,7 +223,7 @@ func (d *diluc) Tick() {
 			//if so, set ability to be on cd equal to 10s less started
 			cd := 600 - (d.S.F - d.eStartFrame)
 			d.S.Log.Debugf("\t Diluc skill expired, going on cd for %v, last executed %v", cd, d.eLastUse)
-			d.CD[combat.BurstCD] = d.S.F + cd
+			d.CD[combat.SkillCD] = d.S.F + cd
 			//reset
 			d.eStarted = false
 			d.eStartFrame = -1
