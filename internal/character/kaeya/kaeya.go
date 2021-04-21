@@ -23,7 +23,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	c.CharacterTemplate = t
 	c.Energy = 60
 	c.MaxEnergy = 60
-	c.Weapon.Class = combat.WeaponClassClaymore
+	c.Weapon.Class = combat.WeaponClassSword
 
 	c.a4()
 

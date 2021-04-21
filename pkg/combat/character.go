@@ -7,6 +7,7 @@ import (
 type Character interface {
 	//ability functions to be defined by each character on how they will
 	Name() string
+	WeaponClass() WeaponClass
 	CurrentEnergy() float64 //current energy
 	TalentLvlSkill() int
 	TalentLvlAttack() int
@@ -149,6 +150,10 @@ func (c *CharacterTemplate) Tag(key string) int {
 
 func (c *CharacterTemplate) Name() string {
 	return c.Base.Name
+}
+
+func (c *CharacterTemplate) WeaponClass() WeaponClass {
+	return c.Weapon.Class
 }
 
 func (c *CharacterTemplate) TalentLvlSkill() int {
