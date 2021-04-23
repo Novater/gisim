@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	combat.RegisterCharFunc("kaeya", NewChar)
+	combat.RegisterCharFunc("chongyun", NewChar)
 }
 
 type char struct {

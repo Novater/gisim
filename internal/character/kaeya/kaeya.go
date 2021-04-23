@@ -115,6 +115,10 @@ func (c *char) Skill(p int) int {
 }
 
 func (c *char) Burst(p int) int {
+	if c.CD[combat.BurstCD] > c.S.F {
+		c.S.Log.Debugf("\t Kaeya burst still on CD; skipping")
+		return 0
+	}
 
 	d := c.Snapshot("Frostgnaw", combat.ActionSkill, combat.Cryo, combat.MedDurability)
 	d.Mult = 1 //TODO: multiplier
