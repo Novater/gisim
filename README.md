@@ -23,6 +23,8 @@ The following are some ways you can contribute, listed in order of most time con
 3. Running your own character setup in the sim and compare output. Provide feedback on any discrepancy
 4. Generally playing around with the sim, providing any sort of feedback/feature request/etc... 
 
+These are just some ideas. Any bug fixes/pull requests etc... are always welcome.
+
 ## change log
 
 - 04/19/2021: Diluc implemented (not tested)
