@@ -309,6 +309,14 @@ func (s *Sim) Run(length int) (float64, SimStats) {
 		//damage for this frame
 		s.Stats.DamageHist[s.F] = s.Target.Damage
 
+		//recover stam
+		if s.Stam < 240 {
+			s.Stam += 0.5 //30 per second
+			if s.Stam > 240 {
+				s.Stam = 240
+			}
+		}
+
 		//if in cooldown, do nothing
 		if skip > 0 {
 			skip--

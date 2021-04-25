@@ -140,6 +140,13 @@ func (s *Sim) execQueue() int {
 	case ActionAttack:
 		f = c.Attack(n.Param)
 	case ActionCharge:
+		req := c.ActionStam(ActionCharge, n.Param)
+		if s.Stam < req {
+			diff := int((15-s.Stam)/0.5) + 1
+			s.Log.Warnf("[%v] not enough stam to execute charge attack, waiting %v", s.Frame(), diff)
+			f += diff
+		}
+		s.Stam -= req
 		f = c.ChargeAttack(n.Param)
 		s.ResetAllNormalCounter()
 	case ActionHighPlunge:
@@ -161,6 +168,14 @@ func (s *Sim) execQueue() int {
 		s.ResetAllNormalCounter()
 	case ActionCancellable:
 	case ActionDash:
+		//check if enough stam
+		if s.Stam <= 15 {
+			//we need to wait enough frames for this to be greater than 15, in increments of 0.5 stam per frame
+			diff := int((15-s.Stam)/0.5) + 1
+			s.Log.Warnf("[%v] not enough stam to execute dash, waiting %v", s.Frame(), diff)
+			f += diff
+		}
+		s.Stam -= 15
 		f = 24
 		s.ResetAllNormalCounter()
 	case ActionJump:

@@ -163,7 +163,7 @@ func (b *bennett) Skill(p int) int {
 	}
 
 	count := 3
-	if b.S.Rand.Float64() < .5 {
+	if b.S.Rand.Float64() < .75 {
 		count = 2
 	}
 	b.S.AddEnergyParticles("Bennett", count, combat.Pyro, delay[0]+100)

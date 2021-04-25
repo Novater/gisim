@@ -26,7 +26,8 @@ type Character interface {
 	//info methods
 	HasMod(key string) bool
 	ActionReady(a ActionType) bool
-	ChargeAttackStam() float64
+	ActionFrames(a ActionType, p int) int
+	ActionStam(a ActionType, p int) float64
 
 	//other actions
 	UnsafeSetStats(stats []float64)
@@ -283,10 +284,6 @@ func (c *CharacterTemplate) ChargeAttack(p int) int {
 	return 0
 }
 
-func (c *CharacterTemplate) ChargeAttackStam() float64 {
-	return 0
-}
-
 func (c *CharacterTemplate) PlungeAttack(p int) int {
 	return 0
 }
@@ -311,6 +308,16 @@ func (c *CharacterTemplate) RemoveMod(key string) {
 func (c *CharacterTemplate) HasMod(key string) bool {
 	_, ok := c.Mods[key]
 	return ok
+}
+
+func (c *CharacterTemplate) ActionStam(a ActionType, p int) float64 {
+	c.S.Log.Warnf("%v ActionStam not implemented; Character stam usage may be incorrect", c.Base.Name)
+	return 0
+}
+
+func (c *CharacterTemplate) ActionFrames(a ActionType, p int) int {
+	c.S.Log.Warnf("%v ActionFrames not implemented; Character frame count may be incorrect", c.Base.Name)
+	return 0
 }
 
 func (c *CharacterTemplate) ActionReady(a ActionType) bool {
