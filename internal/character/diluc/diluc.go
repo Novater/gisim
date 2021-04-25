@@ -64,10 +64,10 @@ func (d *diluc) burstHook() {
 		if ds.Actor != d.Base.Name {
 			return false
 		}
-		if ds.AbilType != combat.ActionAttack {
+		if ds.AbilType != combat.ActionAttack && ds.AbilType != combat.ActionCharge {
 			return false
 		}
-		if _, ok := d.S.Status["Diluc Burst"]; !ok {
+		if !d.S.StatusActive("Diluc Burst") {
 			return false
 		}
 		ds.Element = combat.Pyro
@@ -173,7 +173,7 @@ func (d *diluc) Skill(p int) int {
 }
 
 func (d *diluc) Burst(p int) int {
-	d.S.Status["Diluc Burst"] = 12 * 60
+	d.S.Status["Diluc Burst"] = d.S.F + 12*60
 
 	//add initial damage
 	x := d.Snapshot("Dawn (Initial)", combat.ActionBurst, combat.Pyro, combat.StrongDurability)
