@@ -1,4 +1,4 @@
-package mona
+package sucrose
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	combat.RegisterCharFunc("mona", NewChar)
+	combat.RegisterCharFunc("sucrose", NewChar)
 }
 
 type char struct {
@@ -24,9 +24,9 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 	c.Energy = 80
 	c.MaxEnergy = 80
 	c.Weapon.Class = combat.WeaponClassCatalyst
-	if c.Base.Cons == 6 {
-		c.c6()
-	}
+
+	c.a2()
+	c.a4()
 
 	return &c, nil
 }
@@ -63,11 +63,55 @@ func (c *char) ActionFrames(a combat.ActionType, p int) int {
 	}
 }
 
-//this will actually apply hydrop after all postsnapshot adjustments
-func (c *char) Snapshot(name string, t combat.ActionType, e combat.EleType, d float64) combat.Snapshot {
-	s := c.CharacterTemplate.Snapshot(name, t, e, d)
-	s.Stats[combat.HydroP] += 0.2 * s.Stats[combat.ER]
-	return s
+func (c *char) a2() {
+	c.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
+		if c.Tags["a2-pyro"] >= c.S.F && ds.ActorEle == combat.Pyro {
+			ds.Stats[combat.EM] += 50
+			return false
+		}
+		if c.Tags["a2-cryo"] >= c.S.F && ds.ActorEle == combat.Cryo {
+			ds.Stats[combat.EM] += 50
+			return false
+		}
+		if c.Tags["a2-hydro"] >= c.S.F && ds.ActorEle == combat.Hydro {
+			ds.Stats[combat.EM] += 50
+			return false
+		}
+		if c.Tags["a2-electro"] >= c.S.F && ds.ActorEle == combat.Electro {
+			ds.Stats[combat.EM] += 50
+			return false
+		}
+		return false
+	}, "sucrose-a2-buff", combat.PostSnapshot)
+
+	c.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
+		if ds.Actor != c.Base.Name {
+			return false
+		}
+		switch c.S.GlobalFlags.ReactionType {
+		case combat.SwirlCryo:
+			c.Tags["a2-cryo"] = c.S.F + 480
+		case combat.SwirlElectro:
+			c.Tags["a2-electro"] = c.S.F + 480
+		case combat.SwirlHydro:
+			c.Tags["a2-hydro"] = c.S.F + 480
+		case combat.SwirlPyro:
+			c.Tags["a2-pyro"] = c.S.F + 480
+		}
+		return false
+	}, "sucrose-a2-buff", combat.PostReaction)
+}
+
+func (c *char) a4() {
+	c.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
+		if ds.Actor == c.Base.Name {
+			return false
+		}
+		if c.Tags["a4"] >= c.S.F {
+			ds.Stats[combat.EM] += c.Stats[combat.EM] * 0.2
+		}
+		return false
+	}, "sucrose-a2-buff", combat.PostSnapshot)
 }
 
 func (c *char) c6() {
@@ -108,9 +152,7 @@ func (c *char) Attack(p int) int {
 }
 
 func (c *char) Burst(p int) int {
-	//bubble deal 0 dmg hydro app
-	//add bubble status, when bubble status disappears trigger omen dmg the frame after
-	//bubble status bursts either -> takes dmg no freeze OR freeze and freeze disappears
+	//tag a4
 
 	return 0
 }

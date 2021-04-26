@@ -239,6 +239,7 @@ func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType, d flo
 	ds.Abil = name
 	ds.AbilType = t
 	ds.Actor = c.Base.Name
+	ds.ActorEle = c.Base.Element
 	ds.BaseAtk = c.Base.Atk + c.Weapon.Atk
 	ds.CharLvl = c.Base.Level
 	ds.BaseDef = c.Base.Def
