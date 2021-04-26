@@ -28,9 +28,13 @@ import (
 	//weapons
 	_ "github.com/srliao/gisim/internal/weapon/bow/favoniuswarbow"
 	_ "github.com/srliao/gisim/internal/weapon/bow/prototypecrescent"
+	_ "github.com/srliao/gisim/internal/weapon/claymore/archaic"
+	_ "github.com/srliao/gisim/internal/weapon/claymore/favonius"
 	_ "github.com/srliao/gisim/internal/weapon/claymore/pine"
 	_ "github.com/srliao/gisim/internal/weapon/claymore/skyrider"
 	_ "github.com/srliao/gisim/internal/weapon/claymore/skyward"
+	_ "github.com/srliao/gisim/internal/weapon/claymore/spine"
+	_ "github.com/srliao/gisim/internal/weapon/claymore/starsilver"
 	_ "github.com/srliao/gisim/internal/weapon/claymore/wolf"
 	_ "github.com/srliao/gisim/internal/weapon/spear/blacktassel"
 	_ "github.com/srliao/gisim/internal/weapon/spear/skywardspine"

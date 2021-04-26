@@ -24,14 +24,15 @@ type EffectFunc func(s *Sim) bool
 type Sim struct {
 	Log *zap.SugaredLogger
 	//exposed fields
-	Target      *Enemy
-	Status      map[string]int
-	ActiveChar  string
-	ActiveIndex int
-	Stam        float64
-	Chars       []Character
-	SwapCD      int
-	Stats       SimStats
+	Target           *Enemy
+	Status           map[string]int
+	ActiveChar       string
+	ActiveIndex      int
+	CharActiveLength int
+	Stam             float64
+	Chars            []Character
+	SwapCD           int
+	Stats            SimStats
 	//reaction related
 	TargetAura Aura
 
@@ -42,7 +43,7 @@ type Sim struct {
 	charPos     map[string]int
 	GlobalFlags Flags
 	//per tick effects
-	effects []EffectFunc
+	effects map[string]func(s *Sim) bool
 	//event hooks
 	snapshotHooks map[snapshotHookType]map[string]snapshotHookFunc
 	eventHooks    map[eventHookType]map[string]eventHookFunc
@@ -192,6 +193,7 @@ func (s *Sim) initMaps() {
 	s.snapshotHooks = make(map[snapshotHookType]map[string]snapshotHookFunc)
 	s.eventHooks = make(map[eventHookType]map[string]eventHookFunc)
 	s.tasks = make(map[int][]Task)
+	s.effects = make(map[string]func(s *Sim) bool)
 	s.Status = make(map[string]int)
 	s.Chars = make([]Character, 0, 4)
 	s.particles = make(map[int][]Particle)
@@ -262,6 +264,7 @@ func (s *Sim) RunHPMode(hp float64) (float64, SimStats) {
 		s.Stats.CharActiveTime[s.ActiveChar]++
 		s.Stats.AuraUptime[s.TargetAura.E()]++
 		s.Stats.SimDuration++
+		s.CharActiveLength++
 
 		if s.SwapCD > 0 {
 			s.SwapCD--
@@ -301,6 +304,7 @@ func (s *Sim) Run(length int) (float64, SimStats) {
 		//add char active time
 		s.Stats.CharActiveTime[s.ActiveChar]++
 		s.Stats.AuraUptime[s.TargetAura.E()]++
+		s.CharActiveLength++
 
 		if s.SwapCD > 0 {
 			s.SwapCD--

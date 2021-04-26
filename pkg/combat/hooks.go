@@ -14,6 +14,8 @@ const (
 type eventHookType string
 
 const (
+	PreSwapHook   eventHookType = "PRE_SWAP_HOOK"
+	PostSwapHook  eventHookType = "POST_SWAP_HOOK"
 	PreBurstHook  eventHookType = "PRE_BURST_HOOK"
 	PostBurstHook eventHookType = "POST_BURST_HOOK"
 	PreSkillHook  eventHookType = "PRE_SKILL_HOOK"
@@ -42,7 +44,7 @@ func (s *Sim) AddEventHook(f eventHookFunc, key string, hook eventHookType) {
 }
 
 func (s *Sim) AddEffect(f EffectFunc, key string) {
-	s.effects = append(s.effects, f)
+	s.effects[key] = f
 	s.Log.Debugf("\t[%v] new effect added %v", s.Frame(), key)
 }
 
@@ -65,11 +67,10 @@ func (s *Sim) executeSnapshotHooks(t snapshotHookType, ds *Snapshot) {
 }
 
 func (s *Sim) runEffects() {
-	next := make([]EffectFunc, 0, len(s.effects))
-	for _, f := range s.effects {
-		if !f(s) {
-			next = append(next, f)
+	for k, f := range s.effects {
+		if f(s) {
+			s.Log.Debugf("[%v] effect hook %v returned true, deleting", s.Frame(), k)
+			delete(s.effects, k)
 		}
 	}
-	s.effects = next
 }

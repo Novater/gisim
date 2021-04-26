@@ -19,6 +19,7 @@ type Character interface {
 	PlungeAttack(p int) int
 	Skill(p int) int
 	Burst(p int) int
+	Dash(p int) int
 	Tick() //function to be called every frame
 	//special char mods
 	AddMod(key string, val map[StatType]float64)
@@ -37,6 +38,7 @@ type Character interface {
 	Tag(key string) int
 
 	ReceiveParticle(p Particle, isActive bool, partyCount int)
+	AddEnergy(e float64)
 	Snapshot(name string, t ActionType, e EleType, d float64) Snapshot
 	ResetActionCooldown(a ActionType)
 	ReduceActionCooldown(a ActionType, v int)
@@ -180,6 +182,14 @@ func (c *CharacterTemplate) CurrentEnergy() float64 {
 	return c.Energy
 }
 
+func (c *CharacterTemplate) AddEnergy(e float64) {
+	c.Energy += e
+	if c.Energy > c.MaxEnergy {
+		c.Energy = c.MaxEnergy
+	}
+	c.S.Log.Debugw("\t\t adding energy", "rec'd", e, "next energy", c.Energy)
+}
+
 func (c *CharacterTemplate) ReceiveParticle(p Particle, isActive bool, partyCount int) {
 	var amt, er, r float64
 	r = 1.0
@@ -296,6 +306,10 @@ func (c *CharacterTemplate) Burst(p int) int {
 	return 0
 }
 
+func (c *CharacterTemplate) Dash(p int) int {
+	return 24
+}
+
 func (c *CharacterTemplate) AddMod(key string, val map[StatType]float64) {
 	c.Mods[key] = val
 }
@@ -311,6 +325,10 @@ func (c *CharacterTemplate) HasMod(key string) bool {
 }
 
 func (c *CharacterTemplate) ActionStam(a ActionType, p int) float64 {
+	switch a {
+	case ActionDash:
+		return 15
+	}
 	c.S.Log.Warnf("%v ActionStam not implemented; Character stam usage may be incorrect", c.Base.Name)
 	return 0
 }
@@ -327,7 +345,6 @@ func (c *CharacterTemplate) ActionReady(a ActionType) bool {
 			return false
 		}
 		return c.CD[BurstCD] <= c.S.F
-
 	case ActionSkill:
 		return c.CD[SkillCD] <= c.S.F
 	}
@@ -375,15 +392,23 @@ func (c *CharacterTemplate) ResetNormalCounter() {
 func (c *CharacterTemplate) Tick() {
 
 	//check normal reset
-	if c.NormalResetTimer == 0 {
-		if c.NRTChanged {
-			c.S.Log.Infof("[%v] character normal reset", c.S.Frame())
-			c.NRTChanged = false
-		}
-		c.NormalCounter = 0
-	} else {
-		c.NRTChanged = true
+	// if c.NormalResetTimer == 0 {
+	// 	if c.NRTChanged {
+	// 		c.S.Log.Infof("[%v] character normal reset", c.S.Frame())
+	// 		c.NRTChanged = false
+	// 	}
+	// 	c.NormalCounter = 0
+	// } else {
+	// 	c.NRTChanged = true
+	// 	c.NormalResetTimer--
+	// }
+
+	if c.NormalResetTimer > 0 {
 		c.NormalResetTimer--
+		if c.NormalResetTimer == 0 {
+			c.NormalCounter = 0
+			c.S.Log.Infof("[%v] character normal reset", c.S.Frame())
+		}
 	}
 
 	//run tasks

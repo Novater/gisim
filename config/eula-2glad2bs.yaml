@@ -16,18 +16,42 @@ Characters:
       attack: 8
       skill: 6
       burst: 9
+    # Weapon:
+    #   WeaponName: "Favonius Greatsword"
+    #   WeaponRefinement: 1
+    #   WeaponBaseAtk: 454
+    # WeaponSecondaryStat:
+    #   ER: 0.613   
+    # Weapon:
+    #   WeaponName: "Prototype Archaic"
+    #   WeaponRefinement: 5
+    #   WeaponBaseAtk: 565
+    # WeaponSecondaryStat:
+    #   ATK%: 0.276
+    # Weapon:
+    #   WeaponName: "Snow-Tombed Starsilver"
+    #   WeaponRefinement: 1
+    #   WeaponBaseAtk: 565
+    # WeaponSecondaryStat:
+    #   Phys%: .345
     Weapon:
+      WeaponName: "Serpent Spine"
+      WeaponRefinement: 1
+      WeaponBaseAtk: 510
+    WeaponSecondaryStat:
+      CR: .276
+    # Weapon:
     #   WeaponName: "Skyward Pride"
     #   WeaponRefinement: 1
     #   WeaponBaseAtk: 674
     # WeaponSecondaryStat:
     #   ER: 0.368
-    Weapon:
-      WeaponName: "Song of Broken Pines"
-      WeaponRefinement: 1
-      WeaponBaseAtk: 741
-    WeaponSecondaryStat:
-      Phys%: .207
+    # Weapon:
+    #   WeaponName: "Song of Broken Pines"
+    #   WeaponRefinement: 1
+    #   WeaponBaseAtk: 741
+    # WeaponSecondaryStat:
+    #   Phys%: .207
     # Weapon:
     #   WeaponName: "Wolf's Gravestone"
     #   WeaponRefinement: 1

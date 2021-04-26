@@ -155,6 +155,7 @@ func (s *Sim) execQueue() int {
 		f = c.Aimed(n.Param)
 		s.ResetAllNormalCounter()
 	case ActionSwap:
+		s.executeEventHook(PreSwapHook)
 		f = 20
 		//if we're still in cd then forcefully wait up the cd
 		if s.SwapCD > 0 {
@@ -166,16 +167,19 @@ func (s *Sim) execQueue() int {
 		s.ActiveChar = n.Target
 		s.ActiveIndex = ind
 		s.ResetAllNormalCounter()
+		s.executeEventHook(PostSwapHook)
+		s.CharActiveLength = 0
 	case ActionCancellable:
 	case ActionDash:
 		//check if enough stam
-		if s.Stam <= 15 {
+		stam := c.ActionStam(ActionDash, n.Param)
+		if s.Stam <= stam {
 			//we need to wait enough frames for this to be greater than 15, in increments of 0.5 stam per frame
-			diff := int((15-s.Stam)/0.5) + 1
+			diff := int((stam-s.Stam)/0.5) + 1
 			s.Log.Warnf("[%v] not enough stam to execute dash, waiting %v", s.Frame(), diff)
 			f += diff
 		}
-		s.Stam -= 15
+		s.Stam -= stam
 		f = 24
 		s.ResetAllNormalCounter()
 	case ActionJump:

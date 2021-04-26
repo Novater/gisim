@@ -49,6 +49,7 @@ CPU profilling is enabled by default for optimization purposes. If you wish to c
 ## optimizations
 
 - [ ] change stat look ups to switch instead of maps
+- [ ] use int for map keys instead of strings
 
 ## credits
 

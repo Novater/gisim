@@ -39,15 +39,15 @@ func (c *char) ActionFrames(a combat.ActionType, p int) int {
 		switch c.NormalCounter {
 		//TODO: need to add atkspd mod
 		case 1:
-			return 1
+			return 11
 		case 2:
-			return 1
+			return 33
 		case 3:
-			return 1
+			return 60
 		case 4:
-			return 1
+			return 97
 		case 5:
-			return 1
+			return 133
 		}
 	case combat.ActionSkill:
 		return 1
@@ -76,7 +76,7 @@ func (c *char) a2() {
 
 func (c *char) Attack(p int) int {
 	delay := [][]int{
-		{1}, {1}, {1}, {1, 1}, {1},
+		{11}, {33}, {60}, {87, 97}, {133},
 	}
 
 	for i := 0; i < len(attack[c.NormalCounter]); i++ {
@@ -188,6 +188,16 @@ func (c *char) skillChargeHook() {
 }
 
 func (c *char) Burst(p int) int {
+	//a4 increase crit + ER
+	val := make(map[combat.StatType]float64)
+	val[combat.CR] = 0.15
+	val[combat.ER] = 0.15
+	c.AddMod("a4", val)
+	//add hook to remove this
+	c.AddTask(func() {
+		c.RemoveMod("a4")
+	}, "keqing-a4", c.S.F+480)
+
 	//initial
 	initial := c.Snapshot("Starward Sword", combat.ActionBurst, combat.Electro, combat.WeakDurability)
 	initial.Mult = burstInitial[c.TalentLvlBurst()]
@@ -214,16 +224,6 @@ func (c *char) Burst(p int) int {
 		damage, str := s.ApplyDamage(initial)
 		s.Log.Infof("\t Keqing burst final hit dealt %.0f damage [%v]", damage, str)
 	}, "Keqing-Burst-Initial", 1) //TODO: frames
-
-	//a4 increase crit + ER
-	val := make(map[combat.StatType]float64)
-	val[combat.CR] = 0.15
-	val[combat.ER] = 0.15
-	c.AddMod("a4", val)
-	//add hook to remove this
-	c.AddTask(func() {
-		c.RemoveMod("a4")
-	}, "keqing-a4", c.S.F+480)
 
 	c.Energy = 0
 	c.CD[combat.BurstCD] = c.S.F + 720 //12s
