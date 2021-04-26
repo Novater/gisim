@@ -317,8 +317,8 @@ func worker(src []byte, hp float64, dur int, resp chan float64, req chan bool, d
 			}
 
 			if hp > 0 {
-				dmg, _ := s.RunHPMode(hp)
-				resp <- dmg / float64(dur)
+				dmg, stat := s.RunHPMode(hp)
+				resp <- dmg * 60 / float64(stat.SimDuration)
 			} else {
 				dmg, _ := s.Run(dur)
 				resp <- dmg / float64(dur)

@@ -24,7 +24,7 @@ Characters:
     #   ER: 0.613   
     # Weapon:
     #   WeaponName: "Prototype Archaic"
-    #   WeaponRefinement: 5
+    #   WeaponRefinement: 1
     #   WeaponBaseAtk: 565
     # WeaponSecondaryStat:
     #   ATK%: 0.276
@@ -34,12 +34,12 @@ Characters:
     #   WeaponBaseAtk: 565
     # WeaponSecondaryStat:
     #   Phys%: .345
-    Weapon:
-      WeaponName: "Serpent Spine"
-      WeaponRefinement: 1
-      WeaponBaseAtk: 510
-    WeaponSecondaryStat:
-      CR: .276
+    # Weapon:
+    #   WeaponName: "Serpent Spine"
+    #   WeaponRefinement: 1
+    #   WeaponBaseAtk: 510
+    # WeaponSecondaryStat:
+    #   CR: .276
     # Weapon:
     #   WeaponName: "Skyward Pride"
     #   WeaponRefinement: 1
@@ -52,12 +52,12 @@ Characters:
     #   WeaponBaseAtk: 741
     # WeaponSecondaryStat:
     #   Phys%: .207
-    # Weapon:
-    #   WeaponName: "Wolf's Gravestone"
-    #   WeaponRefinement: 1
-    #   WeaponBaseAtk: 608
-    # WeaponSecondaryStat:
-    #   ATK%: .496
+    Weapon:
+      WeaponName: "Wolf's Gravestone"
+      WeaponRefinement: 1
+      WeaponBaseAtk: 608
+    WeaponSecondaryStat:
+      ATK%: .496
     Artifacts:
       Flower:
         Level: 20
