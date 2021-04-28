@@ -61,13 +61,19 @@ func (s *Sim) executeCharacterTicks() {
 	}
 }
 
+type CharStatMod struct {
+	Mod    map[StatType]float64
+	Expiry int
+}
+
 type CharacterTemplate struct {
 	S *Sim
 	//this should describe the frame in which the abil becomes available
 	//if frame > current then it's available. no need to decrement this way
-	CD   map[string]int
-	Mods map[string]map[StatType]float64
-	Tags map[string]int
+	CD        map[string]int
+	Mods      map[string]map[StatType]float64
+	TimedMods map[string]CharStatMod
+	Tags      map[string]int
 	//Profile info
 	Base    CharacterBase
 	Weapon  WeaponProfile
@@ -236,6 +242,17 @@ func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType, d flo
 		}
 	}
 
+	for key, m := range c.TimedMods {
+		if m.Expiry > c.S.F {
+			c.S.Log.Debugw("\t\t timed char stat mod", "key", key, "mods", m.Mod, "expires in", m.Expiry-c.S.F)
+			for k, v := range m.Mod {
+				ds.Stats[k] += v
+			}
+		} else {
+			delete(c.TimedMods, key)
+		}
+	}
+
 	ds.Abil = name
 	ds.AbilType = t
 	ds.Actor = c.Base.Name
@@ -309,6 +326,18 @@ func (c *CharacterTemplate) Burst(p int) int {
 
 func (c *CharacterTemplate) Dash(p int) int {
 	return 24
+}
+
+func (c *CharacterTemplate) AddTimedMod(key string, val map[StatType]float64, expiry int) {
+	c.TimedMods[key] = CharStatMod{
+		Mod:    val,
+		Expiry: expiry,
+	}
+}
+
+func (c *CharacterTemplate) HasTimedMod(key string) bool {
+	_, ok := c.TimedMods[key]
+	return ok
 }
 
 func (c *CharacterTemplate) AddMod(key string, val map[StatType]float64) {
