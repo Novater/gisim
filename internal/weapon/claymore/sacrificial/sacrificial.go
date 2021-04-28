@@ -24,6 +24,9 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if s.StatusActive("Sacrificial Greatsword Proc") {
 			return false
 		}
+		if c.ActionReady(combat.ActionSkill) {
+			return false
+		}
 		if s.Rand.Float64() > prob {
 			return false
 		}
