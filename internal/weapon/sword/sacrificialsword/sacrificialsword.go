@@ -5,7 +5,7 @@ import (
 )
 
 func init() {
-	combat.RegisterWeaponFunc("Sacrificial Sword", weapon)
+	combat.RegisterWeaponFunc("sacrificial sword", weapon)
 }
 
 func weapon(c combat.Character, s *combat.Sim, r int) {

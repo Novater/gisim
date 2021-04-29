@@ -60,6 +60,7 @@ const (
 	itemRightParen       // ')'
 	itemLeftSquareParen  // '['
 	itemRightSquareParen // ']'
+	itemString           // string, including quotes
 	// following is logic operator
 	itemLogicOP // used only to delimit logical operation
 	LogicAnd    // && keyword
@@ -76,6 +77,17 @@ const (
 	itemKeyword // used only to delimit the keywords
 	itemDot     // the cursor, spelled '.'
 	itemAction  // action keyword
+	itemChar    // char
+	itemStats   // stats
+	itemWeapon  // weapon
+	itemArt     // art
+	itemLvl     // lvl
+	itemCons    // cons
+	itemTalent  // talent
+	itemRefine  // refine
+	itemLabel   // label
+	itemCount   // count
+	itemEle     // ele
 	itemTarget  // char keyword
 	itemExec    // exec keyword
 	itemLock    // lock keyword
@@ -83,12 +95,54 @@ const (
 	itemSwap    // swap keyword
 	itemPost    // trail keyword
 	itemActive  // active keyword
+	// stat types after the rest
+	statKeyword  // delimit stats
+	statDEFP     // def%
+	statDEF      // def
+	statHP       // hp
+	statHPP      // hp%
+	statATK      // atk
+	statATKP     // atk%
+	statER       // er
+	statEM       // em
+	statCR       // cr
+	statCD       // cd
+	statHeal     // heal
+	statPyroP    // pyro%
+	statHydroP   // hydro%
+	statCryoP    // cryo%
+	statElectroP // electro%
+	statAnemoP   // anemo%
+	statGeoP     // geo%
+	statPhyP     // phy%
+	statDendroP  // dendro%
+	eleTypeKeyword
+	elePyro     // pyro
+	eleHydro    // hydro
+	eleCryo     // cryo
+	eleElectro  // electro
+	eleGeo      // geo
+	eleAnemo    // anemo
+	eleDendro   // dendro
+	elePhysical // physical
 
 )
 
 var key = map[string]ItemType{
-	".":       itemDot,
+	".": itemDot,
+	//action related
 	"actions": itemAction,
+	"char":    itemChar,
+	"stats":   itemStats,
+	"weapon":  itemWeapon,
+	"art":     itemArt,
+	"lvl":     itemLvl,
+	"cons":    itemCons,
+	"talent":  itemTalent,
+	"refine":  itemRefine,
+	"label":   itemLabel,
+	"count":   itemCount,
+	"ele":     itemEle,
 	"target":  itemTarget,
 	"exec":    itemExec,
 	"lock":    itemLock,
@@ -96,6 +150,35 @@ var key = map[string]ItemType{
 	"swap":    itemSwap,
 	"post":    itemPost,
 	"active":  itemActive,
+	//stats
+	"def%":     statDEFP,
+	"def":      statDEF,
+	"hp":       statHP,
+	"hp%":      statHPP,
+	"atk":      statATK,
+	"atk%":     statATKP,
+	"er":       statER,
+	"em":       statEM,
+	"cr":       statCR,
+	"cd":       statCD,
+	"heal":     statHeal,
+	"pyro%":    statPyroP,
+	"hydro%":   statHydroP,
+	"cryo%":    statCryoP,
+	"electro%": statElectroP,
+	"anemo%":   statAnemoP,
+	"geo%":     statGeoP,
+	"phy%":     statPhyP,
+	"dendro%":  statDendroP,
+	//element types
+	"pyro":     elePyro,
+	"hydro":    eleHydro,
+	"cryo":     eleCryo,
+	"electro":  eleElectro,
+	"geo":      eleGeo,
+	"anemo":    eleAnemo,
+	"dendro":   eleDendro,
+	"physical": elePhysical,
 }
 
 const eof = -1
@@ -294,6 +377,8 @@ func lexText(l *lexer) stateFn {
 		} else {
 			return l.errorf("unrecognized character in action: %#U", r)
 		}
+	case r == '"':
+		return lexQuote
 	case r == '&':
 		if n := l.next(); n == '&' {
 			l.emit(LogicAnd)
@@ -382,6 +467,25 @@ func lexFieldOrVariable(l *lexer, typ ItemType) stateFn {
 	return lexText
 }
 
+func lexQuote(l *lexer) stateFn {
+Loop:
+	for {
+		switch l.next() {
+		case '\\':
+			if r := l.next(); r != eof && r != '\n' {
+				break
+			}
+			fallthrough
+		case eof, '\n':
+			return l.errorf("unterminated quoted string")
+		case '"':
+			break Loop
+		}
+	}
+	l.emit(itemString)
+	return lexText
+}
+
 // lexIdentifier scans an alphanumeric.
 func lexIdentifier(l *lexer) stateFn {
 Loop:
@@ -433,7 +537,7 @@ func isSpace(r rune) bool {
 
 // isAlphaNumeric reports whether r is an alphabetic, digit, or underscore.
 func isAlphaNumeric(r rune) bool {
-	return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r)
+	return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r) || r == '%'
 }
 
 // atTerminator reports whether the input is at valid termination character to

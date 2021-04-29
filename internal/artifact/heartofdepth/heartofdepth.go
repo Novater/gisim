@@ -5,7 +5,7 @@ import (
 )
 
 func init() {
-	combat.RegisterSetFunc("Heart of Depth", set)
+	combat.RegisterSetFunc("heart of depth", set)
 }
 
 func set(c combat.Character, s *combat.Sim, count int) {

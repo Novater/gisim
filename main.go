@@ -50,8 +50,6 @@ import (
 	_ "github.com/srliao/gisim/internal/artifact/noblesse"
 	_ "github.com/srliao/gisim/internal/artifact/paleflame"
 	_ "github.com/srliao/gisim/internal/artifact/wanderer"
-
-	"gopkg.in/yaml.v2"
 )
 
 func main() {
@@ -61,13 +59,13 @@ func main() {
 
 	debug := flag.String("d", "error", "output level: debug, info, warn")
 	seconds := flag.Int("s", 120, "how many seconds to run the sim for")
-	cfgFile := flag.String("p", "config.yaml", "which profile to use")
+	cfgFile := flag.String("p", "config.txt", "which profile to use")
 	f := flag.String("o", "", "detailed log file")
 	hp := flag.Float64("hp", 0, "hp mode: how much hp to deal damage to")
 	showCaller := flag.Bool("c", false, "show caller in debug low")
 	avgMode := flag.Bool("a", false, "run sim multiple times and calculate avg damage (smooth out randomness). default false. note that there is no debug log in this mode")
 	w := flag.Int("w", 24, "number of workers to run when running multiple iterations; default 24")
-	i := flag.Int("i", 200, "number of iterations to run if we're running multiple")
+	i := flag.Int("i", 5000, "number of iterations to run if we're running multiple")
 
 	flag.Parse()
 
@@ -82,18 +80,11 @@ func main() {
 		runIter(*i, *w, source, *hp, *seconds)
 	} else {
 		defer profile.Start(profile.ProfilePath("./")).Stop()
-		var cfg combat.Profile
-		err = yaml.Unmarshal(source, &cfg)
+		parser := parse.New("single", string(source))
+		cfg, err := parser.Parse()
 		if err != nil {
 			log.Fatal(err)
 		}
-		parser := parse.New("single", cfg.RotationString)
-		rot, err := parser.Parse()
-		if err != nil {
-			log.Fatal(err)
-		}
-		cfg.Rotation = rot
-
 		cfg.LogConfig.LogLevel = *debug
 		cfg.LogConfig.LogFile = *f
 		cfg.LogConfig.LogShowCaller = *showCaller
@@ -296,17 +287,11 @@ func worker(src []byte, hp float64, dur int, resp chan float64, req chan bool, d
 	for {
 		select {
 		case <-req:
-			var cfg combat.Profile
-			err := yaml.Unmarshal(src, &cfg)
+			parser := parse.New("single", string(src))
+			cfg, err := parser.Parse()
 			if err != nil {
 				log.Fatal(err)
 			}
-			parser := parse.New("single", cfg.RotationString)
-			rot, err := parser.Parse()
-			if err != nil {
-				log.Fatal(err)
-			}
-			cfg.Rotation = rot
 			cfg.LogConfig.LogLevel = "error"
 			cfg.LogConfig.LogFile = ""
 			cfg.LogConfig.LogShowCaller = false

@@ -5,7 +5,7 @@ import (
 )
 
 func init() {
-	combat.RegisterSetFunc("Archaic Petra", set)
+	combat.RegisterSetFunc("archaic petra", set)
 }
 
 func set(c combat.Character, s *combat.Sim, count int) {

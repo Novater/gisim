@@ -118,14 +118,14 @@ Characters:
           CD: 0.218
       Sands:
         Level: 16
-        Set: "Noblesse Oblige"
+        Set: "Gladiator's Finale"
         Main:
-          ATK%: 0.387
+          ATK%: 0.466
         Sub:
-          ATK: 37
-          DEF: 23
-          HP%: 0.099
-          ER: 0.168
+          CD: 0.124
+          CR: 0.078
+          HP: 207
+          ATK: 51
       Goblet:
         Level: 20
         Set: "Maiden Beloved"
@@ -139,14 +139,14 @@ Characters:
       Circlet:
         Level: 20
         Type: "Circlet"
-        Set: "Noblesse Oblige"
+        Set: "Gladiator's Finale"
         Main:
-          CR: 0.232
+          CR: 0.311
         Sub:
-          CD: 0.056
-          ATK: 28
-          EM: 30
-          DEF%: 0.053
+          ATK%: 0.087
+          HP%: 0.058
+          CD: 0.132
+          DEF: 76
   - Base:
       Name: fischl
       Level: 70
@@ -251,7 +251,7 @@ Characters:
       Flower:
         Level: 20
         Type: "Flower"
-        Set: "Gladiator's Finale"
+        Set: "Noblesse Oblige"
         Main:
           HP: 4780
         Sub:
@@ -273,7 +273,7 @@ Characters:
       Sands:
         Level: 20
         Type: "Sands"
-        Set: "Thundersoother"
+        Set: "Noblesse Oblige"
         Main:
           ATK%: 0.466
         Sub:
@@ -284,7 +284,7 @@ Characters:
       Goblet:
         Level: 20
         Type: "Goblet"
-        Set: "Maiden Beloved"
+        Set: "Gladiator's Finale"
         Main:
           Hydro%: 0.466
         Sub:
@@ -295,7 +295,7 @@ Characters:
       Circlet:
         Level: 16
         Type: "Circlet"
-        Set: "Bloodstained Chivalry"
+        Set: "Archaic Petra"
         Main:
           CR: 0.258
         Sub:

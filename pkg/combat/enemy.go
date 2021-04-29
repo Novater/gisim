@@ -6,7 +6,7 @@ import (
 
 //Enemy keeps track of the status of one enemy Enemy
 type Enemy struct {
-	Level  int64
+	Level  int
 	res    map[EleType]float64
 	mod    map[string]ResistMod
 	HPMode bool

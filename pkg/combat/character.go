@@ -105,10 +105,6 @@ const (
 )
 
 func NewTemplateChar(s *Sim, p CharacterProfile) (*CharacterTemplate, error) {
-	//error checks
-	if len(p.ArtifactsConfig) > 5 {
-		return nil, fmt.Errorf("number of artifacts exceeds 5 - %v", p.Base.Name)
-	}
 	c := CharacterTemplate{}
 	c.S = s
 	c.CD = make(map[string]int)
@@ -116,34 +112,19 @@ func NewTemplateChar(s *Sim, p CharacterProfile) (*CharacterTemplate, error) {
 	c.Tags = make(map[string]int)
 	c.Base = p.Base
 	c.Weapon = p.Weapon
-	c.Talents.Attack = p.TalentLevelConfig["attack"]
+	c.Talents = p.Talents
 	if c.Talents.Attack < 1 || c.Talents.Attack > 15 {
 		return nil, fmt.Errorf("invalid talent lvl: attack - %v", c.Talents.Attack)
 	}
-	c.Talents.Skill = p.TalentLevelConfig["skill"]
 	if c.Talents.Attack < 1 || c.Talents.Attack > 12 {
 		return nil, fmt.Errorf("invalid talent lvl: skill - %v", c.Talents.Skill)
 	}
-	c.Talents.Burst = p.TalentLevelConfig["burst"]
 	if c.Talents.Attack < 1 || c.Talents.Attack > 12 {
 		return nil, fmt.Errorf("invalid talent lvl: burst - %v", c.Talents.Burst)
 	}
 	c.Stats = make([]float64, len(StatTypeString))
-	//load artifacts
-	for _, a := range p.ArtifactsConfig {
-		//find out which main stat it is
-
-		//load sub stats
-		for i := 0; i < len(c.Stats); i++ {
-			c.Stats[i] += a.Main[StatTypeString[i]]
-			c.Stats[i] += a.Sub[StatTypeString[i]]
-		}
-		// s.Log.Debugw("loading artifacts", "a", a, "stats", c.Stats)
-	}
-	//load weapon and ascension bonus
-	for i := 0; i < len(c.Stats); i++ {
-		c.Stats[i] += p.WeaponBonusConfig[StatTypeString[i]]
-		c.Stats[i] += p.AscensionBonusConfig[StatTypeString[i]]
+	for i, v := range p.Stats {
+		c.Stats[i] = v
 	}
 
 	return &c, nil
@@ -262,8 +243,6 @@ func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType, d flo
 	ds.BaseDef = c.Base.Def
 	ds.Element = e
 	ds.Durability = d
-	ds.Stats[CR] += c.Base.CR
-	ds.Stats[CD] += c.Base.CD
 
 	for _, f := range c.S.snapshotHooks[PostSnapshot] {
 		f(&ds)

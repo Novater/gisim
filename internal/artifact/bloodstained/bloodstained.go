@@ -3,7 +3,7 @@ package bloodstained
 import "github.com/srliao/gisim/pkg/combat"
 
 func init() {
-	combat.RegisterSetFunc("Bloodstained Chivalry", set)
+	combat.RegisterSetFunc("bloodstained chivalry", set)
 }
 
 func set(c combat.Character, s *combat.Sim, count int) {

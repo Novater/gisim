@@ -5,7 +5,7 @@ import (
 )
 
 func init() {
-	combat.RegisterSetFunc("Gladiator's Finale", set)
+	combat.RegisterSetFunc("gladiator's finale", set)
 }
 
 func set(c combat.Character, s *combat.Sim, count int) {

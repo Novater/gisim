@@ -41,7 +41,7 @@ func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error)
 		f.c6()
 	}
 
-	f.turbo()
+	// f.turbo()
 
 	return &f, nil
 }

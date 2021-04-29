@@ -161,14 +161,8 @@ func (s *Sim) initTeam(p Profile) error {
 		}
 		wf(c, s, v.Weapon.Refine)
 
-		//check set bonus
-		sb := make(map[string]int)
-		for _, a := range v.ArtifactsConfig {
-			sb[a.Set]++
-		}
-
 		//add set bonus
-		for key, count := range sb {
+		for key, count := range v.Sets {
 			f, ok := setMap[key]
 			if ok {
 				f(c, s, count)
