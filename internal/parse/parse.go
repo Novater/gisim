@@ -47,6 +47,20 @@ func (p *Parser) Parse() (combat.Profile, error) {
 	p.chars = make(map[string]*combat.CharacterProfile)
 	for n := p.next(); n.typ != itemEOF; n = p.next() {
 		switch n.typ {
+		case itemLabel:
+			_, err := p.consume(itemAddToList)
+			if err != nil {
+				return r, err
+			}
+			n = p.next()
+			if n.typ != itemIdentifier {
+				return r, fmt.Errorf("<active> bad token at line %v: %v", n.line, n)
+			}
+			r.Label = n.val
+			n = p.next()
+			if n.typ != itemTerminateLine {
+				return r, fmt.Errorf("<active> bad token at line %v: %v", n.line, n)
+			}
 		case itemAction:
 			next, err := p.parseAction()
 			if err != nil {

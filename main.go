@@ -92,7 +92,16 @@ func main() {
 		// lines := strings.Split(string(content), `\n`)
 		runMulti(*i, *w, files, *hp, *seconds)
 	case *avgMode:
-		runIter(*i, *w, source, *hp, *seconds)
+		r := runIter(*i, *w, source, *hp, *seconds)
+		fmt.Printf(
+			"Simulation done; %v iterations; average dps of %0.0f over %v seconds (min: %0.02f, max: %0.02f, stddev: %0.02f)\n",
+			*i,
+			r.mean,
+			*seconds,
+			r.min,
+			r.max,
+			r.sd,
+		)
 	default:
 		defer profile.Start(profile.ProfilePath("./")).Stop()
 		parser := parse.New("single", string(source))
@@ -232,8 +241,16 @@ func runSingle(cfg combat.Profile, hp float64, dur int) {
 	}
 }
 
-func runIter(n, w int, src []byte, hp float64, dur int) {
-	var progress, sum, ss, min, max float64
+type result struct {
+	mean float64
+	min  float64
+	max  float64
+	sd   float64
+}
+
+func runIter(n, w int, src []byte, hp float64, dur int) result {
+	// var progress float64
+	var sum, ss, min, max float64
 	var data []float64
 	min = math.MaxFloat64
 	max = -1
@@ -256,7 +273,7 @@ func runIter(n, w int, src []byte, hp float64, dur int) {
 		}
 	}()
 
-	fmt.Print("Progress: 0")
+	// fmt.Print("0")
 
 	for count > 0 {
 		val := <-resp
@@ -269,12 +286,12 @@ func runIter(n, w int, src []byte, hp float64, dur int) {
 		if val > max {
 			max = val
 		}
-		if (1 - float64(count)/float64(n)) > (progress + 0.1) {
-			progress = (1 - float64(count)/float64(n))
-			fmt.Printf(".%.0f", 100*progress)
-		}
+		// if (1 - float64(count)/float64(n)) > (progress + 0.1) {
+		// 	progress = (1 - float64(count)/float64(n))
+		// 	fmt.Printf(".%.0f", 100*progress)
+		// }
 	}
-	fmt.Print("...done\n")
+	// fmt.Print(".100")
 
 	close(done)
 
@@ -286,15 +303,12 @@ func runIter(n, w int, src []byte, hp float64, dur int) {
 
 	sd := math.Sqrt(ss / float64(n))
 
-	fmt.Printf(
-		"Simulation done; %v iterations; average dps of %0.0f over %v seconds (min: %0.02f, max: %0.02f, stddev: %0.02f)\n",
-		n,
-		mean,
-		dur,
-		min,
-		max,
-		sd,
-	)
+	return result{
+		mean: mean,
+		min:  min,
+		max:  max,
+		sd:   sd,
+	}
 }
 
 func worker(src []byte, hp float64, dur int, resp chan float64, req chan bool, done chan bool) {
@@ -331,12 +345,21 @@ func worker(src []byte, hp float64, dur int, resp chan float64, req chan bool, d
 }
 
 func runMulti(n, w int, files []string, hp float64, dur int) {
+	fmt.Printf("Simulating %v seconds of combat over %v iterations\n", dur, n)
+	start := time.Now()
+	fmt.Print("Filename                                 |      Mean|       Min|       Max|   Std Dev|\n")
+	fmt.Print("--------------------------------------------------------------------------------------\n")
 	for _, f := range files {
 		source, err := ioutil.ReadFile(f)
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println("running ", f)
-		runIter(n, w, source, hp, dur)
+		fmt.Printf("%40.40v |", f)
+		r := runIter(n, w, source, hp, dur)
+		fmt.Printf("%10.2f|%10.2f|%10.2f|%10.2f|\n", r.mean, r.min, r.max, r.sd)
 	}
+	elapsed := time.Since(start)
+	fmt.Printf("Completed in %s\n", elapsed)
 }
+
+// 0.10.20.30.40.50.60.70.80.90.100
