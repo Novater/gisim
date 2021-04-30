@@ -346,7 +346,24 @@ func (s *Sim) evalStatus(c Condition) bool {
 		e := x.CurrentEnergy()
 		return compFloat(c.Op, e, float64(c.Value))
 	default:
-		return false
+		//look to see if there's a matching status tag
+		//if so convert is active = 1, and not active to 0
+		status := strings.TrimPrefix(c.Fields[2], ".")
+		f, ok := s.Status[status]
+		if !ok {
+			return false
+		}
+		active := 0
+		if f > s.F {
+			active = 1
+		}
+		val := c.Value
+		if val > 0 {
+			val = 1
+		} else {
+			val = 0
+		}
+		return compInt(c.Op, active, val)
 	}
 }
 

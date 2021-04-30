@@ -112,7 +112,7 @@ func (x *xingqiu) Skill(p int) int {
 	d := x.Snapshot("Guhua Sword: Fatal Rainscreen", combat.ActionSkill, combat.Hydro, combat.WeakDurability)
 	if x.Base.Cons >= 4 {
 		//check if ult is up, if so increase multiplier
-		if x.S.StatusActive("Xingqiu-Burst") {
+		if x.S.StatusActive("xqburst") {
 			d.OtherMult = 1.5
 		}
 	}
@@ -140,7 +140,7 @@ func (x *xingqiu) Skill(p int) int {
 func (x *xingqiu) burstHook() {
 	x.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		//check if buff is up
-		if !x.S.StatusActive("Xingqiu-Burst") {
+		if !x.S.StatusActive("xqburst") {
 			return false
 		}
 		//check if off ICD
@@ -238,7 +238,7 @@ func (x *xingqiu) Burst(p int) int {
 		dur += 3
 	}
 	dur = dur * 60
-	x.S.Status["Xingqiu-Burst"] = x.S.F + dur
+	x.S.Status["xqburst"] = x.S.F + dur
 
 	x.burstCounter = 0
 	x.numSwords = 2
