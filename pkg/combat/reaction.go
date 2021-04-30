@@ -91,28 +91,48 @@ func (s *Sim) applyReactionDamage(ds Snapshot, r ReactionType) float64 {
 	s.Log.Infof("[%v] %v (%v) caused %v, dealt %0.2f damage", s.Frame(), ds.Actor, ds.Abil, r, damage)
 	s.Target.Damage += damage
 	s.Target.HP -= damage
-	s.Stats.DamageByChar[ds.Actor][string(r)] += damage
+	if s.Stats.LogStats {
+		s.Stats.DamageByChar[ds.Actor][string(r)] += damage
+	}
 
 	return damage
 }
 
 //EleType is a string representing an element i.e. HYDRO/PYRO/etc...
-type EleType string
+type EleType int
 
 //ElementType should be pryo, Hydro, Cryo, Electro, Geo, Anemo and maybe dendro
 const (
-	Pyro      EleType = "pyro"
-	Hydro     EleType = "hydro"
-	Cryo      EleType = "cryo"
-	Electro   EleType = "electro"
-	Geo       EleType = "geo"
-	Anemo     EleType = "anemo"
-	Dendro    EleType = "dendro"
-	Physical  EleType = "physical"
-	Frozen    EleType = "frozen"
-	EC        EleType = "electro-charged"
-	NoElement EleType = ""
+	Pyro EleType = iota
+	Hydro
+	Cryo
+	Electro
+	Geo
+	Anemo
+	Dendro
+	Physical
+	Frozen
+	EC
+	NoElement
 )
+
+func (e EleType) String() string {
+	return EleTypeString[e]
+}
+
+var EleTypeString = [...]string{
+	"pyro",
+	"hydro",
+	"cryo",
+	"electro",
+	"geo",
+	"anemo",
+	"dendro",
+	"physical",
+	"frozen",
+	"electro-charged",
+	"",
+}
 
 const (
 	WeakAuraBase   int64 = 570

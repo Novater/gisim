@@ -24,6 +24,20 @@ var actionKeys = map[string]combat.ActionType{
 	"swap":            combat.ActionSwap,
 }
 
+var eleKeys = map[string]combat.EleType{
+	"pyro":            combat.Pyro,
+	"hydro":           combat.Hydro,
+	"cryo":            combat.Cryo,
+	"electro":         combat.Electro,
+	"geo":             combat.Geo,
+	"anemo":           combat.Anemo,
+	"dendro":          combat.Dendro,
+	"physical":        combat.Physical,
+	"frozen":          combat.Frozen,
+	"electro-charged": combat.EC,
+	"":                combat.NoElement,
+}
+
 type Parser struct {
 	input  string
 	l      *lexer
@@ -154,7 +168,7 @@ loop:
 			if n.typ <= eleTypeKeyword {
 				return fmt.Errorf("<char> expecting element, got bad token at line %v - %v: %v", n.line, n.pos, n)
 			}
-			c.Base.Element = combat.EleType(n.val)
+			c.Base.Element = eleKeys[n.val]
 		case itemLvl:
 			_, err = p.consume(itemAssign)
 			if err != nil {
@@ -552,7 +566,7 @@ loop:
 			if err != nil {
 				return fmt.Errorf("<target> expecting float lvl: %v", err)
 			}
-			p.target.Resist[combat.EleType(s)] += amt
+			p.target.Resist[eleKeys[s]] += amt
 		case n.typ == itemTerminateLine:
 			break loop
 		default:

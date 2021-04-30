@@ -62,6 +62,7 @@ type Flags struct {
 }
 
 type SimStats struct {
+	LogStats             bool
 	AuraUptime           map[EleType]int //uptime in frames
 	DamageHist           []float64
 	DamageByChar         map[string]map[string]float64
@@ -72,7 +73,13 @@ type SimStats struct {
 	//super detailed data!
 	CharActiveFrame    map[string][]int
 	ElementActiveFrame map[EleType][]int
-	AbilUsageByFrame   []int
+	AbilUsageByFrame   []AbilUsage
+}
+
+type AbilUsage struct {
+	Actor  string
+	Action string
+	Param  int
 }
 
 //New creates new sim from given profile
@@ -87,6 +94,7 @@ func New(p Profile) (*Sim, error) {
 	u.mod = make(map[string]ResistMod)
 	s.Target = u
 	s.GlobalFlags.NextAttackMVMult = 1
+	s.Stats.LogStats = p.LogStats
 
 	s.initMaps()
 	s.Stam = 240
@@ -155,8 +163,6 @@ func (s *Sim) initTeam(p Profile) error {
 			return fmt.Errorf("duplicated character %v", v.Base.Name)
 		}
 		dup[v.Base.Name] = true
-		s.Stats.DamageByChar[v.Base.Name] = make(map[string]float64)
-		s.Stats.AbilUsageCountByChar[v.Base.Name] = make(map[string]int)
 
 		//initialize weapon
 		wf, ok := weaponMap[v.Weapon.Name]
@@ -198,11 +204,14 @@ func (s *Sim) initMaps() {
 	s.charPos = make(map[string]int)
 	s.TargetAura = NewNoAura()
 
-	s.Stats.AuraUptime = make(map[EleType]int)
-	s.Stats.DamageByChar = make(map[string]map[string]float64)
-	s.Stats.CharActiveTime = make(map[string]int)
-	s.Stats.AbilUsageCountByChar = make(map[string]map[string]int)
-	s.Stats.ReactionsTriggered = make(map[ReactionType]int)
+	if s.Stats.LogStats {
+
+		s.Stats.AuraUptime = make(map[EleType]int)
+		s.Stats.DamageByChar = make(map[string]map[string]float64)
+		s.Stats.CharActiveTime = make(map[string]int)
+		s.Stats.AbilUsageCountByChar = make(map[string]map[string]int)
+		s.Stats.ReactionsTriggered = make(map[ReactionType]int)
+	}
 
 	s.actionQueue = make([]ActionItem, 0, 10)
 }
@@ -259,10 +268,12 @@ func (s *Sim) RunHPMode(hp float64) (float64, SimStats) {
 		s.runTasks()
 
 		//add char active time
-		s.Stats.CharActiveTime[s.ActiveChar]++
-		s.Stats.AuraUptime[s.TargetAura.E()]++
-		s.Stats.SimDuration++
-		s.CharActiveLength++
+		if s.Stats.LogStats {
+			s.Stats.CharActiveTime[s.ActiveChar]++
+			s.Stats.AuraUptime[s.TargetAura.E()]++
+			s.Stats.SimDuration++
+			s.CharActiveLength++
+		}
 
 		if s.SwapCD > 0 {
 			s.SwapCD--
@@ -283,7 +294,21 @@ func (s *Sim) RunHPMode(hp float64) (float64, SimStats) {
 
 //Run the sim; length in seconds
 func (s *Sim) Run(length int) (float64, SimStats) {
-	s.Stats.DamageHist = make([]float64, length*60)
+	if s.Stats.LogStats {
+		s.Stats.DamageHist = make([]float64, length*60)
+		s.Stats.AbilUsageByFrame = make([]AbilUsage, length*60)
+		s.Stats.CharActiveFrame = make(map[string][]int)
+		for _, c := range s.Chars {
+			s.Stats.CharActiveFrame[c.Name()] = make([]int, length*60)
+			s.Stats.DamageByChar[c.Name()] = make(map[string]float64)
+			s.Stats.AbilUsageCountByChar[c.Name()] = make(map[string]int)
+		}
+		s.Stats.ElementActiveFrame = make(map[EleType][]int)
+		for i := range EleTypeString {
+			s.Stats.ElementActiveFrame[EleType(i)] = make([]int, length*60)
+		}
+	}
+
 	var skip int
 	rand.Seed(time.Now().UnixNano())
 	//60fps, 60s/min, 2min
@@ -299,17 +324,21 @@ func (s *Sim) Run(length int) (float64, SimStats) {
 		s.checkAura()
 		s.runTasks()
 
-		//add char active time
-		s.Stats.CharActiveTime[s.ActiveChar]++
-		s.Stats.AuraUptime[s.TargetAura.E()]++
-		s.CharActiveLength++
+		if s.Stats.LogStats {
+			//add char active time
+			s.Stats.CharActiveTime[s.ActiveChar]++
+			s.Stats.AuraUptime[s.TargetAura.E()]++
+			s.CharActiveLength++
+			//damage for this frame
+			s.Stats.DamageHist[s.F] = s.Target.Damage
+			//log current events
+			s.Stats.CharActiveFrame[s.ActiveChar][s.F] = 1
+			s.Stats.ElementActiveFrame[s.TargetAura.E()][s.F] = 1
+		}
 
 		if s.SwapCD > 0 {
 			s.SwapCD--
 		}
-
-		//damage for this frame
-		s.Stats.DamageHist[s.F] = s.Target.Damage
 
 		//recover stam
 		if s.Stam < 240 {

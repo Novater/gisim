@@ -589,6 +589,7 @@ func NewElement() *Element {
 func NewNoAura() *NoAura {
 	r := &NoAura{}
 	r.Element = &Element{}
+	r.Element.Type = NoElement
 	return r
 }
 

@@ -39,7 +39,9 @@ func (s *Sim) ApplyDamage(ds Snapshot) (float64, string) {
 	dr := calcDmg(ds, *s.Target, s.Rand, s.Log)
 	s.Target.Damage += dr.damage
 	s.Target.HP -= dr.damage
-	s.Stats.DamageByChar[ds.Actor][ds.Abil] += dr.damage
+	if s.Stats.LogStats {
+		s.Stats.DamageByChar[ds.Actor][ds.Abil] += dr.damage
+	}
 
 	if dr.isCrit {
 		s.executeSnapshotHooks(OnCritDamage, &ds)
@@ -50,10 +52,13 @@ func (s *Sim) ApplyDamage(ds Snapshot) (float64, string) {
 	//check if reaction occured and call hooks
 	if s.GlobalFlags.ReactionDidOccur {
 		s.executeSnapshotHooks(PreReaction, &ds)
-		s.Stats.ReactionsTriggered[s.GlobalFlags.ReactionType]++
 		s.Log.Debugf("\t reaction %v occured", s.GlobalFlags.ReactionType)
 		sb.WriteString(" ")
 		sb.WriteString(string(s.GlobalFlags.ReactionType))
+
+		if s.Stats.LogStats {
+			s.Stats.ReactionsTriggered[s.GlobalFlags.ReactionType]++
+		}
 	}
 
 	//apply reaction damage

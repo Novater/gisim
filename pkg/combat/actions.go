@@ -187,7 +187,14 @@ func (s *Sim) execQueue() int {
 		s.ResetAllNormalCounter()
 	}
 
-	s.Stats.AbilUsageCountByChar[c.Name()][n.Typ.String()]++
+	if s.Stats.LogStats {
+		s.Stats.AbilUsageCountByChar[c.Name()][n.Typ.String()]++
+		s.Stats.AbilUsageByFrame[s.F] = AbilUsage{
+			Actor:  c.Name(),
+			Action: n.Typ.String(),
+			Param:  n.Param,
+		}
+	}
 
 	// s.Log.Infof("[%v] %v executing %v", s.Frame(), s.ActiveChar, a.Action)
 	s.Log.Infof("[%v] %v executed %v; animation duration %v; swap cd %v", s.Frame(), s.ActiveChar, n.Typ.String(), f, s.SwapCD)

@@ -112,14 +112,85 @@ func main() {
 		cfg.LogConfig.LogLevel = *debug
 		cfg.LogConfig.LogFile = *f
 		cfg.LogConfig.LogShowCaller = *showCaller
+		cfg.LogStats = true
 		os.Remove(*f)
 		runSingle(cfg, *hp, *seconds)
 	}
 
 }
 
+func frameDataToCSV(s combat.SimStats) {
+	os.Remove("result.csv")
+	file, err := os.Create("result.csv")
+	if err != nil {
+		log.Panic(err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	chars := make([]string, 0, len(s.CharActiveFrame))
+	ele := make([]combat.EleType, 0, len(s.ElementActiveFrame))
+
+	header := make([]string, len(s.CharActiveFrame)+len(s.ElementActiveFrame)+3)
+	header[0] = "Character"
+	header[1] = "Action"
+	header[2] = "Action Param"
+
+	i := 3
+	for k := range s.CharActiveFrame {
+		chars = append(chars, k)
+
+	}
+	sort.Strings(chars)
+	for _, v := range chars {
+		header[i] = v
+		i++
+	}
+	for k := range s.ElementActiveFrame {
+		ele = append(ele, k)
+		header[i] = k.String()
+		i++
+	}
+
+	writer.Write(header)
+
+	elen := len(ele)
+	clen := len(chars)
+	log.Println(elen, clen)
+
+	for i, a := range s.AbilUsageByFrame {
+
+		record := make([]string, elen+clen+3)
+
+		record[0] = a.Actor
+		record[1] = a.Action
+		record[2] = strconv.FormatInt(int64(a.Param), 10)
+		n := 3
+		for _, k := range chars {
+			record[n] = "0"
+			if s.CharActiveFrame[k][i] == 1 {
+				record[n] = "1"
+			}
+			n++
+		}
+
+		for _, k := range ele {
+			record[n] = "0"
+			if s.ElementActiveFrame[k][i] == 1 {
+				record[n] = "1"
+			}
+			n++
+		}
+
+		writer.Write(record)
+	}
+
+}
+
 func graphToCSV(in []float64) {
-	os.Remove("graph.csv")
+	os.Remove("result.csv")
 	file, err := os.Create("result.csv")
 	if err != nil {
 		log.Panic(err)
@@ -237,7 +308,7 @@ func runSingle(cfg combat.Profile, hp float64, dur int) {
 	fmt.Printf("Running profile %v, total damage dealt: %.2f over %v seconds. DPS = %.2f. Sim took %s\n", cfg.Label, dmg, dur, dmg/float64(dur), elapsed)
 
 	if hp == 0 {
-		graphToCSV(stats.DamageHist)
+		frameDataToCSV(stats)
 	}
 }
 
@@ -324,6 +395,7 @@ func worker(src []byte, hp float64, dur int, resp chan float64, req chan bool, d
 			cfg.LogConfig.LogLevel = "error"
 			cfg.LogConfig.LogFile = ""
 			cfg.LogConfig.LogShowCaller = false
+			cfg.LogStats = false
 
 			s, err := combat.New(cfg)
 			if err != nil {

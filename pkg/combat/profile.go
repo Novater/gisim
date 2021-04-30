@@ -12,6 +12,7 @@ type Profile struct {
 	Characters    []CharacterProfile `yaml:"Characters"`
 	Rotation      []Action
 	LogConfig     LogConfig
+	LogStats      bool
 }
 
 type LogConfig struct {
