@@ -1,9 +1,10 @@
 package combat
 
 type Snapshot struct {
-	CharLvl  int
-	Actor    string //name of the character triggering the damage
-	ActorEle EleType
+	CharLvl     int
+	Actor       string //name of the character triggering the damage
+	ActorEle    EleType
+	SourceFrame int
 
 	Abil        string      //name of ability triggering the damage
 	AbilType    ActionType  //type of ability triggering the damage

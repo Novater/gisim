@@ -14,7 +14,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 	s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
 		if ds.AbilType == combat.ActionAttack || ds.AbilType == combat.ActionCharge {
 			s.Log.Debugf("\t\tBlack sword adding %v dmg", dmg)
-			ds.DmgBonus += dmg
+			ds.Stats[combat.DmgP] += dmg
 		}
 		return false
 	}, "The Black Sword", combat.PreDamageHook)

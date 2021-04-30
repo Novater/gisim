@@ -63,7 +63,7 @@ func (c *char) a4() {
 			return false
 		}
 		//add 15% to dmg
-		ds.DmgBonus += 0.15
+		ds.Stats[combat.DmgP] += 0.15
 
 		//TODO: missing 15% atkspeed
 

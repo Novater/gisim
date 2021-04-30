@@ -11,14 +11,14 @@ import (
 func (s *Sim) ApplyDamage(ds Snapshot) (float64, string) {
 	var sb strings.Builder
 
-	s.Log.Debugf("  [%v] %v - %v triggered dmg", s.Frame(), ds.Actor, ds.Abil)
+	s.Log.Debugf("[%v] %v - %v triggered dmg", s.Frame(), ds.Actor, ds.Abil)
 	s.Log.Debugw("\t target", "auras", s.TargetAura, "ele applied", ds.Element, "dur applied", ds.Durability)
 	old := s.TargetAura
 	//apply new aura
 	s.TargetAura = s.TargetAura.React(ds, s)
 
 	if old.E() != s.TargetAura.E() {
-		s.Log.Infof("[%v] previous ele <%v>, next ele <%v>", s.Frame(), old.E(), s.TargetAura.E())
+		s.Log.Infof("\t [%v] previous ele <%v>, next ele <%v>", s.Frame(), old.E(), s.TargetAura.E())
 	}
 
 	//change multiplier if vape or melt
@@ -96,8 +96,9 @@ func calcDmg(ds Snapshot, target Enemy, rand *rand.Rand, log *zap.SugaredLogger)
 
 	st := EleToDmgP(ds.Element)
 	ds.DmgBonus += ds.Stats[st] + ds.Stats[DmgP]
-
-	log.Debugw("\t\tcalc", "base atk", ds.BaseAtk, "flat +", ds.Stats[ATK], "% +", ds.Stats[ATKP], "ele", st, "ele %", ds.Stats[st], "bonus dmg", ds.DmgBonus, "mul", ds.Mult)
+	log.Debugf("\t\t -------------------------------------------------")
+	log.Debugf("\t\t |Calculating damage for %v: %v (source frame: %v)", ds.Actor, ds.Abil, ds.SourceFrame)
+	log.Debugw("\t\t |calc", "base atk", ds.BaseAtk, "flat +", ds.Stats[ATK], "% +", ds.Stats[ATKP], "ele", st, "ele %", ds.Stats[st], "bonus dmg", ds.DmgBonus, "mul", ds.Mult)
 	//calculate using attack or def
 	var a float64
 	if ds.UseDef {
@@ -109,7 +110,7 @@ func calcDmg(ds Snapshot, target Enemy, rand *rand.Rand, log *zap.SugaredLogger)
 	base := ds.Mult*a + ds.FlatDmg
 	damage := base * (1 + ds.DmgBonus)
 
-	log.Debugw("\t\tcalc", "total atk", a, "base dmg", base, "dmg + bonus", damage)
+	log.Debugw("\t\t |calc", "total atk", a, "base dmg", base, "dmg + bonus", damage)
 
 	//make sure 0 <= cr <= 1
 	if ds.Stats[CR] < 0 {
@@ -120,7 +121,7 @@ func calcDmg(ds Snapshot, target Enemy, rand *rand.Rand, log *zap.SugaredLogger)
 	}
 	res := target.Resist(log)[ds.Element]
 
-	log.Debugw("\t\tcalc", "cr", ds.Stats[CR], "cd", ds.Stats[CD], "def adj", ds.DefMod, "char lvl", ds.CharLvl, "target lvl", target.Level, "target res", res)
+	log.Debugw("\t\t |calc", "cr", ds.Stats[CR], "cd", ds.Stats[CD], "def adj", ds.DefMod, "char lvl", ds.CharLvl, "target lvl", target.Level, "target res", res)
 
 	defmod := float64(ds.CharLvl+100) / (float64(ds.CharLvl+100) + float64(target.Level+100)*(1-ds.DefMod))
 	//apply def mod
@@ -137,30 +138,33 @@ func calcDmg(ds Snapshot, target Enemy, rand *rand.Rand, log *zap.SugaredLogger)
 
 	//apply other multiplier bonus
 	if ds.OtherMult > 0 {
-		log.Debugw("\t\tcalc", "other mult", ds.OtherMult)
+		log.Debugw("\t\t |calc", "other mult", ds.OtherMult)
 		damage = damage * ds.OtherMult
 	}
-	log.Debugw("\t\tcalc", "def mod", defmod, "res", res, "res mod", resmod)
-	log.Debugw("\t\tcalc", "pre crit damage", damage, "dmg if crit", damage*(1+ds.Stats[CD]), "melt/vape", ds.IsMeltVape)
+	log.Debugw("\t\t |calc", "def mod", defmod, "res", res, "res mod", resmod)
+	log.Debugw("\t\t |calc", "pre crit damage", damage, "dmg if crit", damage*(1+ds.Stats[CD]), "melt/vape", ds.IsMeltVape)
 
 	//check melt/vape
 	if ds.IsMeltVape {
 		//calculate em bonus
 		em := ds.Stats[EM]
 		emBonus := (2.78 * em) / (1400 + em)
-		log.Debugw("\t\tcalc", "react mult", ds.ReactMult, "em", em, "em bonus", emBonus, "react bonus", ds.ReactBonus, "pre react damage", damage)
+		log.Debugw("\t\t |calc", "react mult", ds.ReactMult, "em", em, "em bonus", emBonus, "react bonus", ds.ReactBonus, "pre react damage", damage)
 		damage = damage * (ds.ReactMult * (1 + emBonus + ds.ReactBonus))
-		log.Debugw("\t\tcalc", "pre crit (post react) damage", damage, "pre react if crit", damage*(1+ds.Stats[CD]))
+		log.Debugw("\t\t |calc", "pre crit (post react) damage", damage, "pre react if crit", damage*(1+ds.Stats[CD]))
 	}
 
 	//check if crit
 	if rand.Float64() <= ds.Stats[CR] || ds.HitWeakPoint {
-		log.Debugf("\t\tdamage is crit!")
+		log.Debugf("\t\t |damage is crit!")
 		damage = damage * (1 + ds.Stats[CD])
 		result.isCrit = true
 	}
 
 	result.damage = damage
+
+	log.Debugw("\t\t |Calculation result:", "damage", damage)
+	log.Debugf("\t\t -------------------------------------------------")
 
 	return result
 }

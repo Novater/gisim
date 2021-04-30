@@ -216,8 +216,11 @@ func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType, d flo
 	ds.Stats = make([]float64, len(c.Stats))
 	copy(ds.Stats, c.Stats)
 
+	c.S.Log.Debugf("\t\t +++++++++++++++++++++++++++++++++++++++++++++++++")
+	c.S.Log.Debugf("\t\t +[%v] snapshot for %v : %v (action: %v, ele: %v, dur: %v)", c.S.Frame(), c.Base.Name, name, t, e, d)
+
 	for key, m := range c.Mods {
-		c.S.Log.Debugw("\t\t char stat mod", "key", key, "mods", m)
+		c.S.Log.Debugw("\t\t +char stat mod", "key", key, "mods", m)
 		for k, v := range m {
 			ds.Stats[k] += v
 		}
@@ -225,7 +228,7 @@ func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType, d flo
 
 	for key, m := range c.TimedMods {
 		if m.Expiry > c.S.F {
-			c.S.Log.Debugw("\t\t timed char stat mod", "key", key, "mods", m.Mod, "expires in", m.Expiry-c.S.F)
+			c.S.Log.Debugw("\t\t +timed char stat mod", "key", key, "mods", m.Mod, "expires in", m.Expiry-c.S.F)
 			for k, v := range m.Mod {
 				ds.Stats[k] += v
 			}
@@ -238,15 +241,25 @@ func (c *CharacterTemplate) Snapshot(name string, t ActionType, e EleType, d flo
 	ds.AbilType = t
 	ds.Actor = c.Base.Name
 	ds.ActorEle = c.Base.Element
+	ds.SourceFrame = c.S.F
 	ds.BaseAtk = c.Base.Atk + c.Weapon.Atk
 	ds.CharLvl = c.Base.Level
 	ds.BaseDef = c.Base.Def
 	ds.Element = e
 	ds.Durability = d
 
-	for _, f := range c.S.snapshotHooks[PostSnapshot] {
-		f(&ds)
+	c.S.Log.Debugf("\t\t +Calling snaphot functions")
+	for k, f := range c.S.snapshotHooks[PostSnapshot] {
+		c.S.Log.Debugf("\t\t +Applying %v", k)
+		if f(&ds) {
+			c.S.Log.Debugf("\t\t +Deleting %v", k)
+			delete(c.S.snapshotHooks[PostSnapshot], k)
+		}
 	}
+
+	c.S.Log.Debugf("\t\t +Final stats %v", PrettyPrintStats(ds.Stats))
+
+	c.S.Log.Debugf("\t\t +++++++++++++++++++++++++++++++++++++++++++++++++")
 
 	return ds
 }

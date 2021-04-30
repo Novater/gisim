@@ -21,13 +21,13 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			}
 
 			if s.TargetAura.E() == combat.Cryo {
-				s.Log.Debugf("\tapplying blizzard strayer 2pc buff on cryo target")
 				ds.Stats[combat.CR] += .2
+				s.Log.Debugf("\t applying blizzard strayer 2pc buff on cryo target, new crit %v", ds.Stats[combat.CR])
 			}
 
 			if s.TargetAura.E() == combat.Frozen {
-				s.Log.Debugf("\tapplying blizzard strayer 4pc buff on cryo target")
 				ds.Stats[combat.CR] += .4
+				s.Log.Debugf("\t applying blizzard strayer 4pc buff on frozen target, new crit %v", ds.Stats[combat.CR])
 			}
 
 			return false

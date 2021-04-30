@@ -24,7 +24,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			if ds.WeaponClass != combat.WeaponClassCatalyst && ds.WeaponClass != combat.WeaponClassBow {
 				return false
 			}
-			ds.DmgBonus += 0.35
+			ds.Stats[combat.DmgP] += 0.35
 			return false
 		}, "wanderer’s troupe 4pc", combat.PreDamageHook)
 	}

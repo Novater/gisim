@@ -33,7 +33,7 @@ func (e *Enemy) Resist(log *zap.SugaredLogger) map[EleType]float64 {
 		r[k] = v
 	}
 	for k, v := range e.mod {
-		log.Debugf("\t\t Resist %v modified by %v; from %v", v.Ele, v.Value, k)
+		log.Debugw("\t\t >Resist modified", "ele", v.Ele, "amount", v.Value, "from", k)
 		r[v.Ele] += v.Value
 	}
 	return r

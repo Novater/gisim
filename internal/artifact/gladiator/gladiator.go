@@ -22,7 +22,8 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			if ds.WeaponClass != combat.WeaponClassSpear && ds.WeaponClass != combat.WeaponClassSword && ds.WeaponClass != combat.WeaponClassClaymore {
 				return false
 			}
-			ds.DmgBonus += 0.35
+			ds.Stats[combat.DmgP] += 0.35
+			// ds.DmgBonus += 0.35
 			return false
 		}, "gladiator's finale 4pc", combat.PostSnapshot)
 	}

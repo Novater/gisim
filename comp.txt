@@ -1,2 +1,4 @@
 config/xl-xq-bennett-fischl.txt
 config/ganyumelt.txt
+config/ganyu-freeze-xq.txt
+config/ganyu-aim-spam.txt

@@ -1,6 +1,8 @@
 package ganyu
 
 import (
+	"fmt"
+
 	"github.com/srliao/gisim/pkg/combat"
 )
 
@@ -8,34 +10,35 @@ func init() {
 	combat.RegisterCharFunc("ganyu", NewChar)
 }
 
-type ganyu struct {
+type char struct {
 	*combat.CharacterTemplate
 }
 
 func NewChar(s *combat.Sim, p combat.CharacterProfile) (combat.Character, error) {
-	g := ganyu{}
+	c := char{}
 	t, err := combat.NewTemplateChar(s, p)
 	if err != nil {
 		return nil, err
 	}
-	g.CharacterTemplate = t
-	g.Energy = 60
-	g.MaxEnergy = 60
-	g.Weapon.Class = combat.WeaponClassBow
+	c.CharacterTemplate = t
+	c.Energy = 60
+	c.MaxEnergy = 60
+	c.Weapon.Class = combat.WeaponClassBow
+	c.a2()
 
-	if g.Base.Cons >= 1 {
-		g.c1()
+	if c.Base.Cons >= 1 {
+		c.c1()
 	}
 
-	return &g, nil
+	return &c, nil
 }
 
-func (g *ganyu) c1() {
-	s := g.S
+func (c *char) c1() {
+	s := c.S
 	s.Log.Debugf("\tactivating Ganyu C1")
 
 	s.AddSnapshotHook(func(snap *combat.Snapshot) bool {
-		if snap.Actor != g.Base.Name {
+		if snap.Actor != c.Base.Name {
 			return false
 		}
 		if snap.Abil != "Frost Flake Arrow" {
@@ -43,11 +46,11 @@ func (g *ganyu) c1() {
 		}
 
 		//if c1, increase character energy by 2, unaffected by ER; assume assuming arrow always hits here
-		g.Energy += 2
-		if g.Energy > g.MaxEnergy {
-			g.Energy = g.MaxEnergy
+		c.Energy += 2
+		if c.Energy > c.MaxEnergy {
+			c.Energy = c.MaxEnergy
 		}
-		s.Log.Debugf("\t Ganyu C1 refunding 2 energy; current energy %v", g.Energy)
+		s.Log.Debugf("\t Ganyu C1 refunding 2 energy; current energy %v", c.Energy)
 		//also add c1 debuff to target
 		s.Target.AddResMod("ganyu-c1", combat.ResistMod{
 			Ele:      combat.Cryo,
@@ -59,44 +62,110 @@ func (g *ganyu) c1() {
 	}, "ganyu-c1", combat.PostDamageHook)
 }
 
-func (g *ganyu) Aimed(p int) int {
-	f := g.Snapshot("Frost Flake Arrow", combat.ActionAim, combat.Cryo, combat.WeakDurability)
-	f.HitWeakPoint = true
-	f.Mult = ffa[g.TalentLvlAttack()]
+func (c *char) a2() {
+	c.S.AddSnapshotHook(func(ds *combat.Snapshot) bool {
+		if ds.Actor != c.Base.Name {
+			return false
+		}
+		if ds.AbilType != combat.ActionAim {
+			return false
+		}
+		if c.CD["A2"] <= c.S.F {
+			return false
+		}
+		ds.Stats[combat.CR] += 0.2
+		c.S.Log.Debugf("\t applying Ganyu a2, new crit %v", ds.Stats[combat.CR])
 
-	b := g.Snapshot("Frost Flake Bloom", combat.ActionAim, combat.Cryo, combat.WeakDurability)
-	b.Mult = ffb[g.TalentLvlAttack()]
+		return false
+	}, "ganyu-a2", combat.PreDamageHook)
+}
 
-	a2 := g.CD["A2"]
-	if a2 > g.S.F {
-		f.Stats[combat.CR] += 0.2
-		b.Stats[combat.CR] += 0.2
+func (c *char) ActionFrames(a combat.ActionType, p int) int {
+	switch a {
+	case combat.ActionAttack:
+		f := 0
+		switch c.NormalCounter {
+		//TODO: need to add atkspd mod
+		case 0:
+			f = 18 //frames from keqing lib
+		case 1:
+			f = 43
+		case 2:
+			f = 73
+		case 3:
+			f = 117
+		case 4:
+			f = 153
+		case 5:
+			f = 190
+		}
+		f = int(float64(f) / (1 + c.Stats[combat.AtkSpd]))
+		return f
+	case combat.ActionAim:
+		return 137 //frames from keqing lib
+	case combat.ActionSkill:
+		return 30 //ok
+	case combat.ActionBurst:
+		return 122 //ok
+	default:
+		c.S.Log.Warnf("%v: unknown action, frames invalid", a)
+		return 0
+	}
+}
+
+func (c *char) Attack(p int) int {
+	d := c.Snapshot("Normal", combat.ActionAttack, combat.Physical, 0)
+	d.Mult = attack[c.NormalCounter][c.TalentLvlAttack()]
+	f := c.ActionFrames(combat.ActionAttack, p)
+	delay := f + 40 //TODO: frames
+
+	c.S.AddTask(func(s *combat.Sim) {
+		damage, str := s.ApplyDamage(d)
+		s.Log.Infof("\t %v normal %v dealt %.0f damage, dur %v [%v]", c.Base.Name, c.NormalCounter, damage, d.Durability, str)
+	}, fmt.Sprintf("%v-Normal-%v", c.Base.Name, c.NormalCounter), delay)
+
+	c.NormalResetTimer = 150
+	c.NormalCounter++
+	if c.NormalCounter == 6 {
+		c.NormalCounter = 0
+		c.NormalResetTimer = 0
 	}
 
-	g.S.AddTask(func(s *combat.Sim) {
+	return f
+}
+
+func (c *char) Aimed(p int) int {
+	f := c.Snapshot("Frost Flake Arrow", combat.ActionAim, combat.Cryo, combat.WeakDurability)
+	f.HitWeakPoint = true
+	f.Mult = ffa[c.TalentLvlAttack()]
+
+	b := c.Snapshot("Frost Flake Bloom", combat.ActionAim, combat.Cryo, combat.WeakDurability)
+	b.Mult = ffb[c.TalentLvlAttack()]
+
+	c.S.AddTask(func(s *combat.Sim) {
 		damage, str := s.ApplyDamage(f)
 		s.Log.Infof("\t Ganyu frost arrow dealt %.0f damage [%v]", damage, str)
 		//apply A2 on hit
-		g.CD["A2"] = g.S.F + 5*60
+		c.CD["A2"] = c.S.F + 5*60
 	}, "Ganyu-Aimed-FFA", 20+137)
 
-	g.S.AddTask(func(s *combat.Sim) {
+	c.S.AddTask(func(s *combat.Sim) {
 		damage, str := s.ApplyDamage(b)
 		s.Log.Infof("\t Ganyu frost flake bloom dealt %.0f damage [%v]", damage, str)
 		//apply A2 on hit
-		g.CD["A2"] = g.S.F + 5*60
+		c.CD["A2"] = c.S.F + 5*60
 	}, "Ganyu-Aimed-FFB", 20+20+137)
 
 	return 137
 }
 
-func (g *ganyu) Skill(p int) int {
+func (c *char) Skill(p int) int {
 	//if c2, check if either cd is cooldown
 	charge := ""
-	c2onCD := g.CD["skill-cd-2"] > g.S.F
-	onCD := g.CD[charge] > g.S.F
+	c2onCD := c.CD["skill-cd-2"] > c.S.F
+	onCD := c.CD[charge] > c.S.F
 
-	if g.Base.Cons >= 2 {
+	if c.Base.Cons >= 2 {
 		if !c2onCD {
 			charge = "skill-cd-2"
 		}
@@ -106,81 +175,81 @@ func (g *ganyu) Skill(p int) int {
 	}
 
 	if charge == "" {
-		g.S.Log.Debugf("\tGanyu skill still on CD; skipping")
+		c.S.Log.Debugf("\tGanyu skill still on CD; skipping")
 		return 0
 	}
 
 	//snap shot stats at cast time here
-	d := g.Snapshot("Ice Lotus", combat.ActionSkill, combat.Cryo, combat.WeakDurability)
-	d.Mult = lotus[g.TalentLvlSkill()]
+	d := c.Snapshot("Ice Lotus", combat.ActionSkill, combat.Cryo, combat.WeakDurability)
+	d.Mult = lotus[c.TalentLvlSkill()]
 
 	//we get the orbs right away
-	g.S.AddEnergyParticles("Ganyu", 2, combat.Cryo, 90) //90s travel time
+	c.S.AddEnergyParticles("Ganyu", 2, combat.Cryo, 90) //90s travel time
 
 	//flower damage is after 6 seconds
-	g.S.AddTask(func(s *combat.Sim) {
+	c.S.AddTask(func(s *combat.Sim) {
 		damage, str := s.ApplyDamage(d)
 		s.Log.Infof("\t Ganyu ice lotus dealt %.0f damage [%v]", damage, str)
 	}, "Ganyu Flower", 6*60)
 
 	//add cooldown to sim
-	g.CD[charge] = g.S.F + 10*60
+	c.CD[charge] = c.S.F + 10*60
 
 	return 30
 }
 
-func (g *ganyu) Burst(p int) int {
+func (c *char) Burst(p int) int {
 	//check if on cd first
-	if g.CD[combat.BurstCD] > g.S.F {
-		g.S.Log.Debugf("\tGanyu burst still on CD; skipping")
+	if c.CD[combat.BurstCD] > c.S.F {
+		c.S.Log.Debugf("\tGanyu burst still on CD; skipping")
 		return 0
 	}
 	//check if sufficient energy
-	if g.Energy < g.MaxEnergy {
-		g.S.Log.Debugf("\tGanyu burst - insufficent energy, current: %v", g.Energy)
+	if c.Energy < c.MaxEnergy {
+		c.S.Log.Debugf("\tGanyu burst - insufficent energy, current: %v", c.Energy)
 		return 0
 	}
 	//snap shot stats at cast time here
-	d := g.Snapshot("Celestial Shower", combat.ActionBurst, combat.Cryo, combat.WeakDurability)
-	d.Mult = shower[g.TalentLvlBurst()]
+	d := c.Snapshot("Celestial Shower", combat.ActionBurst, combat.Cryo, combat.WeakDurability)
+	d.Mult = shower[c.TalentLvlBurst()]
 
 	for delay := 120; delay <= 900; delay += 60 {
-		g.S.AddTask(func(s *combat.Sim) {
+		c.S.AddTask(func(s *combat.Sim) {
 			damage, str := s.ApplyDamage(d)
 			s.Log.Infof("\t Ganyu burst (tick) dealt %.0f damage [%v]", damage, str)
 		}, "Ganyu Burst", delay)
 	}
 
 	//add cooldown to sim
-	g.CD[combat.BurstCD] = g.S.F + 15*60
+	c.CD[combat.BurstCD] = c.S.F + 15*60
 	//use up energy
-	g.Energy = 0
+	c.Energy = 0
 
 	return 122
 }
 
-func (g *ganyu) ActionReady(a combat.ActionType) bool {
+func (c *char) ActionReady(a combat.ActionType) bool {
 	switch a {
 	case combat.ActionBurst:
-		if g.Energy != g.MaxEnergy {
+		if c.Energy != c.MaxEnergy {
 			return false
 		}
-		return g.CD[combat.BurstCD] <= g.S.F
+		return c.CD[combat.BurstCD] <= c.S.F
 	case combat.ActionSkill:
-		skillReady := g.CD[combat.SkillCD] <= g.S.F
+		skillReady := c.CD[combat.SkillCD] <= c.S.F
 		//if skill ready return true regardless of c2
 		if skillReady {
 			return true
 		}
 		//other wise skill-cd is there, we check c2
-		if g.Base.Cons >= 2 {
-			return g.CD["skill-cd2"] <= g.S.F
+		if c.Base.Cons >= 2 {
+			return c.CD["skill-cd2"] <= c.S.F
 		}
 		return false
 	}
 	return true
 }
 
-func (g *ganyu) Tick() {
+func (g *char) Tick() {
 	g.CharacterTemplate.Tick()
 }

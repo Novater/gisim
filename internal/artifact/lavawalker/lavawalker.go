@@ -23,7 +23,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			//only if target affected by pyro
 			if s.TargetAura.E() == combat.Pyro {
 				s.Log.Debugf("\tapplying lavawalker 4pc buff on pyro target")
-				ds.DmgBonus += 0.35
+				ds.Stats[combat.DmgP] += 0.35
 			}
 
 			return false

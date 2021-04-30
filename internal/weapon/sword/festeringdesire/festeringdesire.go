@@ -34,7 +34,7 @@ func weapon(c combat.Character, s *combat.Sim, r int) {
 		if ds.AbilType == combat.ActionSkill {
 			s.Log.Debugf("\t Festering desire adding %v dmg %v crit", dmg, crit)
 			ds.Stats[combat.CR] += crit
-			ds.DmgBonus += dmg
+			ds.Stats[combat.DmgP] += dmg
 		}
 		return false
 	}, "Festering Desire", combat.PreDamageHook)

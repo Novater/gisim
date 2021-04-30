@@ -33,7 +33,7 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			if ds.AbilType != combat.ActionAttack && ds.AbilType != combat.ActionCharge {
 				return false
 			}
-			ds.DmgBonus += 0.30
+			ds.Stats[combat.DmgP] += 0.30
 
 			return false
 		}, "heart of depth 4pc proc", combat.PreDamageHook)

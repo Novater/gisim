@@ -18,8 +18,9 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			if ds.AbilType != combat.ActionBurst {
 				return false
 			}
-			s.Log.Debugf("\t Noblesse 2 pc adding %v damage; pre buff %v", 0.2, ds.DmgBonus)
-			ds.DmgBonus += 0.2
+
+			ds.Stats[combat.DmgP] += 0.2
+			s.Log.Debugf("\t\t >Noblesse 2 pc adding %v damage; post buff %v", 0.2, ds.Stats[combat.DmgP])
 
 			return false
 		}, "noblesse oblige 2pc", combat.PostSnapshot)
@@ -51,8 +52,8 @@ func set(c combat.Character, s *combat.Sim, count int) {
 			if dur <= 0 {
 				return false
 			}
-			s.Log.Debugf("\t Noblesse 4 pc adding %v atk; pre buff %v", 0.2, ds.Stats[combat.ATKP])
 			ds.Stats[combat.ATKP] += 0.2
+			s.Log.Debugf("\t\t >Noblesse 4 pc adding %v atk; post buff %v", 0.2, ds.Stats[combat.ATKP])
 			return false
 		}, "noblesse oblige 4pc", combat.PostSnapshot)
 

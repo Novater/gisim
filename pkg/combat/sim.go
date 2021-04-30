@@ -353,13 +353,13 @@ func (s *Sim) addResonance(count map[EleType]int) {
 				s.Log.Debugf("activating cryo resonance")
 				s.AddSnapshotHook(func(ds *Snapshot) bool {
 					if s.TargetAura.E() == Cryo {
-						s.Log.Debugf("\tapplying cryo resonance on cryo target")
 						ds.Stats[CR] += .15
+						s.Log.Debugf("\t applying cryo resonance on cryo target, new crit %v", ds.Stats[CR])
 					}
 
 					if s.TargetAura.E() == Frozen {
-						s.Log.Debugf("\tapplying cryo resonance on cryo target")
 						ds.Stats[CR] += .15
+						s.Log.Debugf("\t applying cryo resonance on frozen target, new crit %v", ds.Stats[CR])
 					}
 					return false
 				}, "Cryo Resonance", PreDamageHook)

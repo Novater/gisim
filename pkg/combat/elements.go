@@ -200,9 +200,20 @@ func (h *HydroAura) React(ds Snapshot, s *Sim) Aura {
 	case Hydro:
 		h.Refresh(ds.Durability, s)
 	case Cryo:
-		//freeze??
+		//figure out units to reduce by
+		r := h.Durability * (1 - float64(s.F-h.Start)/float64(h.Expiry))
+		if r > ds.Durability {
+			r = ds.Durability
+		}
+		c := NewCryo()
+		c.Attach(ds.Element, ds.Durability, s.F) //TODO: not sure if this part is accurate
+		c.Reduce(r, s)
+		h.Reduce(r, s)
+		f := NewFreeze()
+		f.Init(c, h, r, s)
 		s.GlobalFlags.ReactionDidOccur = true
 		s.GlobalFlags.ReactionType = Freeze
+		return f
 	case Electro:
 		//ec??
 		e := NewElectro()
