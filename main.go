@@ -22,12 +22,14 @@ import (
 	_ "github.com/srliao/gisim/internal/character/eula"
 	_ "github.com/srliao/gisim/internal/character/fischl"
 	_ "github.com/srliao/gisim/internal/character/ganyu"
+	_ "github.com/srliao/gisim/internal/character/sucrose"
 	_ "github.com/srliao/gisim/internal/character/xiangling"
 	_ "github.com/srliao/gisim/internal/character/xingqiu"
 
 	//weapons
 	_ "github.com/srliao/gisim/internal/weapon/bow/favoniuswarbow"
 	_ "github.com/srliao/gisim/internal/weapon/bow/prototypecrescent"
+	_ "github.com/srliao/gisim/internal/weapon/catalyst/sacrificial"
 	_ "github.com/srliao/gisim/internal/weapon/claymore/archaic"
 	_ "github.com/srliao/gisim/internal/weapon/claymore/favonius"
 	_ "github.com/srliao/gisim/internal/weapon/claymore/pine"

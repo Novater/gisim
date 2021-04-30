@@ -1,0 +1,10 @@
+char+=sucrose ele=anemo lvl=60 hp=6501 atk=120 def=494 cr=0.05 cd=0.50 anemo%=.12 cons=2 talent=1,1,1;
+weapon+=sucrose label="sacrificial fragments" atk=99 refine=1 em=85;
+
+target+="blazing axe mitachurl" lvl=88 pyro=0.1 dendro=0.1 hydro=0.1 electro=0.1 geo=0.1 anemo=0.1 physical=.3;
+active+=sucrose;
+
+#actions+=burst target=sucrose;
+#actions+=skill target=sucrose;
+#actions+=attack target=sucrose;
+actions+=charge target=sucrose;

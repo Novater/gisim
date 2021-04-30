@@ -142,12 +142,12 @@ func (s *Sim) execQueue() int {
 	case ActionCharge:
 		req := c.ActionStam(ActionCharge, n.Param)
 		if s.Stam < req {
-			diff := int((15-s.Stam)/0.5) + 1
-			s.Log.Warnf("[%v] not enough stam to execute charge attack, waiting %v", s.Frame(), diff)
+			diff := int((req-s.Stam)/0.5) + 1
+			s.Log.Warnf("[%v] not enough stam (req %v, have %v) to execute charge attack, waiting %v", s.Frame(), req, s.Stam, diff)
 			f += diff
 		}
 		s.Stam -= req
-		f = c.ChargeAttack(n.Param)
+		f += c.ChargeAttack(n.Param)
 		s.ResetAllNormalCounter()
 	case ActionHighPlunge:
 	case ActionLowPlunge:

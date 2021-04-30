@@ -52,7 +52,7 @@ actions+=skill target=fischl if=.status.xiangling.energy<70&&.tags.fischl.oz==0 
 actions+=burst target=fischl if=.tags.fischl.oz==0;
 actions+=skill target=fischl if=.tags.fischl.oz==0;
 actions+=skill target=bennett if=.status.xiangling.energy<40 swap=xiangling;
-actions+=skill target=bennett;
+#actions+=skill target=bennett;
 actions+=attack target=xiangling;
 actions+=attack target=xingqiu active=xingqiu;
 actions+=attack target=bennett active=bennett;

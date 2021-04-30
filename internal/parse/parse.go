@@ -99,6 +99,7 @@ func (p *Parser) Parse() (combat.Profile, error) {
 	for _, v := range p.chars {
 		r.Characters = append(r.Characters, *v)
 	}
+	r.Enemy = *p.target
 	return r, nil
 }
 
