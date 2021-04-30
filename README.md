@@ -27,6 +27,7 @@ These are just some ideas. Any bug fixes/pull requests etc... are always welcome
 
 ## change log
 
+- 04/29/2021: Sucrose implemented (not tested)
 - 04/19/2021: Diluc implemented (not tested)
 
 ## cpu profiling
