@@ -23,14 +23,14 @@ weapon+=diona label="favonius warbow" atk=401 refine=5;
 
 ## ganyu
 
-char+=ganyu ele=cryo lvl=90 hp=9797 atk=335 def=630 cr=0.05 cd=0.884 cons=0 talent=10,6,6;
-weapon+=ganyu label="prototype crescent" atk=510 atk%=0.413 refine=5;
+char+=ganyu ele=cryo lvl=90 hp=9797 atk=335 def=630 cr=0.05 cd=0.884 cons=6 talent=10,9,9;
+weapon+=ganyu label="amos bow" atk=608 atk%=0.496 refine=5;
 art+=ganyu label="blizzard strayer" count=4;
-stats+=ganyu hp=4780 em=21 atk=47 cd=.179 def=19;
-stats+=ganyu atk=311 cd=.062 em=35 atk%=.157 cr=.07;
-stats+=ganyu atk%=.466 atk=31 cd=.225 hp%=.047 er=.168;
-stats+=ganyu cryo%=.466 cd=.07 cr=.093 hp=717 def=16;
-stats+=ganyu cd=.622 cr=.097 def=21 atk%=.14 def%=.066;
+stats+=ganyu hp=4780 def=16 atk=19 cd=.334 def%=.109;
+stats+=ganyu atk=311 cd=.202 def=21 atk%=.111 cr=.062;
+stats+=ganyu atk%=.466 hp=299 cd=.326 hp%=.058 def%=.073;
+stats+=ganyu cryo%=.466 cd=.256 cr=.031 em=35 def=21;
+stats+=ganyu cd=.622 cr=.148 def=39 hp%=.047 def%=.066;
 
 target+="blazing axe mitachurl" lvl=88 pyro=0.1 dendro=0.1 hydro=0.1 electro=0.1 geo=0.1 anemo=0.1 physical=.3;
 active+=xingqiu;
