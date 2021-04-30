@@ -69,6 +69,10 @@ type SimStats struct {
 	AbilUsageCountByChar map[string]map[string]int
 	ReactionsTriggered   map[ReactionType]int
 	SimDuration          int
+	//super detailed data!
+	CharActiveFrame    map[string][]int
+	ElementActiveFrame map[EleType][]int
+	AbilUsageByFrame   []int
 }
 
 //New creates new sim from given profile
