@@ -89,20 +89,20 @@ func (c *char) ActionFrames(a combat.ActionType, p int) int {
 		case 0:
 			f = 18 //frames from keqing lib
 		case 1:
-			f = 43
+			f = 43 - 18
 		case 2:
-			f = 73
+			f = 73 - 43
 		case 3:
-			f = 117
+			f = 117 - 73
 		case 4:
-			f = 153
+			f = 153 - 117
 		case 5:
-			f = 190
+			f = 190 - 153
 		}
 		f = int(float64(f) / (1 + c.Stats[combat.AtkSpd]))
 		return f
 	case combat.ActionAim:
-		return 137 //frames from keqing lib
+		return 115 //frames from keqing lib
 	case combat.ActionSkill:
 		return 30 //ok
 	case combat.ActionBurst:
@@ -156,7 +156,7 @@ func (c *char) Aimed(p int) int {
 		c.CD["A2"] = c.S.F + 5*60
 	}, "Ganyu-Aimed-FFB", 20+20+137)
 
-	return 137
+	return c.ActionFrames(combat.ActionAim, p)
 }
 
 func (c *char) Skill(p int) int {

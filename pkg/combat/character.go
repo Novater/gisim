@@ -409,6 +409,7 @@ func (c *CharacterTemplate) ReduceActionCooldown(a ActionType, v int) {
 
 func (c *CharacterTemplate) ResetNormalCounter() {
 	c.NormalResetTimer = 0
+	c.NormalCounter = 0
 }
 
 func (c *CharacterTemplate) Tick() {
