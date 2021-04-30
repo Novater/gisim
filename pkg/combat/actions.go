@@ -161,7 +161,7 @@ func (s *Sim) execQueue() int {
 		if s.SwapCD > 0 {
 			f += s.SwapCD
 		}
-		s.SwapCD = 150
+		s.SwapCD = 60
 		s.Log.Infof("[%v] swapped from %v to %v", s.Frame(), s.ActiveChar, n.Target)
 		ind := s.charPos[n.Target]
 		s.ActiveChar = n.Target
@@ -224,13 +224,14 @@ func (s *Sim) evalTree(node *ExprTreeNode) bool {
 }
 
 func (s *Sim) evalCond(c Condition) bool {
-	if len(c.Fields) < 3 {
-		panic("unexpected short field")
-	}
+
 	switch c.Fields[0] {
 	case ".buff":
 
 	case ".debuff":
+		return s.evalDebuff(c)
+	case ".element":
+		return s.evalElement(c)
 	case ".cd":
 		return s.evalCD(c)
 	case ".status":
@@ -241,7 +242,73 @@ func (s *Sim) evalCond(c Condition) bool {
 	return false
 }
 
+func (s *Sim) evalDebuff(c Condition) bool {
+	if len(c.Fields) < 2 {
+		panic("unexpected short field")
+	}
+	d := strings.TrimPrefix(c.Fields[1], ".")
+	//expecting the value to be either 0 or not 0; 0 for false
+	val := c.Value
+	if val > 0 {
+		val = 1
+	} else {
+		val = 0
+	}
+	active := 0
+	if s.Target.HasResMod(d) {
+		active = 1
+	}
+	return compInt(c.Op, active, val)
+}
+
+func (s *Sim) evalElement(c Condition) bool {
+	if len(c.Fields) < 2 {
+		panic("unexpected short field")
+	}
+	ele := strings.TrimPrefix(c.Fields[1], ".")
+	//expecting the value to be either 0 or not 0; 0 for false
+	val := c.Value
+	if val > 0 {
+		val = 1
+	} else {
+		val = 0
+	}
+	active := 0
+	switch ele {
+	case "pyro":
+		if s.TargetAura.E() == Pyro {
+			active = 1
+		}
+	case "hydro":
+		if s.TargetAura.E() == Hydro {
+			active = 1
+		}
+	case "cryo":
+		if s.TargetAura.E() == Cryo {
+			active = 1
+		}
+	case "electro":
+		if s.TargetAura.E() == Electro {
+			active = 1
+		}
+	case "frozen":
+		if s.TargetAura.E() == Frozen {
+			active = 1
+		}
+	case "electro-charged":
+		if s.TargetAura.E() == EC {
+			active = 1
+		}
+	default:
+		return false
+	}
+	return compInt(c.Op, active, val)
+}
+
 func (s *Sim) evalCD(c Condition) bool {
+	if len(c.Fields) < 3 {
+		panic("unexpected short field")
+	}
 	//check target is valid
 	name := strings.TrimPrefix(c.Fields[1], ".")
 	ci, ok := s.charPos[name]
@@ -264,6 +331,9 @@ func (s *Sim) evalCD(c Condition) bool {
 }
 
 func (s *Sim) evalStatus(c Condition) bool {
+	if len(c.Fields) < 3 {
+		panic("unexpected short field")
+	}
 	//check target is valid
 	name := strings.TrimPrefix(c.Fields[1], ".")
 	ci, ok := s.charPos[name]
@@ -281,6 +351,9 @@ func (s *Sim) evalStatus(c Condition) bool {
 }
 
 func (s *Sim) evalTags(c Condition) bool {
+	if len(c.Fields) < 3 {
+		panic("unexpected short field")
+	}
 	//check target is valid
 	name := strings.TrimPrefix(c.Fields[1], ".")
 	ci, ok := s.charPos[name]

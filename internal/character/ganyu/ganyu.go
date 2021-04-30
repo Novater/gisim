@@ -35,20 +35,26 @@ func (g *ganyu) c1() {
 	s.Log.Debugf("\tactivating Ganyu C1")
 
 	s.AddSnapshotHook(func(snap *combat.Snapshot) bool {
-		if snap.Actor == "Ganyu" && snap.Abil == "Frost Flake Arrow" {
-			//if c1, increase character energy by 2, unaffected by ER; assume assuming arrow always hits here
-			g.Energy += 2
-			if g.Energy > g.MaxEnergy {
-				g.Energy = g.MaxEnergy
-			}
-			s.Log.Debugf("\t Ganyu C1 refunding 2 energy; current energy %v", g.Energy)
-			//also add c1 debuff to target
-			s.Target.AddResMod("ganyu-c1", combat.ResistMod{
-				Ele:      combat.Cryo,
-				Value:    -0.15,
-				Duration: 5 * 60,
-			})
+		if snap.Actor != g.Base.Name {
+			return false
 		}
+		if snap.Abil != "Frost Flake Arrow" {
+			return false
+		}
+
+		//if c1, increase character energy by 2, unaffected by ER; assume assuming arrow always hits here
+		g.Energy += 2
+		if g.Energy > g.MaxEnergy {
+			g.Energy = g.MaxEnergy
+		}
+		s.Log.Debugf("\t Ganyu C1 refunding 2 energy; current energy %v", g.Energy)
+		//also add c1 debuff to target
+		s.Target.AddResMod("ganyu-c1", combat.ResistMod{
+			Ele:      combat.Cryo,
+			Value:    -0.15,
+			Duration: 5 * 60,
+		})
+
 		return false
 	}, "ganyu-c1", combat.PostDamageHook)
 }

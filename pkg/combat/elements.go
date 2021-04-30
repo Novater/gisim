@@ -146,13 +146,14 @@ func (p *PyroAura) React(ds Snapshot, s *Sim) Aura {
 	case Cryo:
 		//cyro on pyro, x1.5, weak so only .5 applied
 		p.Reduce(0.5*ds.Durability, s)
+		s.GlobalFlags.NextAttackMVMult = 1.5
+		s.GlobalFlags.ReactionDidOccur = true
+		s.GlobalFlags.ReactionType = Melt
 		//fire gone
 		if p.Durability == 0 {
 			return NewNoAura()
 		}
-		s.GlobalFlags.NextAttackMVMult = 1.5
-		s.GlobalFlags.ReactionDidOccur = true
-		s.GlobalFlags.ReactionType = Melt
+
 	case Electro:
 		//electro on pyro, queue overload
 		//reduction in durability is 1:1, no tax on the

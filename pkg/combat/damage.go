@@ -14,8 +14,21 @@ func (s *Sim) ApplyDamage(ds Snapshot) (float64, string) {
 	s.Log.Debugf("  [%v] %v - %v triggered dmg", s.Frame(), ds.Actor, ds.Abil)
 	s.Log.Debugw("\t target", "auras", s.TargetAura, "ele applied", ds.Element, "dur applied", ds.Durability)
 	old := s.TargetAura
+	//apply new aura
+	s.TargetAura = s.TargetAura.React(ds, s)
+
+	if old.E() != s.TargetAura.E() {
+		s.Log.Infof("[%v] previous ele <%v>, next ele <%v>", s.Frame(), old.E(), s.TargetAura.E())
+	}
 
 	//change multiplier if vape or melt
+	// if s.GlobalFlags.ReactionDidOccur {
+	// 	if s.GlobalFlags.ReactionType == Melt || s.GlobalFlags.ReactionType == Vaporize {
+	// 		s.Log.Debugf("hello? vape %v", s.GlobalFlags.NextAttackMVMult)
+	// 		ds.IsMeltVape = true
+	// 		ds.ReactMult = s.GlobalFlags.NextAttackMVMult
+	// 	}
+	// }
 	if s.GlobalFlags.NextAttackMVMult > 1 {
 		ds.IsMeltVape = true
 		ds.ReactMult = s.GlobalFlags.NextAttackMVMult
@@ -33,13 +46,6 @@ func (s *Sim) ApplyDamage(ds Snapshot) (float64, string) {
 		sb.WriteString(" crit")
 	}
 	s.executeSnapshotHooks(PostDamageHook, &ds)
-
-	//apply new aura
-	s.TargetAura = s.TargetAura.React(ds, s)
-
-	if old.E() != s.TargetAura.E() {
-		s.Log.Infof("[%v] previous ele <%v>, next ele <%v>", s.Frame(), old.E(), s.TargetAura.E())
-	}
 
 	//check if reaction occured and call hooks
 	if s.GlobalFlags.ReactionDidOccur {

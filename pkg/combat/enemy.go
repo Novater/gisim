@@ -47,6 +47,11 @@ func (e *Enemy) RemoveResMod(key string) {
 	delete(e.mod, key)
 }
 
+func (e *Enemy) HasResMod(key string) bool {
+	_, ok := e.mod[key]
+	return ok
+}
+
 func (e *Enemy) tick(s *Sim) {
 	//tick down buffs and debuffs
 	for k, v := range e.Status {

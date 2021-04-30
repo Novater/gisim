@@ -10,6 +10,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pkg/profile"
@@ -39,6 +40,7 @@ import (
 	_ "github.com/srliao/gisim/internal/weapon/claymore/starsilver"
 	_ "github.com/srliao/gisim/internal/weapon/claymore/wolf"
 	_ "github.com/srliao/gisim/internal/weapon/spear/blacktassel"
+	_ "github.com/srliao/gisim/internal/weapon/spear/favonius"
 	_ "github.com/srliao/gisim/internal/weapon/spear/skywardspine"
 	_ "github.com/srliao/gisim/internal/weapon/sword/blackcliff"
 	_ "github.com/srliao/gisim/internal/weapon/sword/festeringdesire"
@@ -51,6 +53,7 @@ import (
 	_ "github.com/srliao/gisim/internal/artifact/gladiator"
 	_ "github.com/srliao/gisim/internal/artifact/noblesse"
 	_ "github.com/srliao/gisim/internal/artifact/paleflame"
+	_ "github.com/srliao/gisim/internal/artifact/viridescent"
 	_ "github.com/srliao/gisim/internal/artifact/wanderer"
 )
 
@@ -64,10 +67,11 @@ func main() {
 	cfgFile := flag.String("p", "config.txt", "which profile to use")
 	f := flag.String("o", "", "detailed log file")
 	hp := flag.Float64("hp", 0, "hp mode: how much hp to deal damage to")
-	showCaller := flag.Bool("c", false, "show caller in debug low")
+	showCaller := flag.Bool("caller", false, "show caller in debug low")
 	avgMode := flag.Bool("a", false, "run sim multiple times and calculate avg damage (smooth out randomness). default false. note that there is no debug log in this mode")
 	w := flag.Int("w", 24, "number of workers to run when running multiple iterations; default 24")
 	i := flag.Int("i", 5000, "number of iterations to run if we're running multiple")
+	multi := flag.String("comp", "", "comparison mode")
 
 	flag.Parse()
 
@@ -78,9 +82,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if *avgMode {
+	switch {
+	case *multi != "":
+		content, err := ioutil.ReadFile(*multi)
+		if err != nil {
+			log.Fatal(err)
+		}
+		files := strings.Split(strings.ReplaceAll(string(content), "\r\n", "\n"), "\n")
+		// lines := strings.Split(string(content), `\n`)
+		runMulti(*i, *w, files, *hp, *seconds)
+	case *avgMode:
 		runIter(*i, *w, source, *hp, *seconds)
-	} else {
+	default:
 		defer profile.Start(profile.ProfilePath("./")).Stop()
 		parser := parse.New("single", string(source))
 		cfg, err := parser.Parse()
@@ -274,7 +287,7 @@ func runIter(n, w int, src []byte, hp float64, dur int) {
 	sd := math.Sqrt(ss / float64(n))
 
 	fmt.Printf(
-		"Simulation done; %v iterations resulted in average dps of %0.0f over %v seconds (min: %0.02f, max: %0.02f, stddev: %0.02f)\n",
+		"Simulation done; %v iterations; average dps of %0.0f over %v seconds (min: %0.02f, max: %0.02f, stddev: %0.02f)\n",
 		n,
 		mean,
 		dur,
@@ -314,5 +327,16 @@ func worker(src []byte, hp float64, dur int, resp chan float64, req chan bool, d
 		case <-done:
 			return
 		}
+	}
+}
+
+func runMulti(n, w int, files []string, hp float64, dur int) {
+	for _, f := range files {
+		source, err := ioutil.ReadFile(f)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("running ", f)
+		runIter(n, w, source, hp, dur)
 	}
 }

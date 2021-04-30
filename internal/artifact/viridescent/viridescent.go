@@ -17,50 +17,49 @@ func set(c combat.Character, s *combat.Sim, count int) {
 	}
 	//increase swirl dmg by 60%, decrease elemental res to element by 40%
 	if count >= 4 {
-		s.AddSnapshotHook(func(snap *combat.Snapshot) bool {
-			if snap.Actor != c.Name() {
+		s.AddSnapshotHook(func(ds *combat.Snapshot) bool {
+			if ds.Actor != c.Name() {
 				return false
 			}
-
-			if !snap.WillReact {
-				return false
-			}
-
 			//decrease res
-			switch snap.ReactionType {
+			switch s.GlobalFlags.ReactionType {
 			case combat.SwirlCryo:
-				s.Target.AddResMod("VV4PCCryo", combat.ResistMod{
+				s.Target.AddResMod("vvcryo", combat.ResistMod{
 					Duration: 600, //10 seconds
 					Ele:      combat.Cryo,
 					Value:    -0.4,
 				})
+				s.Log.Debugf("\t vv 4 pc triggered - cryo")
 			case combat.SwirlElectro:
-				s.Target.AddResMod("VV4PCElectro", combat.ResistMod{
+				s.Target.AddResMod("vvelectro", combat.ResistMod{
 					Duration: 600, //10 seconds
 					Ele:      combat.Electro,
 					Value:    -0.4,
 				})
+				s.Log.Debugf("\t vv 4 pc triggered - electro")
 			case combat.SwirlPyro:
-				s.Target.AddResMod("VV4PCPyro", combat.ResistMod{
+				s.Target.AddResMod("vvpyro", combat.ResistMod{
 					Duration: 600, //10 seconds
 					Ele:      combat.Pyro,
 					Value:    -0.4,
 				})
+				s.Log.Debugf("\t vv 4 pc triggered - pyro")
 			case combat.SwirlHydro:
-				s.Target.AddResMod("VV4PCHydro", combat.ResistMod{
+				s.Target.AddResMod("vvhydro", combat.ResistMod{
 					Duration: 600, //10 seconds
 					Ele:      combat.Hydro,
 					Value:    -0.4,
 				})
+				s.Log.Debugf("\t vv 4 pc triggered - hydro")
 			default:
 				return false
 			}
 
 			//increase damage
-			snap.ReactBonus += 0.6
+			ds.ReactBonus += 0.6
 
 			return false
-		}, "viridescent venerer 4pc", combat.PreReaction)
+		}, "viridescent venerer 4pc", combat.PostReaction)
 	}
 	//add flat stat to char
 }
